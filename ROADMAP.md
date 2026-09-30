@@ -126,7 +126,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 
 ### J0 — Mise en place
 - [x] `git init` et premier commit de l'état actuel (projet Dakar)
-- [ ] Choisir le nom national, renommer le projet et le dépôt (nom choisi : SamaReew ; reste à renommer le dossier local)
+- [x] Choisir le nom national, renommer le projet et le dépôt (SamaReew ; dossier local `samareew`)
 - [x] Créer le dépôt GitHub : [Bigtapha/samareew](https://github.com/Bigtapha/samareew) (privé pour l’instant, à rendre public avant J6)
 - [x] Choisir les licences : MIT pour le code (`LICENSE`), CC BY 4.0 pour les données (`LICENSE-DATA.md`)
 
@@ -183,6 +183,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : le site fonctionne en local, il est lisible sur téléphone et chaque chiffre renvoie à sa source.
 
 ### J6 — Publication
+- [ ] Rendre public le dépôt GitHub (vérifier avant qu'aucun secret ni fichier lourd n'y figure)
 - [ ] Déploiement (GitHub Pages)
 - [ ] Données téléchargeables publiées (releases)
 - [ ] README mis à jour, avec la manière de citer le projet
