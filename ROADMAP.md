@@ -36,7 +36,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Thème de départ | **Expansion urbaine**, un seul thème pour la v1 |
 | Villes (v1) | **Dakar, Touba, Thiès, Mbour** (capitale, ville religieuse de l'intérieur, carrefour, littoral) |
 | Modèle de classification | **Un Random Forest national** (entraîné sur les 4 zones) ; adaptation par ville seulement si nécessaire |
-| Définition d'une ville | Règle **homogène** : enveloppe d'agglomération (Africapolis / GHSL) + tampon, figée dans le dépôt |
+| Définition d'une ville | Règle **homogène** : agglomération urbaine GHSL 2025 + tampon de 2 km, figée dans `zones/` |
 | Unité grand public | **La commune** ; découpage plus fin uniquement si nécessaire (**Touba** : secteurs anneaux × directions ou grille hexagonale) |
 | Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
@@ -133,12 +133,13 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : l'état actuel est versionné et sauvegardé en ligne.
 
 ### J1 — Définition des zones d'étude
-- [ ] Récupérer les enveloppes d'agglomération (Africapolis ou GHS-UCDB) pour les 4 villes
-- [ ] Choisir la règle de tampon (fixe ou proportionnelle) en laissant de la marge pour 10 ans de croissance
+- [x] Récupérer les enveloppes d'agglomération pour les 4 villes (GHSL GHS-SMOD 2025, agglomération urbaine ; Africapolis non téléchargeable par script)
+- [x] Choisir la règle de tampon : 2 km fixes pour toutes les villes, terre uniquement (partage à mi-distance si deux zones se chevauchent)
 - [ ] Définir le centre de chaque ville (pour directions et anneaux)
-- [ ] Récupérer les limites communales (OCHA COD-AB sur HDX, ou geoBoundaries)
+- [x] Récupérer les limites communales : OpenStreetMap corrigé (OCHA et geoBoundaries s'arrêtent aux arrondissements)
+- [ ] Vérifier les communes de Thiès (Thiès Nord / Est / Ouest petites, débordement sur Fandène) avec une source officielle si possible
 - [ ] Concevoir le découpage en secteurs de Touba
-- [ ] Documenter ces choix dans le journal des décisions
+- [ ] Documenter ces choix dans le journal des décisions (fait pour enveloppes, tampon et communes)
 
 **Critère de fin** : `zones/` contient les 4 zones figées, les communes et les secteurs, tous documentés.
 
@@ -237,7 +238,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Taille / règle du tampon autour des agglomérations | J1 |
 | Centre de chaque ville | J1 |
 | Découpage de Touba (secteurs ou hexagones) | J1 |
 | Règles densification / extension / saut | J3 |
@@ -257,3 +257,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 30/09/2026 | Un seul dépôt, frontière stricte pipeline / site | Format d'échange encore instable, projet solo |
 | 30/09/2026 | Nom : SamaReew (« mon pays » en wolof) | Nom court, national, parlant pour le public sénégalais |
 | 30/09/2026 | Licences : MIT (code), CC BY 4.0 (données) | Réutilisation libre avec attribution |
+| 30/09/2026 | Enveloppe : agglomération urbaine GHSL (GHS-SMOD 2025, classe ≥ 21) plutôt que le centre urbain | Le centre urbain manque la croissance récente (Diamniadio, Petite Côte) ; GHSL est reproductible dans Earth Engine et sous CC BY 4.0 |
+| 30/09/2026 | Tampon de 2 km pour toutes les villes, terre uniquement ; partage à mi-distance si deux zones se chevauchent | 5 km essayé puis écarté : zones 2 à 4 fois plus grandes que l'agglomération, surtout rurales, et Dakar touchait Thiès et Mbour ; même règle partout pour la comparabilité |
+| 30/09/2026 | Communes : OpenStreetMap corrigé (noms post-2013, chevauchements retirés au profit de la plus petite commune, découpe à la côte), sous ODbL | Aucune source ouverte officielle au niveau commune |

@@ -5,6 +5,7 @@ requests
 numpy
 pandas
 rasterio
+geopandas
 matplotlib
 pillow
 scikit-learn

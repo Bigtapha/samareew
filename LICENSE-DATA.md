@@ -20,4 +20,11 @@ attribution requirements, in particular:
 
 - Contains modified Copernicus Sentinel data (2016–2026).
 - ESA WorldCover 2021 (CC BY 4.0) and Google Dynamic World (CC BY 4.0), used as training references.
-- Administrative boundaries: FAO GAUL 2015.
+- Administrative boundaries: FAO GAUL 2015; OCHA COD-AB Senegal 2024 (CC BY-IGO).
+- Urban clusters: GHSL GHS-SMOD R2023A, © European Union (CC BY 4.0).
+
+## Exception: communes (ODbL)
+
+`zones/communes.geojson` is derived from OpenStreetMap and is released under the
+**[Open Database License (ODbL 1.0)](https://opendatacommons.org/licenses/odbl/1-0/)**:
+© OpenStreetMap contributors. See `zones/README.md`.
