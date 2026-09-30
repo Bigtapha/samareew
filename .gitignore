@@ -1,0 +1,10 @@
+/data/
+__pycache__/
+.ipynb_checkpoints/
+*.aux.xml
+myvenv/
+.venv/
+*:Zone.Identifier
+.pytest_cache/
+# Rasters lourds hors de git (ROADMAP §4.4)
+*.tif

@@ -1,0 +1,43 @@
+{
+  "n_points": 73,
+  "classes": [
+    "not built",
+    "built before 2017",
+    "new built-up"
+  ],
+  "confusion_matrix_rows_reference_cols_map": [
+    [
+      18,
+      1,
+      7
+    ],
+    [
+      3,
+      14,
+      8
+    ],
+    [
+      1,
+      1,
+      20
+    ]
+  ],
+  "overall_accuracy": 0.712,
+  "area_weighted_overall_accuracy": 0.786,
+  "kappa": 0.573,
+  "precision_users_accuracy": {
+    "not built": 0.818,
+    "built before 2017": 0.875,
+    "new built-up": 0.571
+  },
+  "recall_producers_accuracy": {
+    "not built": 0.692,
+    "built before 2017": 0.56,
+    "new built-up": 0.909
+  },
+  "f1": {
+    "not built": 0.75,
+    "built before 2017": 0.683,
+    "new built-up": 0.702
+  }
+}

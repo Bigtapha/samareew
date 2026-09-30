@@ -1,0 +1,11 @@
+earthengine-api>=1.0
+geemap>=0.35
+geedim
+requests
+numpy
+pandas
+rasterio
+matplotlib
+pillow
+scikit-learn
+pytest

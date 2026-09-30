@@ -1,0 +1,47 @@
+{
+  "confusion_matrix": [
+    [
+      420,
+      40
+    ],
+    [
+      36,
+      427
+    ]
+  ],
+  "f1": [
+    0.9170305676855894,
+    0.9182795698924731
+  ],
+  "feature_importance": {
+    "B11": 375.49898376523464,
+    "B12": 425.7663841928989,
+    "B2": 344.2688673203478,
+    "B3": 347.72436204731866,
+    "B4": 351.19933150502186,
+    "B8": 324.0609480748349,
+    "BSI": 335.09927294823314,
+    "MNDWI": 381.43922443668214,
+    "NDBI": 339.9615887610552,
+    "NDVI": 358.421268464514
+  },
+  "kappa": 0.8353132307229991,
+  "n_test": 923,
+  "n_train": 2077,
+  "overall_accuracy": 0.9176598049837487,
+  "producers_accuracy": [
+    [
+      0.9130434782608695
+    ],
+    [
+      0.9222462203023758
+    ]
+  ],
+  "users_accuracy": [
+    [
+      0.9210526315789473,
+      0.9143468950749465
+    ]
+  ],
+  "note": "Test labels come from WorldCover/Dynamic World agreement areas: this measures agreement with reference products. See 04_validation.py for an independent accuracy assessment on photo-interpreted points."
+}
