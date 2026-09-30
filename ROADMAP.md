@@ -1,4 +1,4 @@
-# Feuille de route — Atlas urbain du Sénégal (nom provisoire)
+# Feuille de route — SamaReew
 
 _Synthèse du brainstorming du 30/09/2026. Document vivant : cocher les tâches au fil de l'eau
 et noter les décisions dans la section « Journal des décisions »._
@@ -32,12 +32,13 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Sujet | Décision |
 |---|---|
 | Public | Grand public, données **open source** uniquement |
-| Nom | National (à choisir : _Atlas urbain du Sénégal_, _Villes du Sénégal en données_, _Dëkk_…) |
+| Nom | **SamaReew** (_sama réew_, « mon pays » en wolof) ; dépôt `samareew` |
 | Thème de départ | **Expansion urbaine**, un seul thème pour la v1 |
 | Villes (v1) | **Dakar, Touba, Thiès, Mbour** (capitale, ville religieuse de l'intérieur, carrefour, littoral) |
 | Modèle de classification | **Un Random Forest national** (entraîné sur les 4 zones) ; adaptation par ville seulement si nécessaire |
 | Définition d'une ville | Règle **homogène** : enveloppe d'agglomération (Africapolis / GHSL) + tampon, figée dans le dépôt |
 | Unité grand public | **La commune** ; découpage plus fin uniquement si nécessaire (**Touba** : secteurs anneaux × directions ou grille hexagonale) |
+| Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
 | Validation | Nouvel **échantillon national** stratifié par ville × classe (~120 points/ville) ; l'échantillon actuel de Dakar (260 points) n'est **plus à étiqueter** |
 
@@ -94,7 +95,7 @@ Le site ne change pas.
 ### 4.4 Structure du dépôt
 
 ```
-<nom-national>/
+samareew/
 ├── config/        settings (commun) + cities (une entrée par ville)
 ├── zones/         enveloppes figées, communes, secteurs (Touba)
 ├── pipeline/      étapes 1 à 7
@@ -124,10 +125,10 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 ## 5. Jalons
 
 ### J0 — Mise en place
-- [ ] `git init` et premier commit de l'état actuel (projet Dakar)
-- [ ] Choisir le nom national, renommer le projet et le dépôt
+- [x] `git init` et premier commit de l'état actuel (projet Dakar)
+- [ ] Choisir le nom national, renommer le projet et le dépôt (nom choisi : SamaReew ; reste à renommer le dossier local)
 - [ ] Créer le dépôt GitHub
-- [ ] Choisir les licences (proposition : MIT pour le code, CC-BY 4.0 pour les données produites)
+- [x] Choisir les licences : MIT pour le code (`LICENSE`), CC BY 4.0 pour les données (`LICENSE-DATA.md`)
 
 **Critère de fin** : l'état actuel est versionné et sauvegardé en ligne.
 
@@ -235,7 +236,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Nom du site | J0 |
 | Taille / règle du tampon autour des agglomérations | J1 |
 | Centre de chaque ville | J1 |
 | Découpage de Touba (secteurs ou hexagones) | J1 |
@@ -254,3 +254,5 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 30/09/2026 | Modèle national unique | Comparabilité entre villes |
 | 30/09/2026 | Échantillon de validation Dakar actuel abandonné au profit d'un échantillon national | La carte va changer avec le modèle national |
 | 30/09/2026 | Un seul dépôt, frontière stricte pipeline / site | Format d'échange encore instable, projet solo |
+| 30/09/2026 | Nom : SamaReew (« mon pays » en wolof) | Nom court, national, parlant pour le public sénégalais |
+| 30/09/2026 | Licences : MIT (code), CC BY 4.0 (données) | Réutilisation libre avec attribution |

@@ -1,10 +1,15 @@
-# Urban expansion in the Dakar region, Senegal — 2016–2026
+# SamaReew — urban expansion in Senegal
+
+> **SamaReew** (_sama réew_, "my country" in Wolof) is becoming a public, open-data atlas
+> comparing Senegalese cities (Dakar, Touba, Thiès, Mbour), inspired by Our World in Data.
+> See [ROADMAP.md](ROADMAP.md). The content below documents the first case study:
+> **urban expansion in the Dakar region, 2016–2026**.
 
 Ten years of urban expansion mapped from **Sentinel-2** imagery with **Google Earth Engine**,
 a **Random Forest** classifier, a temporal consistency filter and an **independent accuracy
 assessment**, published as an **interactive web map**.
 
-**[→ Open the interactive map](https://Bigtapha.github.io/dakar-urban-expansion/)**
+**[→ Open the interactive map](https://Bigtapha.github.io/samareew/)**
 
 ![Urban expansion map](outputs/urban_expansion_map.png)
 
@@ -112,6 +117,10 @@ pytest
 
 Python · Google Earth Engine · geemap · rasterio · NumPy · pandas · scikit-learn ·
 Matplotlib · Leaflet
+
+## License
+
+Code: [MIT](LICENSE). Produced data: [CC BY 4.0](LICENSE-DATA.md).
 
 ## Author
 
