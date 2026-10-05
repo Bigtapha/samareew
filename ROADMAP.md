@@ -135,11 +135,11 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 ### J1 — Définition des zones d'étude
 - [x] Récupérer les enveloppes d'agglomération pour les 4 villes (GHSL GHS-SMOD 2025, agglomération urbaine ; Africapolis non téléchargeable par script)
 - [x] Choisir la règle de tampon : 2 km fixes pour toutes les villes, terre uniquement (partage à mi-distance si deux zones se chevauchent)
-- [ ] Définir le centre de chaque ville (pour directions et anneaux)
+- [x] Définir le centre de chaque ville (pour directions et anneaux) : lieu du cœur historique, `zones/centres.geojson`
 - [x] Récupérer les limites communales : OpenStreetMap corrigé (OCHA et geoBoundaries s'arrêtent aux arrondissements)
-- [ ] Vérifier les communes de Thiès (Thiès Nord / Est / Ouest petites, débordement sur Fandène) avec une source officielle si possible
-- [ ] Concevoir le découpage en secteurs de Touba
-- [ ] Documenter ces choix dans le journal des décisions (fait pour enveloppes, tampon et communes)
+- [x] Vérifier les communes de Thiès : aucune source officielle ouverte trouvée (GADM / mapSenegal testé : ancien découpage, licence non ouverte) ; on garde OSM corrigé, imprécision documentée
+- [x] Concevoir le découpage en secteurs de Touba : disque central 0–2 km + anneaux de 2 km × 8 directions autour de la Grande Mosquée (47 secteurs, `zones/sectors.geojson`)
+- [x] Documenter ces choix dans le journal des décisions
 
 **Critère de fin** : `zones/` contient les 4 zones figées, les communes et les secteurs, tous documentés.
 
@@ -238,8 +238,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Centre de chaque ville | J1 |
-| Découpage de Touba (secteurs ou hexagones) | J1 |
 | Règles densification / extension / saut | J3 |
 | Source de population (WorldPop ou RGPH-5) | J3 |
 | Outils du site | J5 |
@@ -260,3 +258,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 30/09/2026 | Enveloppe : agglomération urbaine GHSL (GHS-SMOD 2025, classe ≥ 21) plutôt que le centre urbain | Le centre urbain manque la croissance récente (Diamniadio, Petite Côte) ; GHSL est reproductible dans Earth Engine et sous CC BY 4.0 |
 | 30/09/2026 | Tampon de 2 km pour toutes les villes, terre uniquement ; partage à mi-distance si deux zones se chevauchent | 5 km essayé puis écarté : zones 2 à 4 fois plus grandes que l'agglomération, surtout rurales, et Dakar touchait Thiès et Mbour ; même règle partout pour la comparabilité |
 | 30/09/2026 | Communes : OpenStreetMap corrigé (noms post-2013, chevauchements retirés au profit de la plus petite commune, découpe à la côte), sous ODbL | Aucune source ouverte officielle au niveau commune |
+| 05/10/2026 | Centres : Place de l'Indépendance (Dakar), Grande Mosquée (Touba), Place de France (Thiès), quai de pêche (Mbour) | Règle unique « cœur historique, lieu connu de tous » (comme l'Atlas of Urban Expansion) ; un centre calculé tomberait à Pikine pour Dakar |
+| 05/10/2026 | Touba découpé en secteurs : disque central 0–2 km, puis anneaux de 2 km × 8 directions | La commune de Touba Mosquée couvre 264 des 413 km² de la zone ; les secteurs suivent la forme radiale de la ville et la géométrie des indicateurs direction / anneaux, et se nomment simplement (« Nord-Est, 4–6 km ») ; hexagones gardés en réserve comme couche de carte commune |
+| 05/10/2026 | Communes OSM corrigées pour les 4 villes, y compris Thiès (pas de secteurs) ; GADM / mapSenegal écarté | Uniformité entre villes ; GADM : 433 communes (découpage ancien, manque Mbour, Saly, Mbacké…), contours grossiers, licence non commerciale |

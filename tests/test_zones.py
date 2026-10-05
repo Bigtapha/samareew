@@ -49,3 +49,20 @@ def test_relation_polygon_with_hole():
     poly = zn.relation_polygon(element)
     assert poly.area == pytest.approx(100 - 4)
     assert not poly.contains(Point(5, 5))
+
+
+def test_sectors_cover_the_zone_without_overlap():
+    centre, zone = Point(0, 0), box(-9000, -5000, 7000, 6000)
+    secs = zn.sectors(centre, zone, ring_width=2000, min_area=500_000)
+    total = sum(s["geometry"].area for s in secs)
+    assert total == pytest.approx(zone.area, rel=1e-6)                  # no gap, no overlap
+    assert secs[0]["direction"] == "C" and secs[0]["ring_max"] == 2000  # one central sector
+    assert {s["direction"] for s in secs[1:]} == set(zn.DIRECTIONS_8)
+    assert min(s["geometry"].area for s in secs) >= 500_000             # slivers merged inward
+
+
+def test_north_sector_points_north():
+    secs = zn.sectors(Point(0, 0), box(-10000, -10000, 10000, 10000), ring_width=2000)
+    north = [s for s in secs if s["direction"] == "N" and s["ring_min"] == 2000][0]
+    c = north["geometry"].centroid
+    assert c.y > 2000 and abs(c.x) < 100

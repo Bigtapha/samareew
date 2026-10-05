@@ -80,7 +80,16 @@ CITIES = {
     "thies": ("Thiès", [-16.926, 14.791]),
     "mbour": ("Mbour", [-16.967, 14.420]),
 }
-GHSL_SMOD_COLLECTION = "JRC/GHSL/P2023A/GHS_SMOD_V2-0"
+# City centres, used for growth directions and distance rings. Rule: the historic heart of
+# the city, marked by a landmark everyone knows (as in the Atlas of Urban Expansion).
+# slug: (landmark, [lon, lat], OSM source)
+CITY_CENTRES = {
+    "dakar": ("Place de l'Indépendance", [-17.43206, 14.66953], "way/27811247"),
+    "touba": ("Grande Mosquée", [-15.87554, 14.86319], "way/362222045"),
+    "thies": ("Place de France", [-16.92562, 14.79154], "way/340403572"),
+    "mbour": ("Quai de pêche (marché aux poissons)", [-16.96940, 14.40780], "way/221602952"),
+}
+GHSL_SMOD_COLLECTION ="JRC/GHSL/P2023A/GHS_SMOD_V2-0"
 GHSL_EPOCH = "2025"
 GHSL_MIN_CLASS = 21        # 21-23 = urban cluster, 30 = urban centre (GHSL degree of urbanisation)
 ZONE_BUFFER_M = 2000       # margin for growth beyond the 2025 urban cluster
@@ -97,6 +106,11 @@ OVERPASS_URLS = [
 HTTP_USER_AGENT = "SamaReew (https://github.com/Bigtapha/samareew)"
 OSM_COMMUNE_ADMIN_LEVEL = "8"
 MIN_COMMUNE_PART_KM2 = 0.5  # commune pieces smaller than this inside a zone are dropped
+
+# Sectors replace communes where one commune covers most of the city (Touba Mosquée).
+# Central disc of one ring width, then rings x 8 directions around the city centre.
+SECTOR_CITIES = ["touba"]
+SECTOR_RING_M = 2000
 
 # --- Files ---------------------------------------------------------------
 AOI_BOUNDARY_GEOJSON = DATA_DIR / "aoi_boundary.geojson"  # written by step 1

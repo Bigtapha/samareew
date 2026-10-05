@@ -8,6 +8,8 @@ zones, so they only change when the rule changes (log it in ROADMAP §9).
 | `urban_clusters.geojson` | GHSL urban cluster of each city (GHS-SMOD R2023A, epoch 2025, class ≥ 21, 1 km grid) |
 | `zones.geojson` | Study zone of each city: urban cluster + 2 km buffer, land only |
 | `communes.geojson` | OpenStreetMap communes (admin_level 8) clipped to land and to the zones |
+| `centres.geojson` | Centre of each city: a landmark of its historic heart, used for directions and distance rings |
+| `sectors.geojson` | Touba only: central disc (0-2 km), then 2 km rings x 8 directions around the Grande Mosquée |
 
 ## Rule
 
@@ -34,7 +36,7 @@ Fields: `city`, `commune`, `osm_name`, `osm_id`, `area_km2` (inside the zone),
 
 **Known limitations**: OSM boundaries are not official. Around Thiès, the urban communes
 (Thiès Nord, Est, Ouest) are small and the built-up area spills into Fandène; Touba Mosquée
-is a single very large commune, to be split into sectors.
+is a single very large commune, so Touba is split into sectors (`sectors.geojson`).
 
 ## Licences
 

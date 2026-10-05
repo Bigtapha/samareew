@@ -11,6 +11,8 @@ Outputs (frozen and versioned; re-run only to change the rule)
 - zones/urban_clusters.geojson   GHSL urban cluster of each city
 - zones/zones.geojson            study zone of each city
 - zones/communes.geojson         communes clipped to the zones
+- zones/centres.geojson          centre of each city (config.CITY_CENTRES)
+- zones/sectors.geojson          rings x directions around the centre (config.SECTOR_CITIES)
 
 Usage
     python 00_zones.py               # uses cached downloads in data/raw/ when present
@@ -26,7 +28,7 @@ from datetime import date
 import ee
 import geopandas as gpd
 import requests
-from shapely.geometry import shape
+from shapely.geometry import Point, shape
 from shapely.ops import unary_union
 
 import config as cfg
@@ -120,6 +122,34 @@ def communes_by_zone(communes: gpd.GeoDataFrame, zones: dict) -> gpd.GeoDataFram
     return gpd.GeoDataFrame(rows, crs=cfg.ANALYSIS_CRS)
 
 
+def city_centres(zones: dict) -> gpd.GeoDataFrame:
+    rows = []
+    for slug, (landmark, lonlat, osm) in cfg.CITY_CENTRES.items():
+        rows.append({"city": slug, "landmark": landmark, "source": f"OpenStreetMap {osm}",
+                     "geometry": Point(lonlat)})
+    centres = gpd.GeoDataFrame(rows, crs=4326)
+    for c in centres.to_crs(cfg.ANALYSIS_CRS).itertuples():
+        if not zones[c.city].contains(c.geometry):
+            raise ValueError(f"{c.city}: centre {c.landmark} is outside the study zone")
+    return centres
+
+
+def city_sectors(centres: gpd.GeoDataFrame, zones: dict) -> gpd.GeoDataFrame:
+    rows = []
+    for c in centres.to_crs(cfg.ANALYSIS_CRS).itertuples():
+        if c.city not in cfg.SECTOR_CITIES:
+            continue
+        for s in zn.sectors(c.geometry, zones[c.city], cfg.SECTOR_RING_M, cfg.MIN_COMMUNE_PART_KM2 * 1e6):
+            km = f"{s['ring_min'] / 1000:g}-{s['ring_max'] / 1000:g} km"
+            central = s["direction"] == "C"
+            rows.append({"city": c.city, "sector": "C" if central else f"{s['direction']}-{km[:-3]}",
+                         "label": f"Centre (0-{km[2:]})" if central else f"{zn.DIRECTION_NAMES[s['direction']]}, {km}",
+                         "direction": s["direction"], "ring_min_km": s["ring_min"] / 1000,
+                         "ring_max_km": s["ring_max"] / 1000,
+                         "area_km2": round(s["geometry"].area / 1e6, 2), "geometry": s["geometry"]})
+    return gpd.GeoDataFrame(rows, crs=cfg.ANALYSIS_CRS)
+
+
 def write(gdf: gpd.GeoDataFrame, name: str) -> None:
     path = cfg.ZONES_DIR / name
     gdf.to_crs(4326).to_file(path, driver="GeoJSON", COORDINATE_PRECISION=6)
@@ -155,6 +185,9 @@ def main(refresh: bool) -> None:
         geometry=list(zones.values()), crs=cfg.ANALYSIS_CRS), "zones.geojson")
     communes["osm_date"] = osm_date[:10]
     write(communes, "communes.geojson")
+    centres = city_centres(zones)
+    write(centres, "centres.geojson")
+    write(city_sectors(centres, zones), "sectors.geojson")
 
     print("\nCity    cluster km2   zone km2   communes   zone covered by communes")
     for slug, zone in zones.items():

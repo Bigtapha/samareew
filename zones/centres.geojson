@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "centres",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"xy_coordinate_resolution": 1e-06,
+"features": [
+{ "type": "Feature", "properties": { "city": "dakar", "landmark": "Place de l'Indépendance", "source": "OpenStreetMap way/27811247" }, "geometry": { "type": "Point", "coordinates": [ -17.43206, 14.66953 ] } },
+{ "type": "Feature", "properties": { "city": "touba", "landmark": "Grande Mosquée", "source": "OpenStreetMap way/362222045" }, "geometry": { "type": "Point", "coordinates": [ -15.87554, 14.86319 ] } },
+{ "type": "Feature", "properties": { "city": "thies", "landmark": "Place de France", "source": "OpenStreetMap way/340403572" }, "geometry": { "type": "Point", "coordinates": [ -16.92562, 14.79154 ] } },
+{ "type": "Feature", "properties": { "city": "mbour", "landmark": "Quai de pêche (marché aux poissons)", "source": "OpenStreetMap way/221602952" }, "geometry": { "type": "Point", "coordinates": [ -16.9694, 14.4078 ] } }
+]
+}
