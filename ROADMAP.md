@@ -178,6 +178,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [ ] Page thème « Expansion urbaine » avec 4 ou 5 points clés
 - [ ] Les graphiques des indicateurs v1
 - [ ] 4 fiches villes
+- [ ] Fiche Touba : préciser que l'agglomération inclut Mbacké (« un seul ensemble bâti ») ; onglets par secteur et par commune
 - [ ] Page Données & méthode (sources, licences, limites, validation)
 - [ ] Tests sur mobile et connexion lente
 
@@ -260,4 +261,5 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 30/09/2026 | Communes : OpenStreetMap corrigé (noms post-2013, chevauchements retirés au profit de la plus petite commune, découpe à la côte), sous ODbL | Aucune source ouverte officielle au niveau commune |
 | 05/10/2026 | Centres : Place de l'Indépendance (Dakar), Grande Mosquée (Touba), Place de France (Thiès), quai de pêche (Mbour) | Règle unique « cœur historique, lieu connu de tous » (comme l'Atlas of Urban Expansion) ; un centre calculé tomberait à Pikine pour Dakar |
 | 05/10/2026 | Touba découpé en secteurs : disque central 0–2 km, puis anneaux de 2 km × 8 directions | La commune de Touba Mosquée couvre 264 des 413 km² de la zone ; les secteurs suivent la forme radiale de la ville et la géométrie des indicateurs direction / anneaux, et se nomment simplement (« Nord-Est, 4–6 km ») ; hexagones gardés en réserve comme couche de carte commune |
+| 05/10/2026 | Mbacké : pas d'unité à part dans les secteurs ; ses chiffres viennent du découpage par commune ; « Touba » = agglomération Touba-Mbacké, précisé sur la fiche | Garder des secteurs purs (direction × distance) ; la commune de Mbacké est déjà entièrement dans la zone, sans travail supplémentaire |
 | 05/10/2026 | Communes OSM corrigées pour les 4 villes, y compris Thiès (pas de secteurs) ; GADM / mapSenegal écarté | Uniformité entre villes ; GADM : 433 communes (découpage ancien, manque Mbour, Saly, Mbacké…), contours grossiers, licence non commerciale |
