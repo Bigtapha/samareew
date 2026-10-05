@@ -17,49 +17,15 @@ def init(project: str) -> None:
         ee.Initialize(project=project)
 
 
-def aoi_geometry(bbox: list) -> ee.Geometry:
-    return ee.Geometry.Rectangle(bbox, proj="EPSG:4326", geodesic=False)
-
-
-def admin_boundary(collection: str, filters: dict) -> ee.Geometry:
-    """Boundary of one administrative unit, e.g. {"ADM0_NAME": "Senegal", "ADM1_NAME": "Dakar"}."""
-    fc = ee.FeatureCollection(collection)
-    for prop, value in filters.items():
-        fc = fc.filter(ee.Filter.eq(prop, value))
-    n = fc.size().getInfo()
-    if n != 1:
-        raise ValueError(f"{n} features match {filters} in {collection}; exactly one is expected. "
-                         "Check the spelling of the names in config.ADMIN_FILTERS.")
-    return fc.geometry()
-
-
-def file_boundary(path) -> ee.Geometry:
-    """Boundary read from a local GeoJSON file (all features are merged)."""
-    import json
-    geojson = json.loads(open(path, encoding="utf-8").read())
-    if geojson["type"] == "FeatureCollection":
-        return ee.FeatureCollection([ee.Feature(f) for f in geojson["features"]]).geometry()
-    if geojson["type"] == "Feature":
-        return ee.Feature(geojson).geometry()
-    return ee.Geometry(geojson)
-
-
-def load_aoi(cfg) -> ee.Geometry:
-    """Study area according to config.AOI_MODE ("admin", "file" or "bbox")."""
-    if cfg.AOI_MODE == "admin":
-        return admin_boundary(cfg.ADMIN_COLLECTION, cfg.ADMIN_FILTERS)
-    if cfg.AOI_MODE == "file":
-        return file_boundary(cfg.AOI_FILE)
-    if cfg.AOI_MODE == "bbox":
-        return aoi_geometry(cfg.AOI_BBOX)
-    raise ValueError(f"Unknown AOI_MODE: {cfg.AOI_MODE}")
-
-
-def bounds_of(aoi: ee.Geometry) -> dict:
-    """West/south/east/north of the study area in WGS84."""
-    ring = aoi.bounds(maxError=1).coordinates().get(0).getInfo()
-    lons, lats = [p[0] for p in ring], [p[1] for p in ring]
-    return {"west": min(lons), "south": min(lats), "east": max(lons), "north": max(lats)}
+def city_zone(cfg, city: str) -> ee.Geometry:
+    """Frozen study zone of a city (zones/zones.geojson), simplified for Earth Engine."""
+    import geopandas as gpd  # imported here: only needed on the client side
+    zones = gpd.read_file(cfg.ZONES_GEOJSON).to_crs(cfg.ANALYSIS_CRS)
+    zone = zones.loc[zones["city"] == city, "geometry"]
+    if len(zone) != 1:
+        raise ValueError(f"{city} is not in {cfg.ZONES_GEOJSON}; run python -m pipeline.s0_zones")
+    simple = zone.simplify(cfg.ZONE_SIMPLIFY_M).to_crs(4326).iloc[0]
+    return ee.Geometry(simple.__geo_interface__, None, False)  # planar edges, as in GeoJSON
 
 
 def add_indices(img: ee.Image) -> ee.Image:

@@ -1,0 +1,96 @@
+"""Settings shared by all cities. Edit this file, not the pipeline steps."""
+from pathlib import Path
+
+# --- Paths ---------------------------------------------------------------
+ROOT = Path(__file__).parents[1]
+DATA_DIR = ROOT / "data"              # ignored by git: raw and intermediate files
+OUTPUT_DIR = ROOT / "outputs"
+ZONES_DIR = ROOT / "zones"            # frozen study zones (step 0)
+MODEL_DIR = OUTPUT_DIR / "model"      # national model: evaluation by city
+
+# --- Google Earth Engine -------------------------------------------------
+# Your Google Cloud project registered for Earth Engine
+# (see https://developers.google.com/earth-engine/guides/access)
+GEE_PROJECT = "tieufmaps"
+
+# Projected CRS used for analysis and area calculations (UTM zone 28N)
+ANALYSIS_CRS = "EPSG:32628"
+SCALE = 10  # metres (Sentinel-2 native resolution for B2, B3, B4, B8)
+ZONE_SIMPLIFY_M = 20  # zones are simplified before being sent to Earth Engine
+
+# --- Time period ---------------------------------------------------------
+YEARS = list(range(2016, 2027))  # 2016 ... 2026
+# Dry season in Senegal: few clouds, stable vegetation -> comparable composites
+SEASON_START = "01-01"  # MM-DD
+SEASON_END = "05-31"
+
+# Cloud Score+ threshold (0-1). Higher = stricter cloud masking.
+CLOUD_SCORE_THRESHOLD = 0.60
+
+# --- Classification (one national model) ---------------------------------
+TRAINING_YEAR = 2021          # year of the reference land-cover products (WorldCover 2021)
+POINTS_PER_CLASS = 1500       # stratified sample size per class AND per city (balanced city x class)
+TRAIN_FRACTION = 0.7          # 70 % training, 30 % test, in every city
+N_TREES = 200
+SEED = 42
+
+# --- Post-processing -----------------------------------------------------
+# A pixel is considered urbanised in year Y if it is classified as built-up
+# in at least this share of the years from Y to the last year, including
+# the last year. This removes one-year classification noise.
+PERSISTENCE_RATIO = 0.8
+
+# Periods used for the map legend (start_year, end_year, label)
+PERIODS = [
+    (2016, 2016, "Built before 2017"),
+    (2017, 2018, "2017-2018"),
+    (2019, 2020, "2019-2020"),
+    (2021, 2022, "2021-2022"),
+    (2023, 2024, "2023-2024"),
+    (2025, 2026, "2025-2026"),
+]
+PERIOD_COLORS = ["#6b6b6b", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404"]
+
+# --- Study zones (step 0, see ROADMAP J1) --------------------------------
+# One zone per city, same rule everywhere: GHSL urban cluster + fixed buffer,
+# clipped to land. Zones are written once to zones/ and then frozen.
+GHSL_SMOD_COLLECTION = "JRC/GHSL/P2023A/GHS_SMOD_V2-0"
+GHSL_EPOCH = "2025"
+GHSL_MIN_CLASS = 21        # 21-23 = urban cluster, 30 = urban centre (GHSL degree of urbanisation)
+ZONE_BUFFER_M = 2000       # margin for growth beyond the 2025 urban cluster
+# Where buffers of two cities overlap, each point goes to the nearest urban cluster.
+
+# Land mask and communes
+COD_AB_URL = ("https://data.humdata.org/dataset/bd9bc484-155d-41a3-87cf-064310a94492/resource/"
+              "02745b5a-88b7-4132-ae11-8bdaf64afff8/download/sen_admin_boundaries.geojson.zip")
+OVERPASS_URLS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+]
+HTTP_USER_AGENT = "SamaReew (https://github.com/Bigtapha/samareew)"
+OSM_COMMUNE_ADMIN_LEVEL = "8"
+MIN_COMMUNE_PART_KM2 = 0.5  # commune pieces smaller than this inside a zone are dropped
+
+# Sectors (cities with "sectors": True in config/cities.py): central disc of one ring
+# width, then rings x 8 directions around the city centre.
+SECTOR_RING_M = 2000
+
+# --- Files ---------------------------------------------------------------
+ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
+TRAINING_SAMPLES_CSV = DATA_DIR / "training_samples.csv"   # written by step 1, read by step 2
+ACCURACY_BY_CITY_JSON = MODEL_DIR / "accuracy_by_city.json"
+
+# Per-city files, in data/cities/<city>/ and outputs/cities/<city>/
+BUILT_STACK_TIF = "built_by_year.tif"        # one band per year (0/1/255)
+IMAGE_COUNTS_JSON = "image_counts.json"      # Sentinel-2 scenes per season (quality check)
+FIRST_YEAR_TIF = "urbanisation_year.tif"     # year a pixel became built
+STATS_CSV = "built_area_by_year.csv"
+
+
+def city_data_dir(city: str) -> Path:
+    return DATA_DIR / "cities" / city
+
+
+def city_output_dir(city: str) -> Path:
+    return OUTPUT_DIR / "cities" / city

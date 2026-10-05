@@ -4,6 +4,11 @@
 > comparing Senegalese cities (Dakar, Touba, Thiès, Mbour), inspired by Our World in Data.
 > See [ROADMAP.md](ROADMAP.md). The content below documents the first case study:
 > **urban expansion in the Dakar region, 2016–2026**.
+>
+> **Work in progress (J2):** the code is moving to a national pipeline (one model for the
+> four cities). The case-study results are kept in `outputs/legacy_dakar/`. New commands:
+> `python -m pipeline.s0_zones`, `s1_train`, `s2_classify`, `s3_postprocess`
+> (settings in `config/`, cities in `config/cities.py`).
 
 Ten years of urban expansion mapped from **Sentinel-2** imagery with **Google Earth Engine**,
 a **Random Forest** classifier, a temporal consistency filter and an **independent accuracy
@@ -11,7 +16,7 @@ assessment**, published as an **interactive web map**.
 
 **[→ Open the interactive map](https://Bigtapha.github.io/samareew/)**
 
-![Urban expansion map](outputs/urban_expansion_map.png)
+![Urban expansion map](outputs/legacy_dakar/urban_expansion_map.png)
 
 ## Why this area
 
@@ -34,7 +39,7 @@ rectangle in `config.py` (`AOI_MODE`).
 | Agreement with reference products (30 % test sample) | 91.8 % (kappa 0.84) |
 | Overall accuracy (independent validation, area-weighted) | _pending_ |
 
-_Areas from `outputs/built_area_by_year.csv`, agreement from `outputs/accuracy_gee_test.json`;
+_Areas from `outputs/legacy_dakar/built_area_by_year.csv`, agreement from `outputs/legacy_dakar/accuracy_gee_test.json`;
 independent accuracy from `outputs/accuracy_validation.json` once step 4 is done._
 
 ## Method

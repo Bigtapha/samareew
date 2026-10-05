@@ -1,6 +1,6 @@
 # Study zones (frozen)
 
-Produced by `python 00_zones.py`, then frozen: every indicator is computed inside these
+Produced by `python -m pipeline.s0_zones`, then frozen: every indicator is computed inside these
 zones, so they only change when the rule changes (log it in ROADMAP §9).
 
 | File | Content |

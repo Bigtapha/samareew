@@ -1,9 +1,15 @@
-"""Step 2 - Local post-processing: urbanisation year, statistics and static maps.
+"""Step 3 - Local post-processing of every city: urbanisation year, statistics, static maps.
 
-Input : data/built_by_year.tif (from step 1)
-Output: outputs/urbanisation_year.tif, outputs/built_area_by_year.csv,
-        outputs/urban_expansion_map.png, outputs/built_area_chart.png
+Input : data/cities/<city>/built_by_year.tif (step 2)
+Output, in outputs/cities/<city>/: urbanisation_year.tif, built_area_by_year.csv,
+        urban_expansion_map.png, built_area_chart.png
+
+Usage
+    python -m pipeline.s3_postprocess                 # every city with a stack from step 2
+    python -m pipeline.s3_postprocess --city touba    # one city
 """
+import argparse
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -24,14 +30,14 @@ def save_geotiff(array, profile, path):
         dst.update_tags(description="Year of urbanisation (0 = not built, -1 = no data)")
 
 
-def static_map(first_year, path):
+def static_map(first_year, name, path):
     classes = np.ma.masked_where(first_year == pp.NODATA_OUT,   # outside the study area
                                  pp.period_index(first_year, cfg.PERIODS))
     cmap = ListedColormap(["#f2efe9"] + cfg.PERIOD_COLORS)
     cmap.set_bad("white")
     fig, ax = plt.subplots(figsize=(9, 7))
     ax.imshow(classes, cmap=cmap, vmin=0, vmax=len(cfg.PERIODS), interpolation="nearest")
-    ax.set_title(f"Urban expansion - {cfg.AOI_NAME}, {cfg.YEARS[0]}-{cfg.YEARS[-1]}")
+    ax.set_title(f"Urban expansion - {name}, {cfg.YEARS[0]}-{cfg.YEARS[-1]}")
     ax.set_axis_off()
     handles = [Patch(color=c, label=p[2]) for c, p in zip(cfg.PERIOD_COLORS, cfg.PERIODS)]
     ax.legend(handles=handles, loc="lower left", fontsize=8, frameon=True)
@@ -42,42 +48,62 @@ def static_map(first_year, path):
     plt.close(fig)
 
 
-def chart(stats, path):
+def chart(stats, name, path):
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.bar(stats["year"], stats["built_area_ha"], color="#d95f0e")
     ax.set_ylabel("Built-up area (ha)")
-    ax.set_title("Built-up area per year")
+    ax.set_title(f"Built-up area per year - {name}")
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
 
 
-def main():
-    cfg.OUTPUT_DIR.mkdir(exist_ok=True)
-    with rasterio.open(cfg.BUILT_STACK_TIF) as src:
+def run_city(city: str) -> None:
+    stack_path = cfg.city_data_dir(city) / cfg.BUILT_STACK_TIF
+    out_dir = cfg.city_output_dir(city)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    name = cfg.CITIES[city]["name"]
+    with rasterio.open(stack_path) as src:
         stack = src.read()
         profile = src.profile
         pixel_area = abs(src.transform.a * src.transform.e)
 
     if stack.shape[0] != len(cfg.YEARS):
-        raise SystemExit(f"Expected {len(cfg.YEARS)} bands, found {stack.shape[0]}")
+        raise SystemExit(f"{stack_path}: expected {len(cfg.YEARS)} bands, found {stack.shape[0]}")
 
     missing = [(y, round(float((b == pp.NODATA_IN).mean()) * 100, 1))
                for y, b in zip(cfg.YEARS, stack)]
-    print("Share of pixels without clear observation (%):", dict(missing))
+    print("  share of pixels without clear observation (%):", dict(missing))
 
     first_year = pp.urbanisation_year(stack, cfg.YEARS, cfg.PERSISTENCE_RATIO)
-    save_geotiff(first_year, profile, cfg.FIRST_YEAR_TIF)
+    save_geotiff(first_year, profile, out_dir / cfg.FIRST_YEAR_TIF)
 
     stats = pp.area_by_year(first_year, cfg.YEARS, pixel_area)
-    stats.to_csv(cfg.STATS_CSV, index=False)
+    stats.to_csv(out_dir / cfg.STATS_CSV, index=False)
     print(stats.to_string(index=False))
 
-    static_map(first_year, cfg.OUTPUT_DIR / "urban_expansion_map.png")
-    chart(stats, cfg.OUTPUT_DIR / "built_area_chart.png")
-    print(f"Saved results in {cfg.OUTPUT_DIR}. Next: python 03_make_webmap.py")
+    static_map(first_year, name, out_dir / "urban_expansion_map.png")
+    chart(stats, name, out_dir / "built_area_chart.png")
+    print(f"  saved results in {out_dir.relative_to(cfg.ROOT)}")
+
+
+def main(cities: list):
+    done = []
+    for city in cities:
+        if not (cfg.city_data_dir(city) / cfg.BUILT_STACK_TIF).exists():
+            print(f"{city}: no stack from step 2, skipped")
+            continue
+        print(f"Post-processing {city}...")
+        run_city(city)
+        done.append(city)
+    if not done:
+        raise SystemExit("Nothing to do: run python -m pipeline.s2_classify first")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--city", choices=list(cfg.CITIES), help="only this city (default: all)")
+    args = parser.parse_args()
+    main([args.city] if args.city else list(cfg.CITIES))

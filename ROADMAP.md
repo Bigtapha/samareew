@@ -144,7 +144,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : `zones/` contient les 4 zones figées, les communes et les secteurs, tous documentés.
 
 ### J2 — Modèle national et classification
-- [ ] Réorganiser le code selon la structure cible (configuration par ville)
+- [x] Réorganiser le code selon la structure cible (configuration par ville) : `config/`, `pipeline/s0…s3`, résultats Dakar dans `outputs/legacy_dakar/`
 - [ ] Échantillonnage d'entraînement équilibré par ville × classe
 - [ ] Entraîner le Random Forest national et l'évaluer par ville
 - [ ] Classer 2016–2026 pour les 4 villes

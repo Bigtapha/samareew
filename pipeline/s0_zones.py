@@ -11,19 +11,18 @@ Outputs (frozen and versioned; re-run only to change the rule)
 - zones/urban_clusters.geojson   GHSL urban cluster of each city
 - zones/zones.geojson            study zone of each city
 - zones/communes.geojson         communes clipped to the zones
-- zones/centres.geojson          centre of each city (config.CITY_CENTRES)
-- zones/sectors.geojson          rings x directions around the centre (config.SECTOR_CITIES)
+- zones/centres.geojson          centre of each city (config/cities.py)
+- zones/sectors.geojson          rings x directions around the centre (cities with "sectors": True)
 
 Usage
-    python 00_zones.py               # uses cached downloads in data/raw/ when present
-    python 00_zones.py --refresh     # download OSM and OCHA data again
+    python -m pipeline.s0_zones              # uses cached downloads in data/raw/ when present
+    python -m pipeline.s0_zones --refresh    # download OSM and OCHA data again
 """
 import argparse
 import io
 import json
 import time
 import zipfile
-from datetime import date
 
 import ee
 import geopandas as gpd
@@ -44,13 +43,14 @@ def urban_clusters() -> gpd.GeoSeries:
     """GHSL urban cluster containing each city's seed point."""
     smod = (ee.ImageCollection(cfg.GHSL_SMOD_COLLECTION)
             .filter(ee.Filter.eq("system:index", cfg.GHSL_EPOCH)).first().select("smod_code"))
-    seeds = [p for _, p in cfg.CITIES.values()]
+    seeds = [c["seed"] for c in cfg.CITIES.values()]
     region = ee.Geometry.MultiPoint(seeds).bounds().buffer(50_000)
     vectors = smod.gte(cfg.GHSL_MIN_CLASS).selfMask().reduceToVectors(
         geometry=region, crs=smod.projection(), scale=1000, geometryType="polygon",
         eightConnected=True, maxPixels=1e9)
     geoms = {}
-    for slug, (name, seed) in cfg.CITIES.items():
+    for slug, city in cfg.CITIES.items():
+        name, seed = city["name"], city["seed"]
         hits = vectors.filterBounds(ee.Geometry.Point(seed))
         if hits.size().getInfo() != 1:
             raise ValueError(f"{name}: the seed point {seed} is not inside exactly one GHSL urban cluster")
@@ -124,7 +124,8 @@ def communes_by_zone(communes: gpd.GeoDataFrame, zones: dict) -> gpd.GeoDataFram
 
 def city_centres(zones: dict) -> gpd.GeoDataFrame:
     rows = []
-    for slug, (landmark, lonlat, osm) in cfg.CITY_CENTRES.items():
+    for slug, city in cfg.CITIES.items():
+        landmark, lonlat, osm = city["centre"]
         rows.append({"city": slug, "landmark": landmark, "source": f"OpenStreetMap {osm}",
                      "geometry": Point(lonlat)})
     centres = gpd.GeoDataFrame(rows, crs=4326)
@@ -137,7 +138,7 @@ def city_centres(zones: dict) -> gpd.GeoDataFrame:
 def city_sectors(centres: gpd.GeoDataFrame, zones: dict) -> gpd.GeoDataFrame:
     rows = []
     for c in centres.to_crs(cfg.ANALYSIS_CRS).itertuples():
-        if c.city not in cfg.SECTOR_CITIES:
+        if not cfg.CITIES[c.city]["sectors"]:
             continue
         for s in zn.sectors(c.geometry, zones[c.city], cfg.SECTOR_RING_M, cfg.MIN_COMMUNE_PART_KM2 * 1e6):
             km = f"{s['ring_min'] / 1000:g}-{s['ring_max'] / 1000:g} km"
@@ -170,8 +171,7 @@ def main(refresh: bool) -> None:
     communes["geometry"] = communes.intersection(land)  # OSM boundaries often run out to sea
     communes = communes_by_zone(communes[~communes.is_empty], zones)
 
-    today = date.today().isoformat()
-    names = {slug: name for slug, (name, _) in cfg.CITIES.items()}
+    names = {slug: city["name"] for slug, city in cfg.CITIES.items()}
     write(gpd.GeoDataFrame(
         {"city": list(clusters.index), "name": [names[s] for s in clusters.index],
          "area_km2": (clusters.area / 1e6).round(1).values,
@@ -180,8 +180,7 @@ def main(refresh: bool) -> None:
     write(gpd.GeoDataFrame(
         {"city": list(zones), "name": [names[s] for s in zones],
          "area_km2": [round(z.area / 1e6, 1) for z in zones.values()],
-         "rule": f"GHSL urban cluster + {cfg.ZONE_BUFFER_M} m buffer, split halfway between cities, land only",
-         "created": today},
+         "rule": f"GHSL urban cluster + {cfg.ZONE_BUFFER_M} m buffer, split halfway between cities, land only"},
         geometry=list(zones.values()), crs=cfg.ANALYSIS_CRS), "zones.geojson")
     communes["osm_date"] = osm_date[:10]
     write(communes, "communes.geojson")
