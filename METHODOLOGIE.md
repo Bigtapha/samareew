@@ -294,12 +294,10 @@ trop de non-bâti en bâti.
 2. on mesure l'accord avec deux autres modèles, pas avec la réalité du terrain ;
 3. on ne teste que 2021, pas les autres années ni l'année d'urbanisation.
 
-### 9.2 Ce qui viendra : la validation nationale (J4)
+### 9.2 La validation nationale (J4)
 
-Un échantillon **tiré dans notre propre carte**, stratifié par ville × classe (non bâti, bâti
-dès 2016, nouveau bâti), environ 120 points par ville, **photo-interprété à l'aveugle** dans
-Google Earth Pro. Chaque strate est ensuite pondérée par sa part de la surface de la carte
-(`src/validation.py`), ce qui donne une précision par ville avec sa marge d'erreur.
+La vraie précision viendra d'un échantillon **tiré dans notre propre carte** et
+**photo-interprété à l'aveugle**, avec une marge d'erreur par ville : voir §14.
 
 ---
 
@@ -607,6 +605,98 @@ apostrophes ; sept variantes d'orthographe sont listées dans `CENSUS_COMMUNE_AL
 m² bâtis par habitant, ODD 11.3.1) ne sont publiés que pour les **villes** ; par commune, on
 publie la population recensée en 2023 et les m² bâtis par habitant qui en découlent (§12.2).
 
+## 14. Validation nationale (étape 5)
+
+`pipeline/s5_validation.py` mesure la précision réelle de la carte 2016 → 2025 : on tire des
+points au hasard dans la carte, on regarde sur des images à très haute résolution ce qu'ils
+sont vraiment, sans connaître la réponse de la carte, puis on estime la précision en tenant
+compte de la surface de chaque strate (Olofsson et al., 2014).
+
+### 14.1 Plan d'échantillonnage
+
+**Même plan dans les quatre villes** (`VALIDATION_POINTS`, graine `VALIDATION_SEED = 42`) :
+5 strates tirées dans la carte de l'année d'urbanisation (§8) et dans celle du type de
+croissance 2016 → 2025 (§11.2), soit **120 points par ville et 480 au total**.
+
+| Strate (classe de la carte) | Points par ville | Part de la surface : Dakar | Touba | Thiès | Mbour |
+|---|---|---|---|---|---|
+| Non bâti en 2025 | 40 | 63,8 % | 64,7 % | 81,8 % | 73,6 % |
+| Bâti dès 2016 | 32 | 24,1 % | 20,7 % | 9,9 % | 14,6 % |
+| Nouveau bâti — densification | 16 | 4,4 % | 5,5 % | 2,3 % | 4,3 % |
+| Nouveau bâti — extension | 16 | 3,1 % | 5,2 % | 1,8 % | 3,2 % |
+| Nouveau bâti — saut | 16 | 4,6 % | 4,0 % | 4,2 % | 4,3 % |
+
+Pourquoi ce plan (décision du 06/10/2026, ROADMAP §9) :
+
+- **Les petites strates sont sur-échantillonnées.** Le nouveau bâti couvre 8 à 15 % de la
+  surface mais reçoit 40 % des points : c'est là que la carte est la moins sûre (§13 : la
+  moitié seulement est confirmée par des toits Open Buildings). La pondération par la
+  surface corrige ensuite ce déséquilibre.
+- **Le nouveau bâti est découpé par type de croissance**, pour mesurer la précision du saut
+  (36 % seulement confirmé à Thiès). Avec 16 points, la précision du saut d'une ville est
+  **indicative** (marge d'environ ±20 points) ; sur les quatre villes (64 points), la marge
+  descend à environ ±11 points.
+- **Pas de points en plus à Thiès** : même plan partout pour la comparabilité.
+- Marge attendue de la précision globale pondérée : environ ±5 à ±7 points par ville.
+
+Les points sont des **centres de pixels de 10 m**, mélangés dans chaque ville : ni l'ordre ni
+l'identifiant (`DAK-001`…) ne trahissent la strate. Fichiers dans `outputs/validation/` :
+`labels.csv` (fiche à remplir, sans la classe de la carte), `points.kml` (points et contour
+du pixel pour Google Earth Pro, un dossier par ville), `sample_key.csv` (strate, classe et
+année de la carte de chaque point : **à ne pas ouvrir pendant l'étiquetage**) et
+`strata.csv` (pixels, surface et poids de chaque strate). Cartes de contrôle :
+`data/j4_sample_<ville>.png`.
+
+### 14.2 Protocole de photo-interprétation
+
+Dans Google Earth Pro, ouvrir `points.kml`, sans aucune couche de nos cartes. Pour chaque
+point, avec l'imagerie historique (icône horloge) :
+
+1. **`built_2016`** : sur l'image la plus proche de la saison sèche 2016 (novembre 2015 –
+   mai 2016) ; **`built_2025`** : sur l'image la plus proche de la saison sèche 2025
+   (novembre 2024 – mai 2025). Noter la date des images utilisées (`image_date_2016`,
+   `image_date_2025`, au format AAAA-MM).
+2. **1 = bâti** si **au moins la moitié du carré jaune** est couverte de surfaces construites :
+   toits, dalles, bâtiments en chantier (murs montés), routes revêtues, cours et ruelles
+   prises dans le tissu bâti. C'est la définition de la carte : des pixels bâtis, pas
+   seulement des toits (§13). **0 = non bâti** : sol nu, sable, champ, végétation, eau,
+   parcelle vide, même clôturée (noter « clôture »), piste en terre hors du tissu bâti.
+3. **`year_built`** (facultatif) : pour un point non bâti en 2016 et bâti en 2025, la première
+   année où la construction apparaît, si les images le permettent. Ce n'est qu'une borne :
+   les images ne sont pas annuelles partout.
+4. **`sure`** : 1 si l'interprétation est sûre, 0 sinon (image floue, pixel à cheval sur un
+   bord, chantier ambigu). `note` : remarque libre (« chantier », « clôture », « sable »…).
+
+La **classe de référence** se déduit des deux dates, comme pour la carte : non bâti en 2025 →
+non bâti ; bâti en 2016 et en 2025 → bâti dès 2016 ; bâti en 2025 seulement → nouveau bâti
+(`src/validation.py`, `reference_class`).
+
+### 14.3 Estimations (`src/validation.py`)
+
+Chaque strate *h* pèse sa part *W_h* de la surface de la ville. Pour un indicateur 0/1
+(point bien classé, point vraiment nouveau bâti…), la moyenne de la ville est
+Σ *W_h* · moyenne_h, avec une erreur type √(Σ *W_h*² · *s_h*² / *n_h*). Les précisions
+utilisateur et producteur sont des **rapports** de deux telles moyennes (Stehman, 2014).
+Toutes les valeurs sont données avec leur **marge à 95 %** (1,96 erreur type) :
+
+| Mesure | Question |
+|---|---|
+| Précision globale pondérée | Quelle part de la surface de la ville est bien classée ? |
+| Précision utilisateur par classe | Quand la carte dit « nouveau bâti », a-t-elle raison ? (fausses alarmes) |
+| Précision producteur par classe | Le vrai nouveau bâti est-il bien trouvé ? (oublis) |
+| Précision par strate | En particulier : le saut est-il fiable dans chaque ville ? |
+| Surface corrigée par classe | Surface de nouveau bâti estimée d'après la réalité, avec sa marge, à comparer à la surface cartographiée |
+| Année d'urbanisation | Part des points bien datés à ±1 an près, d'après `year_built` (année 2017, année 2025) |
+
+Le niveau national traite les 20 strates ville × strate comme un seul tirage, pondéré par
+la surface de chaque zone. Lancement : `python -m pipeline.s5_validation` (sur les points
+déjà étiquetés ; une ville n'est estimée que si chaque strate a au moins deux points),
+résultats dans `outputs/validation/accuracy.json`.
+
+### 14.4 Résultats
+
+_À venir, après la photo-interprétation._
+
 ---
 
 ## Références
@@ -636,3 +726,6 @@ publie la population recensée en 2023 et les m² bâtis par habitant qui en dé
   (Open Buildings Temporal). arXiv:2310.11622.
 - Olofsson, P. et al. (2014). Good practices for estimating area and assessing accuracy of
   land change. _Remote Sensing of Environment_, 148, 42–57.
+- Stehman, S. V. (2014). Estimating area and map accuracy for stratified random sampling
+  when the strata are different from the map classes. _International Journal of Remote
+  Sensing_, 35(13), 4923–4939.

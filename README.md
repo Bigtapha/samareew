@@ -18,8 +18,8 @@ read it first.
 | J0 — Setup (git, GitHub, licences) | Done |
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
 | J2 — National model and classification | Done |
-| **J3 — Indicators and cross-check with GHSL / Open Buildings** | **Done** on branch `j3-indicateurs` (to merge) |
-| J4 — National validation (~480 photo-interpreted points) | To do |
+| J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
+| **J4 — National validation (480 photo-interpreted points)** | **In progress** on branch `j4-validation`: sample drawn, labelling to do |
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
 
@@ -51,8 +51,8 @@ read it first.
 **Weak points for J4 to measure**: new built-up area (only about half confirmed by roofs),
 leapfrog growth in Thiès and Dakar, the 2017 jump in Touba, and 2025 (confirmed by 2026 only).
 
-**Next step**: merge `j3-indicateurs`, then J4 (national validation): first decide the
-sampling design (ROADMAP §8), then draw the sample from the urbanisation maps.
+**Next step**: label the 480 points of `outputs/validation/labels.csv` blind in Google Earth
+Pro (protocol in METHODOLOGIE §14.2), then run `python -m pipeline.s5_validation`.
 
 ## Study zones
 
@@ -111,8 +111,9 @@ Yearly built-up maps ──► temporal consistency filter ──► year of urb
    by city, population (WorldPop Global 2), built-up m² per inhabitant and SDG 11.3.1; by
    commune, the 2023 census population (RGPH-5) and built-up m² per counted inhabitant.
 6. **Accuracy** — the 30 % test points only measure agreement with the reference products.
-   True accuracy will come from a national sample photo-interpreted blind in Google Earth
-   Pro (J4), with area-weighted accuracy per city.
+   True accuracy comes from a national sample (step 5): 120 points per city, stratified by
+   map class with the new built-up area split by growth type, photo-interpreted blind in
+   Google Earth Pro, then area-weighted accuracies and corrected areas with 95 % margins.
 
 ## Repository structure
 
@@ -127,6 +128,7 @@ pipeline/            one step = one module, run from the project root
   s2_classify.py     yearly built-up stacks per city
   s3_postprocess.py  urbanisation year, statistics, static map per city
   s4_indicators.py   indicators of every city -> long table + fact sheets in outputs/tables/
+  s5_validation.py   validation sample (--draw), then accuracy from the labels -> outputs/validation/
   s6_crosscheck.py   comparison with Open Buildings Temporal and GHSL -> outputs/crosscheck/
 src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators,
                      crosscheck, validation
@@ -153,6 +155,8 @@ python -m pipeline.s1_train           # samples + national model -> outputs/mode
 python -m pipeline.s2_classify        # all cities; --city touba for one; --drive to export via Drive
 python -m pipeline.s3_postprocess     # all cities with a stack; --city touba for one
 python -m pipeline.s4_indicators      # indicators of all cities -> outputs/tables/
+python -m pipeline.s5_validation --draw # validation sample, once -> outputs/validation/
+python -m pipeline.s5_validation      # accuracy from the labels entered so far
 python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
 pytest
 ```
@@ -166,8 +170,12 @@ Practical notes:
 - Step 4 downloads the WorldPop population of Senegal once (10 files of 17 MB) into
   `data/raw/worldpop/`.
 - Step 6 downloads the reference maps once per city through Earth Engine (about 5 minutes for
-  Touba, longer for Dakar) into `data/cities/<city>/`. Step 5 is reserved for the national
-  validation (J4).
+  Touba, longer for Dakar) into `data/cities/<city>/`. It is numbered after step 5 (validation)
+  in the plan, but only needs step 4.
+- Step 5 draws the validation sample once (`--draw`; it refuses to overwrite labels already
+  entered). Label `outputs/validation/labels.csv` without opening `sample_key.csv`, which holds
+  the map class of each point; the accuracy can be computed at any time on the points labelled
+  so far.
 - `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
   tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
   uses a geedim function marked as deprecated: keep the pinned versions until it is updated.

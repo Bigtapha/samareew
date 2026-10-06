@@ -44,7 +44,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Type de croissance | Règle de l'**Atlas of Urban Expansion** : emprise de départ = bâti urbain (≥ 25 % de bâti dans un cercle de 1 km²) + frange de 100 m + trous enclavés < 200 ha ; nouveau bâti dedans = **densification**, nouvel îlot qui la touche = **extension**, sinon **saut** ; par période (2016→2020, 2020→2025, 2016→2025) |
 | Population | **WorldPop Global 2** (R2025A, annuel, 100 m, contraint au bâti, CC BY 4.0) ; RGPH-5 2023 en contrôle sur les communes entièrement dans les zones |
 | Échelle des indicateurs de population | WorldPop (population, m²/habitant, ODD 11.3.1) **par ville seulement** ; par commune, la **population recensée 2023** (RGPH-5, ANSD, CC BY 4.0) et les m² bâtis par habitant recensé, pour les communes entièrement dans les zones |
-| Validation | Nouvel **échantillon national** stratifié par ville × classe (~120 points/ville) ; l'échantillon actuel de Dakar (260 points) n'est **plus à étiqueter** |
+| Validation | Nouvel **échantillon national**, même plan dans chaque ville : 120 points par ville (480 au total) en 5 strates, non bâti 40, bâti 2016 32, puis nouveau bâti découpé par type de croissance 2016→2025 (densification 16, extension 16, saut 16) ; photo-interprétation à l'aveugle aux deux dates 2016 et 2025, année d'apparition notée si possible ; l'échantillon de Dakar (260 points) n'est **plus à étiqueter** |
 
 ---
 
@@ -168,8 +168,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : la table longue est complète pour les 4 villes, et les écarts avec GHSL sont expliqués.
 
 ### J4 — Validation nationale
-- [ ] Décider le plan d'échantillonnage (§8), à partir des points faibles vus en J3 : nouveau bâti confirmé à ~50 % seulement par Open Buildings, saut peu sûr à Thiès (36 %) et Dakar (43 %), saut de Touba en 2017, année 2025
-- [ ] Tirer l'échantillon stratifié ville × classe (~480 points ; `src/validation.py` repris de l'étude Dakar : strates non bâti / bâti 2016 / nouveau bâti)
+- [x] Décider le plan d'échantillonnage : 120 points par ville, nouveau bâti découpé par type de croissance (densification / extension / saut), même plan partout, année d'apparition notée si possible (METHODOLOGIE §14.1)
+- [x] Tirer l'échantillon stratifié ville × strate (480 points, `pipeline/s5_validation.py --draw` → `outputs/validation/`)
 - [ ] Photo-interprétation à l'aveugle dans Google Earth Pro
 - [ ] Calculer la précision par ville (avec marge d'erreur) et la précision nationale
 - [ ] Intégrer les résultats aux fiches indicateurs et à la page Méthode
@@ -247,7 +247,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Plan d'échantillonnage de la validation. Proposé : garder ~120 points par ville, mais découper la strate « nouveau bâti » par type de croissance (densification / extension / saut), pour mesurer la précision du saut ville par ville ; même plan partout (pas de sur-échantillonnage de Thiès seule, par comparabilité). Alternative : plan initial (non bâti / bâti 2016 / nouveau bâti) ; ou points supplémentaires à Thiès, signalés | J4 |
 | Outils du site | J5 |
 
 ---
@@ -278,3 +277,4 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 06/10/2026 | Population : WorldPop Global 2 (R2025A), RGPH-5 2023 en contrôle | Seule source annuelle 2016–2025 au maillage fin (100 m), sous CC BY 4.0 (vérifié) ; le recensement ne donne que deux dates par commune entière |
 | 06/10/2026 | Type de croissance : l'emprise de départ ne part que du bâti urbain ou périurbain (≥ 25 % de bâti dans un cercle de 1 km², comme l'Atlas), pas de tout le bâti | À 10 m, la frange de 100 m autour du bâti épars couvrait presque toute la périphérie : 81 à 86 % de densification partout ; avec le seuil, 28 à 38 % selon la ville (cartes `data/j3_growth_<ville>.png`) |
 | 06/10/2026 | Indicateurs de population : WorldPop publié par ville seulement ; par commune, recensement 2023 (communes entièrement dans les zones) | Contrôle avec le RGPH-5 : totaux WorldPop bons (97 % sur les 51 communes de Dakar) mais répartition entre communes fausse d'un facteur 0,35 à 2,9 ; le recensement ne donne qu'une année mais il est juste |
+| 06/10/2026 | Validation : 120 points par ville en 5 strates (non bâti 40, bâti 2016 32, densification / extension / saut 16 chacun), même plan dans les 4 villes ; année d'apparition du bâti notée si les images le permettent | Mesurer la fiabilité du saut, point faible vu en J3 (36 % confirmé à Thiès) ; précision du saut indicative par ville (±20 points), mieux cernée au niveau national (±11 points) ; pas de points en plus à Thiès, par comparabilité ; l'année notée teste le saut de Touba en 2017 et l'année 2025 sans points supplémentaires |

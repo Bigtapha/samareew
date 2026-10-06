@@ -143,6 +143,20 @@ CHECK_WINDOW_PX = 3
 CHECK_MIN_ROOF_PCT = 5
 CHECK_CELL_PX = 10                   # 1 ha cells for the correlation of the two maps
 
+# --- Validation (step 5, ROADMAP J4) -------------------------------------
+# Stratified random sample of each city's map over the whole published period, the same
+# design in every city. The new built-up area is split by growth type (Atlas rule of
+# step 4, same period), to measure the accuracy of leapfrog growth city by city.
+VALIDATION_PERIOD = (2016, 2025)
+VALIDATION_POINTS = {             # points per stratum and per city (120 per city)
+    "not_built": 40,
+    "built_at_start": 32,
+    "densification": 16,
+    "extension": 16,
+    "leapfrog": 16,
+}
+VALIDATION_SEED = SEED
+
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
 TRAINING_SAMPLES_CSV = DATA_DIR / "training_samples.csv"   # written by step 1, read by step 2
@@ -167,6 +181,14 @@ WORLDPOP_COMMUNES_CSV = DATA_DIR / "worldpop_by_commune.csv"
 REFERENCE_ROOFS_TIF = "reference_roofs.tif"          # data/cities/<city>/: ob_<year>, ghsl_2018 bands
 GHSL_SERIES_JSON = "ghsl_built_surface.json"         # data/cities/<city>/: GHSL roofs (ha) per epoch
 CROSSCHECK_DIR = OUTPUT_DIR / "crosscheck"
+
+# Validation (step 5), in outputs/validation/
+VALIDATION_DIR = OUTPUT_DIR / "validation"
+VALIDATION_LABELS_CSV = VALIDATION_DIR / "labels.csv"     # sheet to fill, without the map classes
+VALIDATION_KEY_CSV = VALIDATION_DIR / "sample_key.csv"    # map class of each point: do not open while labelling
+VALIDATION_STRATA_CSV = VALIDATION_DIR / "strata.csv"     # pixels and points per city and stratum
+VALIDATION_KML = VALIDATION_DIR / "points.kml"            # points and their 10 m pixel, for Google Earth Pro
+VALIDATION_REPORT_JSON = VALIDATION_DIR / "accuracy.json"
 
 
 def city_data_dir(city: str) -> Path:
