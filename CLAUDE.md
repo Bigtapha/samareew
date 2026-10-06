@@ -1,0 +1,50 @@
+# CLAUDE.md
+
+SamaReew: open-data atlas comparing Senegalese cities (Dakar, Touba, Thiès, Mbour), first
+theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one national Random Forest.
+
+## Start of a session
+
+1. Read `README.md` (status, structure, commands) and `ROADMAP.md` (plan, decisions §2,
+   open decisions §8, decision log §9).
+2. Check the current branch and `git status`; work on a milestone branch, not on `main`.
+
+## Working with the user
+
+- Talk to the user in **French**. Code, comments, docstrings and `README.md` are in English;
+  `ROADMAP.md` and commit messages are in French (style: `J2 : <what>`).
+- Open decisions (ROADMAP §8) belong to the user: present the options with a recommendation,
+  then wait. Once decided, record it: tick the task, update §2 / §8, add a line to §9.
+- Commit only when asked. The user pushes themselves.
+- Show results visually when choices are spatial: write control maps (PNG) to `data/`
+  (ignored by git) and look at them before reporting.
+
+## Project rules
+
+- **Comparability first**: the same rule for every city (zones, buffer, model, indicators).
+  Never tune one city alone without saying so and logging it.
+- **Settings in `config/`, not in code**: shared settings in `config/settings.py`, one entry
+  per city in `config/cities.py`.
+- **Pure functions in `src/` with tests in `tests/`** (no Earth Engine in tests);
+  pipeline steps in `pipeline/` stay thin.
+- `zones/` is frozen and versioned: re-run step 0 only to change a rule, and check that
+  the geometries are otherwise identical.
+- `site/` (J5) will read only `outputs/`, never import from `pipeline/` or `src/`.
+- Large files (GeoTIFF, tiles) never go into git (`*.tif` and `data/` are ignored).
+- Licences: code MIT, produced data CC BY 4.0, `zones/communes.geojson` ODbL (OSM-derived).
+  Check the licence of any new source before using it (GADM was rejected for that reason).
+
+## Commands
+
+Run from the project root with the venv (`source myvenv/bin/activate`, Python 3.10):
+
+```bash
+python -m pipeline.s0_zones        # zones (cached downloads in data/raw/)
+python -m pipeline.s1_train        # samples + national model -> outputs/model/
+python -m pipeline.s2_classify     # --city <slug>, --drive
+python -m pipeline.s3_postprocess  # --city <slug>
+pytest
+```
+
+Earth Engine project: `tieufmaps` (already authenticated on this machine). Public Overpass
+servers are often busy (step 0 tries three mirrors); Nominatim works for single places.
