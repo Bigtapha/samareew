@@ -1,0 +1,219 @@
+city,unit_type,unit,label,land_ha
+dakar,city,dakar,Dakar,87853.3
+dakar,commune,Biscuiterie,Biscuiterie,121.7
+dakar,commune,Grand-Dakar,Grand-Dakar,104.0
+dakar,commune,Medina Gounass,Medina Gounass,73.2
+dakar,commune,Wakhinane Nimzatt,Wakhinane Nimzatt,432.4
+dakar,commune,Sam Notaire,Sam Notaire,268.6
+dakar,commune,Ndiarème Limamoulaye,Ndiarème Limamoulaye,128.9
+dakar,commune,Golf Sud,Golf Sud,424.2
+dakar,commune,Yeumbeul Nord,Yeumbeul Nord,704.5
+dakar,commune,Malika,Malika,1063.9
+dakar,commune,Keur Massar Nord,Keur Massar Nord,1318.6
+dakar,commune,Yeumbeul Sud,Yeumbeul Sud,261.3
+dakar,commune,Tivaouane Peulh-Niaga,Tivaouane Peulh-Niaga,5437.3
+dakar,commune,Bambylor,Bambylor,5125.3
+dakar,commune,Yenne,Yenne,4162.8
+dakar,commune,Rufisque Ouest,Rufisque Ouest,1155.9
+dakar,commune,Rufisque Nord,Rufisque Nord,714.1
+dakar,commune,Jaxaay - Parcelles,Jaxaay - Parcelles,670.5
+dakar,commune,Sendou,Sendou,827.2
+dakar,commune,Bargny,Bargny,1311.1
+dakar,commune,Sébikhotane,Sébikhotane,2012.1
+dakar,commune,Diamniadio,Diamniadio,7261.0
+dakar,commune,Rufisque Est,Rufisque Est,814.8
+dakar,commune,Sangalkam,Sangalkam,4127.2
+dakar,commune,Diender,Diender,7758.1
+dakar,commune,Cambérène,Cambérène,188.5
+dakar,commune,Patte d'Oie,Patte d'Oie,319.1
+dakar,commune,Parcelles Assainies,Parcelles Assainies,386.9
+dakar,commune,Grand Yoff,Grand Yoff,624.4
+dakar,commune,Yoff,Yoff,1451.1
+dakar,commune,Ngor,Ngor,425.8
+dakar,commune,Ouakam,Ouakam,595.5
+dakar,commune,Mermoz-Sacré-Cœur,Mermoz-Sacré-Cœur,409.6
+dakar,commune,Hann Bel-Air,Hann Bel-Air,1234.2
+dakar,commune,HLM,HLM,174.2
+dakar,commune,Dieuppeul-Derklé,Dieuppeul-Derklé,134.4
+dakar,commune,Sicap-Liberté,Sicap-Liberté,318.6
+dakar,commune,Fann-Point E-Amitié,Fann-Point E-Amitié,451.6
+dakar,commune,Gueule Tapée-Fass-Colobane,Gueule Tapée-Fass-Colobane,202.7
+dakar,commune,Médina,Médina,234.1
+dakar,commune,Dakar-Plateau,Dakar-Plateau,531.6
+dakar,commune,Dalifort,Dalifort,244.8
+dakar,commune,Pikine Ouest,Pikine Ouest,576.0
+dakar,commune,Pikine Nord,Pikine Nord,123.3
+dakar,commune,Guinaw Rail Sud,Guinaw Rail Sud,135.6
+dakar,commune,Guinaw Rail Nord,Guinaw Rail Nord,65.3
+dakar,commune,Pikine Est,Pikine Est,75.1
+dakar,commune,Djidah Thiaroye Kaw,Djidah Thiaroye Kaw,188.7
+dakar,commune,Mbao,Mbao,1393.5
+dakar,commune,Thiaroye-sur-Mer,Thiaroye-sur-Mer,360.2
+dakar,commune,Tivaouane Diacksao,Tivaouane Diacksao,107.8
+dakar,commune,Thiaroye-Gare,Thiaroye-Gare,158.6
+dakar,commune,Diamaguène-Sicap Mbao,Diamaguène-Sicap Mbao,748.4
+dakar,commune,Kayar,Kayar,65.2
+dakar,commune,Pout,Pout,711.4
+dakar,commune,Keur Moussa,Keur Moussa,16122.6
+dakar,commune,Popenguine-Ndayane,Popenguine-Ndayane,514.0
+dakar,commune,Diass,Diass,11562.9
+dakar,commune,Keur Massar Sud,Keur Massar Sud,525.3
+dakar,direction,N,Nord,4771.9
+dakar,direction,NE,Nord-Est,32689.6
+dakar,direction,E,Est,45621.2
+dakar,direction,SE,Sud-Est,141.5
+dakar,direction,S,Sud,90.1
+dakar,direction,SO,Sud-Ouest,98.8
+dakar,direction,O,Ouest,238.3
+dakar,direction,NO,Nord-Ouest,4201.8
+dakar,ring,0-2 km,0–2 km,604.1
+dakar,ring,2-4 km,2–4 km,1074.4
+dakar,ring,4-6 km,4–6 km,1192.9
+dakar,ring,6-8 km,6–8 km,1653.1
+dakar,ring,8-10 km,8–10 km,2654.0
+dakar,ring,10-12 km,10–12 km,3022.3
+dakar,ring,12-14 km,12–14 km,2231.6
+dakar,ring,14-16 km,14–16 km,2331.3
+dakar,ring,16-18 km,16–18 km,2580.9
+dakar,ring,18-20 km,18–20 km,2829.6
+dakar,ring,20-22 km,20–22 km,3268.9
+dakar,ring,22-24 km,22–24 km,3762.6
+dakar,ring,24-26 km,24–26 km,4267.2
+dakar,ring,26-28 km,26–28 km,4863.9
+dakar,ring,28-30 km,28–30 km,5445.7
+dakar,ring,30-32 km,30–32 km,5264.2
+dakar,ring,32-34 km,32–34 km,6065.1
+dakar,ring,34-36 km,34–36 km,6676.9
+dakar,ring,36-38 km,36–38 km,7167.3
+dakar,ring,38-40 km,38–40 km,7786.5
+dakar,ring,40-42 km,40–42 km,5315.0
+dakar,ring,42-44 km,42–44 km,4049.2
+dakar,ring,44-46 km,44–46 km,2648.8
+dakar,ring,46-48 km,46–48 km,1097.9
+touba,city,touba,Touba,41343.6
+touba,commune,Madina,Madina,176.5
+touba,commune,Kael,Kael,239.2
+touba,commune,Missirah,Missirah,4198.0
+touba,commune,Touba Mosquée,Touba Mosquée,26356.8
+touba,commune,Mbacké,Mbacké,1836.2
+touba,commune,Touba Fall,Touba Fall,5210.5
+touba,commune,Dalla Ngabou,Dalla Ngabou,3307.3
+touba,sector,C,Centre (0-2 km),1256.5
+touba,sector,N-2-4,"Nord, 2-4 km",471.2
+touba,sector,NE-2-4,"Nord-Est, 2-4 km",471.2
+touba,sector,E-2-4,"Est, 2-4 km",471.2
+touba,sector,SE-2-4,"Sud-Est, 2-4 km",471.2
+touba,sector,S-2-4,"Sud, 2-4 km",471.2
+touba,sector,SO-2-4,"Sud-Ouest, 2-4 km",471.2
+touba,sector,O-2-4,"Ouest, 2-4 km",471.2
+touba,sector,NO-2-4,"Nord-Ouest, 2-4 km",471.2
+touba,sector,N-4-6,"Nord, 4-6 km",785.3
+touba,sector,NE-4-6,"Nord-Est, 4-6 km",785.3
+touba,sector,E-4-6,"Est, 4-6 km",785.3
+touba,sector,SE-4-6,"Sud-Est, 4-6 km",785.4
+touba,sector,S-4-6,"Sud, 4-6 km",785.4
+touba,sector,SO-4-6,"Sud-Ouest, 4-6 km",785.4
+touba,sector,O-4-6,"Ouest, 4-6 km",785.3
+touba,sector,NO-4-6,"Nord-Ouest, 4-6 km",785.3
+touba,sector,N-6-8,"Nord, 6-8 km",1099.5
+touba,sector,NE-6-8,"Nord-Est, 6-8 km",1099.5
+touba,sector,E-6-8,"Est, 6-8 km",1099.4
+touba,sector,SE-6-8,"Sud-Est, 6-8 km",1099.5
+touba,sector,S-6-8,"Sud, 6-8 km",1099.4
+touba,sector,SO-6-8,"Sud-Ouest, 6-8 km",1099.5
+touba,sector,O-6-8,"Ouest, 6-8 km",1099.5
+touba,sector,NO-6-8,"Nord-Ouest, 6-8 km",1099.5
+touba,sector,N-8-10,"Nord, 8-10 km",1273.1
+touba,sector,NE-8-10,"Nord-Est, 8-10 km",858.6
+touba,sector,E-8-10,"Est, 8-10 km",1413.6
+touba,sector,SE-8-10,"Sud-Est, 8-10 km",1319.1
+touba,sector,S-8-10,"Sud, 8-10 km",1413.5
+touba,sector,SO-8-10,"Sud-Ouest, 8-10 km",1413.6
+touba,sector,O-8-10,"Ouest, 8-10 km",1413.6
+touba,sector,NO-8-10,"Nord-Ouest, 8-10 km",1399.4
+touba,sector,N-10-12,"Nord, 10-12 km",159.6
+touba,sector,NE-10-12,"Nord-Est, 10-12 km",201.3
+touba,sector,E-10-12,"Est, 10-12 km",1247.2
+touba,sector,SE-10-12,"Sud-Est, 10-12 km",496.5
+touba,sector,S-10-12,"Sud, 10-12 km",723.2
+touba,sector,SO-10-12,"Sud-Ouest, 10-12 km",1722.8
+touba,sector,O-10-12,"Ouest, 10-12 km",1648.4
+touba,sector,NO-10-12,"Nord-Ouest, 10-12 km",496.6
+touba,sector,E-12-14,"Est, 12-14 km",409.1
+touba,sector,SO-12-14,"Sud-Ouest, 12-14 km",1480.9
+touba,sector,O-12-14,"Ouest, 12-14 km",190.2
+touba,sector,NO-12-14,"Nord-Ouest, 12-14 km",55.3
+touba,sector,SO-14-16,"Sud-Ouest, 14-16 km",1235.2
+touba,sector,SO-16-18,"Sud-Ouest, 16-18 km",649.1
+touba,direction,N,Nord,3948.0
+touba,direction,NE,Nord-Est,3574.3
+touba,direction,E,Est,5585.3
+touba,direction,SE,Sud-Est,4331.2
+touba,direction,S,Sud,4652.8
+touba,direction,SO,Sud-Ouest,9018.8
+touba,direction,O,Ouest,5766.8
+touba,direction,NO,Nord-Ouest,4466.3
+touba,ring,0-2 km,0–2 km,1256.6
+touba,ring,2-4 km,2–4 km,3770.0
+touba,ring,4-6 km,4–6 km,6283.3
+touba,ring,6-8 km,6–8 km,8796.9
+touba,ring,8-10 km,8–10 km,10507.7
+touba,ring,10-12 km,10–12 km,6704.7
+touba,ring,12-14 km,12–14 km,2138.0
+touba,ring,14-16 km,14–16 km,1236.7
+touba,ring,16-18 km,16–18 km,649.7
+thies,city,thies,Thiès,37457.4
+thies,commune,Fandène,Fandène,15624.0
+thies,commune,Thiès Nord,Thiès Nord,1911.4
+thies,commune,Thiès Ouest,Thiès Ouest,1033.4
+thies,commune,Thiès Est,Thiès Est,547.4
+thies,commune,Keur Moussa,Keur Moussa,615.9
+thies,commune,Notto,Notto,11633.8
+thies,commune,Ngoudiane,Ngoudiane,442.0
+thies,commune,Thiénaba,Thiénaba,5631.8
+thies,direction,N,Nord,2135.9
+thies,direction,NE,Nord-Est,3443.3
+thies,direction,E,Est,10563.3
+thies,direction,SE,Sud-Est,8608.1
+thies,direction,S,Sud,6151.8
+thies,direction,SO,Sud-Ouest,2844.1
+thies,direction,O,Ouest,2368.2
+thies,direction,NO,Nord-Ouest,1342.9
+thies,ring,0-2 km,0–2 km,1256.7
+thies,ring,2-4 km,2–4 km,3770.0
+thies,ring,4-6 km,4–6 km,6158.4
+thies,ring,6-8 km,6–8 km,6984.0
+thies,ring,8-10 km,8–10 km,5503.9
+thies,ring,10-12 km,10–12 km,4891.7
+thies,ring,12-14 km,12–14 km,3817.3
+thies,ring,14-16 km,14–16 km,2006.8
+thies,ring,16-18 km,16–18 km,1519.8
+thies,ring,18-20 km,18–20 km,1315.5
+thies,ring,20-22 km,20–22 km,233.3
+mbour,city,mbour,Mbour,29570.8
+mbour,commune,M'bour,M'bour,2480.7
+mbour,commune,Saly Portudal,Saly Portudal,1422.9
+mbour,commune,Ngaparou,Ngaparou,512.3
+mbour,commune,La Somone,La Somone,547.2
+mbour,commune,Nguékhokh,Nguékhokh,1223.7
+mbour,commune,Sindia,Sindia,10644.5
+mbour,commune,Malicounda,Malicounda,11790.5
+mbour,commune,Sandiara,Sandiara,910.0
+mbour,direction,N,Nord,8231.4
+mbour,direction,NE,Nord-Est,4976.3
+mbour,direction,E,Est,3220.1
+mbour,direction,SE,Sud-Est,5088.9
+mbour,direction,S,Sud,165.7
+mbour,direction,SO,Sud-Ouest,0.5
+mbour,direction,O,Ouest,7.8
+mbour,direction,NO,Nord-Ouest,7880.1
+mbour,ring,0-2 km,0–2 km,736.1
+mbour,ring,2-4 km,2–4 km,2129.4
+mbour,ring,4-6 km,4–6 km,3489.1
+mbour,ring,6-8 km,6–8 km,4880.9
+mbour,ring,8-10 km,8–10 km,5618.1
+mbour,ring,10-12 km,10–12 km,5548.8
+mbour,ring,12-14 km,12–14 km,3493.7
+mbour,ring,14-16 km,14–16 km,2397.3
+mbour,ring,16-18 km,16–18 km,1252.7
+mbour,ring,18-20 km,18–20 km,24.9

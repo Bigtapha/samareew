@@ -85,6 +85,26 @@ MIN_COMMUNE_PART_KM2 = 0.5  # commune pieces smaller than this inside a zone are
 # width, then rings x 8 directions around the city centre.
 SECTOR_RING_M = 2000
 
+# --- Indicators (step 4, ROADMAP §4.3) -----------------------------------
+FORMAT_VERSION = "0.1"           # version of the exchange format read by the site (ROADMAP §4.2)
+RING_WIDTH_M = SECTOR_RING_M     # distance rings around the centre, in every city
+# Growth types (Atlas of Urban Expansion): the urban footprint at the start of a period is
+# the urban and suburban built-up area + a fringe of open land + the open spaces it encloses.
+# Urban or suburban = at least GROWTH_MIN_BUILT_SHARE built land in a 1 km² circle around
+# the pixel; sparser built-up (villages, scattered houses) is rural and left out.
+GROWTH_PERIODS = [(2016, 2020), (2020, 2025), (2016, 2025)]
+GROWTH_CIRCLE_RADIUS_M = 564     # circle of 1 km² (Atlas "walking distance" circle)
+GROWTH_MIN_BUILT_SHARE = 0.25
+GROWTH_FRINGE_M = 100
+GROWTH_MAX_HOLE_HA = 200
+# Population: WorldPop Global 2, constrained, 100 m, one file per year (CC BY 4.0)
+WORLDPOP_URL = ("https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/{year}/SEN/"
+                "v1/100m/constrained/sen_pop_{year}_CN_100m_R2025A_v1.tif")
+WORLDPOP_RELEASE = "WorldPop Global 2, R2025A v1"
+# Built-up m² per inhabitant and SDG 11.3.1 are not published for units with fewer people
+# (a few hundred inhabitants give meaningless ratios)
+MIN_POPULATION = 1000
+
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
 TRAINING_SAMPLES_CSV = DATA_DIR / "training_samples.csv"   # written by step 1, read by step 2
@@ -95,6 +115,13 @@ BUILT_STACK_TIF = "built_by_year.tif"        # one band per year (0/1/255)
 IMAGE_COUNTS_JSON = "image_counts.json"      # Sentinel-2 scenes per season (quality check)
 FIRST_YEAR_TIF = "urbanisation_year.tif"     # year a pixel became built
 STATS_CSV = "built_area_by_year.csv"
+GROWTH_TYPE_TIF = "growth_type_{start}_{end}.tif"   # 1 densification, 2 extension, 3 leapfrog
+
+# Exchange format (step 4), in outputs/tables/
+TABLES_DIR = OUTPUT_DIR / "tables"
+INDICATORS_CSV = TABLES_DIR / "indicators.csv"       # long table: one value per row
+UNITS_CSV = TABLES_DIR / "units.csv"                 # spatial units: names and land area
+INDICATORS_JSON = TABLES_DIR / "indicators.json"     # one fact sheet per indicator
 
 
 def city_data_dir(city: str) -> Path:

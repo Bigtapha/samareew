@@ -46,6 +46,7 @@ python -m pipeline.s0_zones        # zones (cached downloads in data/raw/)
 python -m pipeline.s1_train        # samples + national model -> outputs/model/
 python -m pipeline.s2_classify     # --city <slug>, --drive
 python -m pipeline.s3_postprocess  # --city <slug>
+python -m pipeline.s4_indicators   # all cities -> outputs/tables/
 pytest
 ```
 

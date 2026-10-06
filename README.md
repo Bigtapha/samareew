@@ -17,8 +17,8 @@ read it first.
 |---|---|
 | J0 — Setup (git, GitHub, licences) | Done |
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
-| **J2 — National model and classification** | **In progress** on branch `j2-modele-national` |
-| J3 — Indicators and cross-check with GHSL / Open Buildings | To do |
+| J2 — National model and classification | Done |
+| **J3 — Indicators and cross-check with GHSL / Open Buildings** | **In progress** on branch `j3-indicateurs` |
 | J4 — National validation (~480 photo-interpreted points) | To do |
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
@@ -29,8 +29,14 @@ reference products: 0.924 (kappa 0.849), from 0.906 (Dakar) to 0.946 (Touba). Bu
 from November to May, the last year (2026) only confirms the previous ones, and the
 temporal filter requires two consecutive built years (see [METHODOLOGIE.md](METHODOLOGIE.md)).
 
-**Next step**: close J2 (merge the branch), then J3 (indicators by commune and sector,
-cross-check with GHSL and Open Buildings).
+**J3 so far**: step 4 computes the v1 indicators by city, commune, Touba sector, direction
+and 2 km distance ring, into a long table with one fact sheet per indicator
+(`outputs/tables/`). Growth types follow the Atlas of Urban Expansion; population comes from
+WorldPop Global 2. From 2016 to 2025, built-up area grew about twice as fast as population
+in every city (SDG 11.3.1: Touba 1.7, Dakar 2.2, Mbour 2.3, Thiès 2.8).
+
+**Next step (J3)**: cross-check with GHSL and Open Buildings; check WorldPop against the
+2023 census (RGPH-5).
 
 ## Study zones
 
@@ -70,7 +76,8 @@ One national Random Forest (200 trees) ◄───────────┘  
         ▼
 Yearly built-up maps ──► temporal consistency filter ──► year of urbanisation
                                                                  │
-                                         indicators by city, commune and sector (J3)
+                                                                 ▼
+             indicators by city, commune, sector, direction and ring (+ WorldPop population)
 ```
 
 1. **Composites** — November–May (dry season, starting the previous year) median of cloud-masked Sentinel-2 scenes,
@@ -83,7 +90,10 @@ Yearly built-up maps ──► temporal consistency filter ──► year of urb
    next year, stays built in at least 80 % of the following years and at the end of the
    period (see `tests/test_postprocess.py`). The last year only confirms the previous ones:
    indicators cover 2016–2025.
-5. **Accuracy** — the 30 % test points only measure agreement with the reference products.
+5. **Indicators** — built-up area, base-100 growth, new built-up area, built-up share,
+   growth type (densification / extension / leapfrog, Atlas of Urban Expansion rule),
+   population (WorldPop Global 2), built-up m² per inhabitant and SDG 11.3.1.
+6. **Accuracy** — the 30 % test points only measure agreement with the reference products.
    True accuracy will come from a national sample photo-interpreted blind in Google Earth
    Pro (J4), with area-weighted accuracy per city.
 
@@ -93,16 +103,19 @@ Yearly built-up maps ──► temporal consistency filter ──► year of urb
 config/
   settings.py        settings shared by all cities (years, season, model, thresholds, paths)
   cities.py          one entry per city: name, seed point, centre, sectors
+  indicators.py      one fact sheet per indicator (public title, unit, definition, sources)
 pipeline/            one step = one module, run from the project root
   s0_zones.py        study zones, communes, centres, sectors -> zones/ (frozen)
   s1_train.py        training samples + national Random Forest, agreement by city
   s2_classify.py     yearly built-up stacks per city
   s3_postprocess.py  urbanisation year, statistics, static map per city
-src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, validation
+  s4_indicators.py   indicators of every city -> long table + fact sheets in outputs/tables/
+src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators, validation
 tests/               unit tests (pure functions, no Earth Engine needed)
 zones/               frozen study zones (GeoJSON, versioned)
 data/                ignored by git: downloads (data/raw/), training samples, stacks (data/cities/<city>/)
-outputs/             model/ (evaluation), cities/<city>/ (results), legacy_dakar/ (first case study)
+outputs/             model/ (evaluation), cities/<city>/ (results), tables/ (indicators for the site),
+                     legacy_dakar/ (first case study)
 docs/                old Dakar web map (GitHub Pages), to be replaced by the site in J5
 ```
 
@@ -117,6 +130,7 @@ python -m pipeline.s0_zones           # only to change the zones (they are froze
 python -m pipeline.s1_train           # samples + national model -> outputs/model/
 python -m pipeline.s2_classify        # all cities; --city touba for one; --drive to export via Drive
 python -m pipeline.s3_postprocess     # all cities with a stack; --city touba for one
+python -m pipeline.s4_indicators      # indicators of all cities -> outputs/tables/
 pytest
 ```
 
@@ -126,6 +140,8 @@ Practical notes:
   Overpass (OSM) servers are often busy: the step tries three mirrors in turn.
 - Step 2 retrains the model from `data/training_samples.csv`, so it uses exactly the model
   evaluated in step 1. Run step 1 first.
+- Step 4 downloads the WorldPop population of Senegal once (10 files of 17 MB) into
+  `data/raw/worldpop/`.
 - The virtual environment uses Python 3.10, no longer supported by Google's libraries since
   October 2026 (it still works, with a warning): move to Python 3.11+ when convenient.
 
@@ -152,12 +168,16 @@ in favour of the national one.
   last classified year (2026) is therefore not published: it only confirms 2025, and
   indicators cover 2016–2025. Growth in 2025 is probably still overestimated.
 - Sentinel-2A was launched in June 2015, so the series cannot start before the 2016 dry season.
+- Population is modelled (WorldPop), not counted: it is spread over built-up areas seen
+  from space, so built-up m² per inhabitant is less informative at commune level.
+- Leapfrog growth includes growth around villages and most of the remaining isolated
+  false detections: it is the least reliable growth type.
 - Commune boundaries come from OpenStreetMap and are not official (least reliable around Thiès).
 
 ## Tools
 
 Python · Google Earth Engine · geemap · rasterio · GeoPandas · Shapely · NumPy · pandas ·
-scikit-learn · Matplotlib
+SciPy · scikit-learn · Matplotlib
 
 ## License
 
@@ -167,4 +187,5 @@ Code: [MIT](LICENSE). Produced data: [CC BY 4.0](LICENSE-DATA.md), except
 ## Author
 
 **Moustapha Cisse** — Geomatics engineer, remote sensing and geospatial data engineering.
-Contains modified Copernicus Sentinel data (2016–2026).
+Contains modified Copernicus Sentinel data (2016–2026). Population: WorldPop Global 2
+(R2025A, doi:10.5258/SOTON/WP00839), CC BY 4.0.

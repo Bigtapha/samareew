@@ -9,4 +9,5 @@ geopandas
 matplotlib
 pillow
 scikit-learn
+scipy
 pytest

@@ -41,6 +41,8 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
 | Période | Saisons sèches **2016 à 2026** (1er novembre – 31 mai) ; indicateurs publiés **jusqu'à l'avant-dernière année** (2025), la dernière sert de confirmation |
+| Type de croissance | Règle de l'**Atlas of Urban Expansion** : emprise de départ = bâti urbain (≥ 25 % de bâti dans un cercle de 1 km²) + frange de 100 m + trous enclavés < 200 ha ; nouveau bâti dedans = **densification**, nouvel îlot qui la touche = **extension**, sinon **saut** ; par période (2016→2020, 2020→2025, 2016→2025) |
+| Population | **WorldPop Global 2** (R2025A, annuel, 100 m, contraint au bâti, CC BY 4.0) ; RGPH-5 2023 en contrôle sur les communes entièrement dans les zones |
 | Validation | Nouvel **échantillon national** stratifié par ville × classe (~120 points/ville) ; l'échantillon actuel de Dakar (260 points) n'est **plus à étiqueter** |
 
 ---
@@ -154,12 +156,13 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : 4 piles annuelles et un rapport d'évaluation par ville.
 
 ### J3 — Indicateurs et contrôle croisé
-- [ ] Post-traitement (filtre temporel) pour chaque ville
-- [ ] Définir les règles du type de croissance (seuil extension / saut)
-- [ ] Choisir la source de population (WorldPop ou RGPH-5)
-- [ ] Calculer les indicateurs v1 (§4.3) par ville, commune et secteur
+- [x] Post-traitement (filtre temporel) pour chaque ville (fait pendant J2)
+- [x] Définir les règles du type de croissance (seuil extension / saut) : règle Atlas of Urban Expansion
+- [x] Choisir la source de population (WorldPop ou RGPH-5) : WorldPop Global 2, RGPH-5 en contrôle
+- [ ] Contrôler WorldPop avec le RGPH-5 2023 (communes entièrement dans les zones ; licence à vérifier)
+- [x] Calculer les indicateurs v1 (§4.3) par ville, commune et secteur (aussi par direction et anneau ; `pipeline/s4_indicators.py`)
 - [ ] Comparer avec GHSL et Open Buildings
-- [ ] Produire la table longue et les fiches indicateurs
+- [x] Produire la table longue et les fiches indicateurs (`outputs/tables/`, format 0.1)
 
 **Critère de fin** : la table longue est complète pour les 4 villes, et les écarts avec GHSL sont expliqués.
 
@@ -240,8 +243,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Règles densification / extension / saut | J3 |
-| Source de population (WorldPop ou RGPH-5) | J3 |
 | Outils du site | J5 |
 
 ---
@@ -268,3 +269,6 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 06/10/2026 | Saison sèche allongée : 1er novembre (année précédente) – 31 mai, au lieu de janvier – mai | 2017 n'avait que 30 scènes (Dakar) et son composite surestimait le bâti (saut artificiel de +15 à +32 % en 2017) ; même règle pour toutes les années et toutes les villes |
 | 06/10/2026 | Indicateurs publiés jusqu'à l'avant-dernière année (2016–2025) ; la dernière année (2026) sert seulement de confirmation au filtre temporel | Une année seule n'est jamais filtrée : la surface 2026 était le bâti brut (Thiès +1 865 ha en 2026 contre ~200 ha/an) ; 10 ans de recul à la mise à jour 2027 |
 | 06/10/2026 | Filtre temporel : une année ne peut être l'année d'urbanisation que si le pixel est aussi bâti l'année valide suivante | Années sèches (2017, 2019) : fausses détections en périphérie qui avançaient la croissance réelle en 2017 (nouveau bâti 2017 à Dakar : 2 772 → 1 648 ha) ; hausse 2016–2025 quasi inchangée ; l'entraînement multi-années reste en réserve si J4 montre des erreurs variant selon l'année |
+| 06/10/2026 | Type de croissance : règle de l'Atlas of Urban Expansion (frange 100 m, trous enclavés < 200 ha ; densification / extension / saut), par période 2016→2020, 2020→2025, 2016→2025 | Règle publiée et reconnue, lisible par le grand public ; l'indice LEI, calculé îlot par îlot, est plus sensible au bruit des petits îlots à 10 m |
+| 06/10/2026 | Population : WorldPop Global 2 (R2025A), RGPH-5 2023 en contrôle | Seule source annuelle 2016–2025 au maillage fin (100 m), sous CC BY 4.0 (vérifié) ; le recensement ne donne que deux dates par commune entière |
+| 06/10/2026 | Type de croissance : l'emprise de départ ne part que du bâti urbain ou périurbain (≥ 25 % de bâti dans un cercle de 1 km², comme l'Atlas), pas de tout le bâti | À 10 m, la frange de 100 m autour du bâti épars couvrait presque toute la périphérie : 81 à 86 % de densification partout ; avec le seuil, 28 à 38 % selon la ville (cartes `data/j3_growth_<ville>.png`) |

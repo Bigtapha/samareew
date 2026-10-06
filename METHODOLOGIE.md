@@ -1,6 +1,6 @@
 # Fiche méthodologique — cartographie du bâti
 
-_Comment SamaReew produit les cartes annuelles du bâti (2016–2026) des quatre villes.
+_Comment SamaReew produit les cartes annuelles du bâti (2016–2026) des quatre villes et leurs indicateurs.
 Chaque valeur citée ici vient de `config/settings.py` ou du code (`src/`, `pipeline/`) :
 si un paramètre change, mettre cette fiche à jour._
 
@@ -318,6 +318,132 @@ Google Earth Pro. Chaque strate est ensuite pondérée par sa part de la surface
 
 ---
 
+## 11. Indicateurs (étape 4)
+
+`pipeline/s4_indicators.py` part de la carte de l'année d'urbanisation (§8) et calcule chaque
+indicateur pour **cinq types d'unités**, toujours dans la zone d'étude :
+
+| Unité | Découpage | Pour quoi |
+|---|---|---|
+| Ville | Toute la zone d'étude | Comparer les villes |
+| Commune | Communes OSM, partie dans la zone (`zones/communes.geojson`) | Unité grand public |
+| Secteur | Touba seulement : disque central 0–2 km puis anneaux de 2 km × 8 directions (`zones/sectors.geojson`) | Touba Mosquée couvre presque toute la ville |
+| Direction | 8 directions depuis le centre (N, NE…, chaque secteur angulaire de 45° centré sur sa direction) | « Vers où la ville pousse-t-elle ? » |
+| Anneau | Anneaux de 2 km autour du centre (`RING_WIDTH_M`) | « La croissance se fait-elle de plus en plus loin ? » |
+
+Un pixel appartient à l'unité qui contient **son centre**. Les communes, secteurs, directions
+et anneaux d'une ville redonnent bien le total de la ville (à 0,2 % près pour les communes de
+Dakar : quelques pixels de la zone ne tombent dans aucune commune OSM).
+
+### 11.1 Indicateurs annuels (2016–2025)
+
+| Indicateur | Calcul |
+|---|---|
+| Surface bâtie (ha) | Pixels urbanisés l'année Y ou avant × 100 m² |
+| Nouveau bâti (ha) | Surface bâtie de Y − surface de Y−1 (pas de valeur pour 2016) |
+| Croissance base 100 | Surface de Y / surface de 2016 × 100 |
+| Part de la surface bâtie (%) | Surface bâtie / surface terrestre de l'unité (pixels observés) |
+
+### 11.2 Type de croissance : densification, extension, saut
+
+Règle de l'**Atlas of Urban Expansion** (Angel et al., 2016), calculée pour trois périodes
+(`GROWTH_PERIODS`) : 2016 → 2020, 2020 → 2025 et 2016 → 2025. Pour une période de D à F :
+
+1. **Bâti urbain de départ.** Un pixel bâti en D est « urbain » (urbain ou périurbain dans
+   l'Atlas) si le bâti occupe **au moins 25 %** (`GROWTH_MIN_BUILT_SHARE`) des terres d'un
+   **cercle de 1 km²** autour de lui (rayon 564 m, `GROWTH_CIRCLE_RADIUS_M` ; la mer n'est pas
+   comptée). En dessous, c'est du bâti « rural » : villages, maisons isolées.
+2. **Emprise urbaine de départ** = bâti urbain + **frange** de terrain libre à moins de
+   **100 m** (`GROWTH_FRINGE_M`) + **espaces libres enclavés** de moins de **200 ha**
+   (`GROWTH_MAX_HOLE_HA`) qui ne touchent ni le bord de la zone ni la mer.
+3. Chaque pixel devenu bâti après D et au plus tard en F est classé :
+   - **densification** s'il est dans l'emprise de départ ;
+   - **extension** s'il est hors de l'emprise, dans un îlot de nouveau bâti (pixels voisins,
+     diagonales comprises) qui touche l'emprise ;
+   - **saut** sinon : îlot isolé, qui ne touche pas l'emprise.
+
+Les surfaces de chaque type sont publiées en hectares et en part du nouveau bâti de la
+période (`src/indicators.py`, `growth_types` ; cartes `growth_type_<D>_<F>.tif`).
+
+**Pourquoi le seuil de 25 %.** Une première version prenait tout le bâti de départ pour
+tracer l'emprise. À 10 m, le bâti de 2016 est éparpillé dans toute la périphérie (villages,
+maisons isolées, fausses détections) et sa frange de 100 m couvrait presque tout : 81 à 86 %
+du nouveau bâti sortait en densification dans les quatre villes, même là où Touba s'étale
+nettement. L'Atlas, conçu pour Landsat (30 m), écarte justement le bâti rural de l'emprise.
+
+Au dernier calcul (part du nouveau bâti 2016 → 2025, %) :
+
+| Ville | Densification | Extension | Saut |
+|---|---|---|---|
+| Dakar | 36,0 | 25,8 | 38,2 |
+| Touba | 37,5 | 35,4 | 27,1 |
+| Thiès | 27,6 | 21,8 | 50,6 |
+| Mbour | 36,9 | 26,9 | 36,2 |
+
+**À lire avec prudence :**
+- l'emprise est celle du **début** de la période : sur dix ans, la densification est plus
+  faible que sur les sous-périodes (environ 50 % en 2016 → 2020 et 2020 → 2025), car le bâti
+  construit en 2018 ne compte pas dans l'emprise de 2016 ;
+- le nouveau bâti autour d'un **village** compte comme saut (le village est du bâti rural) :
+  c'est une part importante du saut à Thiès, dont la zone contient beaucoup de villages ;
+- les **fausses détections** isolées qui passent le filtre temporel tombent surtout dans le
+  saut : c'est la catégorie la moins fiable (à vérifier à la validation, J4).
+
+## 12. Population et consommation d'espace
+
+### 12.1 Source : WorldPop Global 2
+
+**WorldPop Global 2, R2025A v1** (Bondarenko et al., 2025, CC BY 4.0) : nombre d'habitants
+par cellule de 3 secondes d'arc (environ 93 m × 90 m à cette latitude), une carte par année de
+2015 à 2030. Version **contrainte** : la population de chaque unité administrative (projetée
+à partir des recensements) n'est répartie que sur les cellules où un produit satellitaire
+voit du bâti. Les fichiers du Sénégal sont téléchargés une fois dans `data/raw/worldpop/`.
+
+Passage à la grille de 10 m : la population de chaque cellule est divisée par sa surface
+(calculée sur la sphère, `cell_areas_m2`), cette densité est rééchantillonnée au plus proche
+voisin sur la grille de la ville, puis multipliée par 100 m². Les totaux par zone sont à
+0,4 % près d'une somme directe des cellules dont le centre est dans la zone.
+
+### 12.2 Indicateurs
+
+| Indicateur | Calcul |
+|---|---|
+| Population | Somme des habitants dans l'unité |
+| Surface bâtie par habitant (m²) | Surface bâtie / population |
+| ODD 11.3.1 | Taux de consommation des terres / taux de croissance de la population, sur une période |
+
+ODD 11.3.1 (méthode ONU-Habitat) : taux de consommation des terres = ln(B_F / B_D) / n,
+taux de croissance de la population = ln(P_F / P_D) / n, où B est la surface bâtie, P la
+population et n le nombre d'années (il s'annule dans le rapport). **Au-dessus de 1**, le bâti
+s'étend plus vite que la population : la ville s'étale et sa densité baisse. Le rapport
+n'est pas publié si la population baisse ou ne change pas.
+
+Ces deux indicateurs ne sont pas publiés pour les unités de moins de **1 000 habitants**
+(`MIN_POPULATION`) : quelques centaines d'habitants donnent des rapports sans signification.
+
+Au dernier calcul :
+
+| Ville | Population 2016 | Population 2025 | m² bâtis / hab. 2016 | 2025 | ODD 11.3.1 (2016 → 2025) |
+|---|---|---|---|---|---|
+| Dakar | 3 498 869 | 4 198 345 | 60 | 76 | 2,24 |
+| Touba | 972 921 | 1 335 013 | 88 | 109 | 1,69 |
+| Thiès | 442 607 | 550 456 | 84 | 124 | 2,77 |
+| Mbour | 492 866 | 635 396 | 88 | 123 | 2,32 |
+
+### 12.3 Limites
+
+- **Population modélisée, pas recensée.** Les totaux sont des projections ; leur répartition
+  dans l'unité administrative suit le bâti vu par satellite. À l'échelle d'une commune, la
+  population et notre surface bâtie ne sont donc pas indépendantes : le rapport m²/habitant
+  y est moins informatif qu'à l'échelle de la ville. Contrôle prévu avec le RGPH-5 2023 sur
+  les communes entièrement dans les zones.
+- WorldPop et SamaReew n'utilisent pas la même carte du bâti : une partie de l'écart de
+  croissance entre bâti et population peut venir de là.
+- La croissance du bâti en 2025 est probablement surestimée (§10) : l'ODD 11.3.1 2020 → 2025
+  l'est aussi.
+
+---
+
 ## Références
 
 - Breiman, L. (2001). Random Forests. _Machine Learning_, 45, 5–32.
@@ -330,5 +456,11 @@ Google Earth Pro. Chaque strate est ensuite pondérée par sa part de la surface
 - Zanaga, D. et al. (2022). ESA WorldCover 10 m 2021 v200.
 - Brown, C. F. et al. (2022). Dynamic World, near real-time global 10 m land use land cover
   mapping. _Scientific Data_, 9, 251.
+- Angel, S. et al. (2016). _Atlas of Urban Expansion — 2016 Edition_, vol. 1 : Areas and
+  Densities. NYU Urban Expansion Program, UN-Habitat, Lincoln Institute of Land Policy.
+- ONU-Habitat (2021). Métadonnées de l'indicateur ODD 11.3.1 (rapport du taux de consommation
+  des terres au taux de croissance de la population).
+- Bondarenko, M. et al. (2025). Constrained estimates of 2015–2030 total number of people per
+  grid square, WorldPop Global 2, R2025A v1. Université de Southampton. doi:10.5258/SOTON/WP00839.
 - Olofsson, P. et al. (2014). Good practices for estimating area and assessing accuracy of
   land change. _Remote Sensing of Environment_, 148, 42–57.
