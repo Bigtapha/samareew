@@ -25,6 +25,16 @@ def test_urbanisation_year(series, expected):
     assert pp.urbanisation_year(pixel(series), YEARS, 0.8)[0, 0] == expected
 
 
+@pytest.mark.parametrize("series, expected", [
+    ([0, 1, 0, 1, 1, 1, 1, 1, 1, 1], 2019),        # 2017 passes 80 % (8/9) but 2018 is not built
+    ([0, 1, 255, 1, 1, 1, 1, 1, 1, 1], 2017),      # next valid year after 2017 is 2019: built
+    ([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 2025),        # last year: no next year to check
+])
+def test_next_valid_year_must_be_built(series, expected):
+    years = list(range(2016, 2026))
+    assert pp.urbanisation_year(pixel(series), years, 0.8)[0, 0] == expected
+
+
 def test_wrong_number_of_bands():
     with pytest.raises(ValueError):
         pp.urbanisation_year(pixel([0, 1]), YEARS, 0.8)

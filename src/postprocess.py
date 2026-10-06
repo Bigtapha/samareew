@@ -13,9 +13,11 @@ def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float) 
     ----------
     stack : array (n_years, rows, cols) with 1 = built, 0 = not built, 255 = no data
     years : list of years matching the first axis of ``stack``
-    persistence_ratio : a pixel is urbanised in year Y if it is built in Y and in at
-        least this share of the valid years from Y to the end, and if its most recent
-        valid observation is built (urbanisation is considered irreversible).
+    persistence_ratio : a pixel is urbanised in year Y if it is built in Y and in its
+        next valid year, in at least this share of the valid years from Y to the end,
+        and if its most recent valid observation is built (urbanisation is considered
+        irreversible). The next-year condition stops an isolated false detection in a
+        dry year from dating real, later construction too early.
 
     Returns
     -------
@@ -37,8 +39,15 @@ def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float) 
     for i in range(len(years)):
         last_status = np.where(valid[i], built[i], last_status)
 
+    # Status at the next valid observation after each year (True if there is none)
+    next_built = np.ones_like(built)
+    status = np.ones(stack.shape[1:], dtype=bool)
+    for i in range(len(years) - 1, -1, -1):
+        next_built[i] = status
+        status = np.where(valid[i], built[i], status)
+
     persistent = built & (built_after >= persistence_ratio * valid_after)
-    candidate = persistent & last_status[np.newaxis]
+    candidate = persistent & next_built & last_status[np.newaxis]
 
     has_year = candidate.any(axis=0)
     first_index = candidate.argmax(axis=0)

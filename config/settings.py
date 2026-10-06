@@ -19,13 +19,22 @@ SCALE = 10  # metres (Sentinel-2 native resolution for B2, B3, B4, B8)
 ZONE_SIMPLIFY_M = 20  # zones are simplified before being sent to Earth Engine
 
 # --- Time period ---------------------------------------------------------
-YEARS = list(range(2016, 2027))  # 2016 ... 2026
-# Dry season in Senegal: few clouds, stable vegetation -> comparable composites
-SEASON_START = "01-01"  # MM-DD
+YEARS = list(range(2016, 2027))  # 2016 ... 2026 (Sentinel-2A launched June 2015)
+# The last year is classified but not published: it only confirms the previous years in
+# the temporal filter (a single year can never be filtered). Published: 2016 ... 2025.
+PUBLISHED_YEARS = YEARS[:-1]
+# Dry season in Senegal: few clouds, stable vegetation -> comparable composites.
+# A start after the end means the season starts in the previous year: the "2016" season
+# runs from 1 November 2015 to 31 May 2016.
+SEASON_START = "11-01"  # MM-DD
 SEASON_END = "05-31"
 
 # Cloud Score+ threshold (0-1). Higher = stricter cloud masking.
 CLOUD_SCORE_THRESHOLD = 0.60
+
+# Direct download of the yearly stacks (step 2): tile size in MB (Earth Engine maximum: 32).
+# Smaller tiles avoid "User memory limit exceeded" with long seasons (many scenes per median).
+DOWNLOAD_MAX_TILE_MB = 8
 
 # --- Classification (one national model) ---------------------------------
 TRAINING_YEAR = 2021          # year of the reference land-cover products (WorldCover 2021)
@@ -47,7 +56,7 @@ PERIODS = [
     (2019, 2020, "2019-2020"),
     (2021, 2022, "2021-2022"),
     (2023, 2024, "2023-2024"),
-    (2025, 2026, "2025-2026"),
+    (2025, 2025, "2025"),
 ]
 PERIOD_COLORS = ["#6b6b6b", "#fee391", "#fec44f", "#fe9929", "#d95f0e", "#993404"]
 

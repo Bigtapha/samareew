@@ -28,6 +28,16 @@ def city_zone(cfg, city: str) -> ee.Geometry:
     return ee.Geometry(simple.__geo_interface__, None, False)  # planar edges, as in GeoJSON
 
 
+def season_dates(year: int, season_start: str, season_end: str) -> tuple:
+    """First and last day (ISO strings) of the season of ``year``.
+
+    Dates are "MM-DD". If the start comes after the end, the season starts in the
+    previous year: ("11-01", "05-31") for 2016 gives ("2015-11-01", "2016-05-31").
+    """
+    start_year = year - 1 if season_start > season_end else year
+    return f"{start_year}-{season_start}", f"{year}-{season_end}"
+
+
 def add_indices(img: ee.Image) -> ee.Image:
     """Spectral indices that help separate built-up areas from sand, vegetation and water."""
     ndvi = img.normalizedDifference(["B8", "B4"]).rename("NDVI")
@@ -47,8 +57,8 @@ def seasonal_composite(aoi: ee.Geometry, year: int, season_start: str,
 
     Reflectance is scaled to 0-1 and spectral indices are added.
     """
-    start = f"{year}-{season_start}"
-    end = ee.Date(f"{year}-{season_end}").advance(1, "day")
+    start, last_day = season_dates(year, season_start, season_end)
+    end = ee.Date(last_day).advance(1, "day")
 
     s2 = (ee.ImageCollection(S2_COLLECTION)
           .filterBounds(aoi)
@@ -68,10 +78,11 @@ def seasonal_composite(aoi: ee.Geometry, year: int, season_start: str,
 
 def count_images(aoi: ee.Geometry, year: int, season_start: str, season_end: str) -> int:
     """Number of Sentinel-2 scenes available for the season (useful for QA)."""
-    end = ee.Date(f"{year}-{season_end}").advance(1, "day")
+    start, last_day = season_dates(year, season_start, season_end)
+    end = ee.Date(last_day).advance(1, "day")
     return (ee.ImageCollection(S2_COLLECTION)
             .filterBounds(aoi)
-            .filterDate(f"{year}-{season_start}", end)
+            .filterDate(start, end)
             .size().getInfo())
 
 

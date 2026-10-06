@@ -1,0 +1,150 @@
+{
+  "national": {
+    "n_test": 3513,
+    "confusion_matrix_rows_reference_cols_map": [
+      [
+        1620,
+        163
+      ],
+      [
+        103,
+        1627
+      ]
+    ],
+    "overall_accuracy": 0.924,
+    "kappa": 0.849,
+    "producers_accuracy": {
+      "not built": 0.909,
+      "built": 0.94
+    },
+    "users_accuracy": {
+      "not built": 0.94,
+      "built": 0.909
+    },
+    "f1": {
+      "not built": 0.924,
+      "built": 0.924
+    }
+  },
+  "dakar": {
+    "n_test": 862,
+    "confusion_matrix_rows_reference_cols_map": [
+      [
+        363,
+        65
+      ],
+      [
+        16,
+        418
+      ]
+    ],
+    "overall_accuracy": 0.906,
+    "kappa": 0.812,
+    "producers_accuracy": {
+      "not built": 0.848,
+      "built": 0.963
+    },
+    "users_accuracy": {
+      "not built": 0.958,
+      "built": 0.865
+    },
+    "f1": {
+      "not built": 0.9,
+      "built": 0.912
+    }
+  },
+  "mbour": {
+    "n_test": 859,
+    "confusion_matrix_rows_reference_cols_map": [
+      [
+        419,
+        32
+      ],
+      [
+        30,
+        378
+      ]
+    ],
+    "overall_accuracy": 0.928,
+    "kappa": 0.855,
+    "producers_accuracy": {
+      "not built": 0.929,
+      "built": 0.926
+    },
+    "users_accuracy": {
+      "not built": 0.933,
+      "built": 0.922
+    },
+    "f1": {
+      "not built": 0.931,
+      "built": 0.924
+    }
+  },
+  "thies": {
+    "n_test": 916,
+    "confusion_matrix_rows_reference_cols_map": [
+      [
+        417,
+        53
+      ],
+      [
+        23,
+        423
+      ]
+    ],
+    "overall_accuracy": 0.917,
+    "kappa": 0.834,
+    "producers_accuracy": {
+      "not built": 0.887,
+      "built": 0.948
+    },
+    "users_accuracy": {
+      "not built": 0.948,
+      "built": 0.889
+    },
+    "f1": {
+      "not built": 0.916,
+      "built": 0.918
+    }
+  },
+  "touba": {
+    "n_test": 876,
+    "confusion_matrix_rows_reference_cols_map": [
+      [
+        421,
+        13
+      ],
+      [
+        34,
+        408
+      ]
+    ],
+    "overall_accuracy": 0.946,
+    "kappa": 0.893,
+    "producers_accuracy": {
+      "not built": 0.97,
+      "built": 0.923
+    },
+    "users_accuracy": {
+      "not built": 0.925,
+      "built": 0.969
+    },
+    "f1": {
+      "not built": 0.947,
+      "built": 0.946
+    }
+  },
+  "feature_importance": {
+    "B11": 1232.4873782709956,
+    "B12": 1623.3287369467741,
+    "B2": 1107.98834692992,
+    "B3": 1165.8860611321236,
+    "B4": 1135.2833196131376,
+    "B8": 1130.4633131890807,
+    "BSI": 1147.6319217049756,
+    "MNDWI": 1318.8254042033057,
+    "NDBI": 1097.4597740291006,
+    "NDVI": 1132.7888347985588
+  },
+  "note": "Test labels come from WorldCover / Dynamic World agreement areas: this measures agreement with reference products, not true accuracy (see the national validation, ROADMAP J4)."
+}

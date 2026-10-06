@@ -23,13 +23,14 @@ read it first.
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
 
-**J2 so far**: the code has been reorganised into a national pipeline (`config/`,
-`pipeline/`). Steps 1 and 3 were smoke-tested (sampling and training on Touba with a few
-points; post-processing reproduces the Dakar case-study figures exactly).
+**J2 so far**: steps 1 to 3 have run for the four cities. National model agreement with the
+reference products: 0.924 (kappa 0.849), from 0.906 (Dakar) to 0.946 (Touba). Built-up area
+2016 → 2025: Dakar +50 %, Touba +71 %, Thiès +83 %, Mbour +80 %. The dry season now runs
+from November to May, the last year (2026) only confirms the previous ones, and the
+temporal filter requires two consecutive built years (see [METHODOLOGIE.md](METHODOLOGIE.md)).
 
-**Next step**: run step 1 for real on the four cities, check the agreement by city in
-`outputs/model/accuracy_by_city.json`, then run step 2 (yearly stacks, the longest step)
-and check the number of Sentinel-2 scenes per city and year.
+**Next step**: close J2 (merge the branch), then J3 (indicators by commune and sector,
+cross-check with GHSL and Open Buildings).
 
 ## Study zones
 
@@ -53,6 +54,9 @@ The same rule for every city, so that cities can be compared (details in
 
 ## Method
 
+The full methodology note (theory, bands and indices, model, filter, evaluation, limits) is
+in **[METHODOLOGIE.md](METHODOLOGIE.md)** (in French).
+
 ```
 Sentinel-2 L1C (harmonised)            ESA WorldCover 2021 + Dynamic World 2021
         │ Cloud Score+ masking                    │ keep pixels where both agree
@@ -69,15 +73,16 @@ Yearly built-up maps ──► temporal consistency filter ──► year of urb
                                          indicators by city, commune and sector (J3)
 ```
 
-1. **Composites** — January–May (dry season) median of cloud-masked Sentinel-2 scenes,
+1. **Composites** — November–May (dry season, starting the previous year) median of cloud-masked Sentinel-2 scenes,
    one per city and year. Cloud Score+ removes clouds and shadows.
 2. **Training data** — built / not-built labels taken only where two independent products
    (ESA WorldCover and Google Dynamic World) agree, to reduce label noise.
 3. **Classification** — one Random Forest for the whole country, on 6 bands and 4 spectral
    indices (they help separate buildings from bright sand), so that cities are comparable.
-4. **Temporal consistency** — a pixel is urbanised in year Y only if it stays built in at
-   least 80 % of the following years and at the end of the period
-   (see `tests/test_postprocess.py`).
+4. **Temporal consistency** — a pixel is urbanised in year Y only if it is also built the
+   next year, stays built in at least 80 % of the following years and at the end of the
+   period (see `tests/test_postprocess.py`). The last year only confirms the previous ones:
+   indicators cover 2016–2025.
 5. **Accuracy** — the 30 % test points only measure agreement with the reference products.
    True accuracy will come from a national sample photo-interpreted blind in Google Earth
    Pro (J4), with area-weighted accuracy per city.
@@ -140,10 +145,13 @@ in favour of the national one.
   scattered constructions can be missed.
 - Bright sand, beaches and salt flats can be confused with built-up areas; the spectral
   indices and the temporal filter reduce but do not remove this.
-- 2016 relies on Sentinel-2A only (fewer scenes) and 2017 has few clear scenes, which likely
-  inflates the 2016→2017 jump.
-- The temporal filter has fewer following years to check near the end of the period, so
-  growth in 2025–2026 is probably overestimated.
+- 2016 relies on Sentinel-2A only (fewer scenes). Dry years (2017, 2019) produce false
+  detections at the urban fringe; the temporal filter removes most of them, but the
+  2016→2017 jump is still likely inflated (Touba +14 %).
+- The temporal filter has fewer following years to check near the end of the period. The
+  last classified year (2026) is therefore not published: it only confirms 2025, and
+  indicators cover 2016–2025. Growth in 2025 is probably still overestimated.
+- Sentinel-2A was launched in June 2015, so the series cannot start before the 2016 dry season.
 - Commune boundaries come from OpenStreetMap and are not official (least reliable around Thiès).
 
 ## Tools

@@ -56,7 +56,8 @@ def run_city(city: str, classifier, to_drive: bool) -> None:
         import geemap  # imported here: only needed for direct download
         path = out_dir / cfg.BUILT_STACK_TIF
         geemap.download_ee_image(stack, str(path), region=zone.bounds(maxError=1),
-                                 crs=cfg.ANALYSIS_CRS, scale=cfg.SCALE, dtype="uint8")
+                                 crs=cfg.ANALYSIS_CRS, scale=cfg.SCALE, dtype="uint8",
+                                 max_tile_size=cfg.DOWNLOAD_MAX_TILE_MB)
         print(f"  saved {path}")
 
 

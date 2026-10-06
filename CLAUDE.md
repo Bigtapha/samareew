@@ -25,6 +25,9 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
   Never tune one city alone without saying so and logging it.
 - **Settings in `config/`, not in code**: shared settings in `config/settings.py`, one entry
   per city in `config/cities.py`.
+- **Keep `METHODOLOGIE.md` in sync** (French, theory of the method with the actual values):
+  update it in the same change whenever a method, setting or result it cites changes, and
+  add a section when a new step is built (indicators, cross-check, validation…).
 - **Pure functions in `src/` with tests in `tests/`** (no Earth Engine in tests);
   pipeline steps in `pipeline/` stay thin.
 - `zones/` is frozen and versioned: re-run step 0 only to change a rule, and check that

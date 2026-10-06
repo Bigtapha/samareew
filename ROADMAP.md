@@ -40,6 +40,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Unité grand public | **La commune** ; découpage plus fin uniquement si nécessaire (**Touba** : secteurs anneaux × directions ou grille hexagonale) |
 | Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
+| Période | Saisons sèches **2016 à 2026** (1er novembre – 31 mai) ; indicateurs publiés **jusqu'à l'avant-dernière année** (2025), la dernière sert de confirmation |
 | Validation | Nouvel **échantillon national** stratifié par ville × classe (~120 points/ville) ; l'échantillon actuel de Dakar (260 points) n'est **plus à étiqueter** |
 
 ---
@@ -145,10 +146,10 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 
 ### J2 — Modèle national et classification
 - [x] Réorganiser le code selon la structure cible (configuration par ville) : `config/`, `pipeline/s0…s3`, résultats Dakar dans `outputs/legacy_dakar/`
-- [ ] Échantillonnage d'entraînement équilibré par ville × classe
-- [ ] Entraîner le Random Forest national et l'évaluer par ville
-- [ ] Classer 2016–2026 pour les 4 villes
-- [ ] Contrôle qualité : nombre de scènes par ville et par an, repérer les années faibles
+- [x] Échantillonnage d'entraînement équilibré par ville × classe (12 000 points)
+- [x] Entraîner le Random Forest national et l'évaluer par ville (concordance 0,924, de 0,906 à Dakar à 0,946 à Touba)
+- [x] Classer 2016–2026 pour les 4 villes (saison 1er nov. – 31 mai, publication jusqu'en 2025)
+- [x] Contrôle qualité : nombre de scènes par ville et par an, repérer les années faibles (2017 : environ deux fois moins de scènes partout ; 2026 non filtrée)
 
 **Critère de fin** : 4 piles annuelles et un rapport d'évaluation par ville.
 
@@ -263,3 +264,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 05/10/2026 | Touba découpé en secteurs : disque central 0–2 km, puis anneaux de 2 km × 8 directions | La commune de Touba Mosquée couvre 264 des 413 km² de la zone ; les secteurs suivent la forme radiale de la ville et la géométrie des indicateurs direction / anneaux, et se nomment simplement (« Nord-Est, 4–6 km ») ; hexagones gardés en réserve comme couche de carte commune |
 | 05/10/2026 | Mbacké : pas d'unité à part dans les secteurs ; ses chiffres viennent du découpage par commune ; « Touba » = agglomération Touba-Mbacké, précisé sur la fiche | Garder des secteurs purs (direction × distance) ; la commune de Mbacké est déjà entièrement dans la zone, sans travail supplémentaire |
 | 05/10/2026 | Communes OSM corrigées pour les 4 villes, y compris Thiès (pas de secteurs) ; GADM / mapSenegal écarté | Uniformité entre villes ; GADM : 433 communes (découpage ancien, manque Mbour, Saly, Mbacké…), contours grossiers, licence non commerciale |
+| 06/10/2026 | Départ en 2016 maintenu (pas 2015 ni 2014) | Sentinel-2A lancé en juin 2015 : aucune scène en saison sèche 2015 ; remonter plus loin demanderait Landsat (30 m, série non comparable) ; le recul historique viendra de GHSL en contexte (J3) |
+| 06/10/2026 | Saison sèche allongée : 1er novembre (année précédente) – 31 mai, au lieu de janvier – mai | 2017 n'avait que 30 scènes (Dakar) et son composite surestimait le bâti (saut artificiel de +15 à +32 % en 2017) ; même règle pour toutes les années et toutes les villes |
+| 06/10/2026 | Indicateurs publiés jusqu'à l'avant-dernière année (2016–2025) ; la dernière année (2026) sert seulement de confirmation au filtre temporel | Une année seule n'est jamais filtrée : la surface 2026 était le bâti brut (Thiès +1 865 ha en 2026 contre ~200 ha/an) ; 10 ans de recul à la mise à jour 2027 |
+| 06/10/2026 | Filtre temporel : une année ne peut être l'année d'urbanisation que si le pixel est aussi bâti l'année valide suivante | Années sèches (2017, 2019) : fausses détections en périphérie qui avançaient la croissance réelle en 2017 (nouveau bâti 2017 à Dakar : 2 772 → 1 648 ha) ; hausse 2016–2025 quasi inchangée ; l'entraînement multi-années reste en réserve si J4 montre des erreurs variant selon l'année |

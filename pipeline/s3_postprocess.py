@@ -37,7 +37,7 @@ def static_map(first_year, name, path):
     cmap.set_bad("white")
     fig, ax = plt.subplots(figsize=(9, 7))
     ax.imshow(classes, cmap=cmap, vmin=0, vmax=len(cfg.PERIODS), interpolation="nearest")
-    ax.set_title(f"Urban expansion - {name}, {cfg.YEARS[0]}-{cfg.YEARS[-1]}")
+    ax.set_title(f"Urban expansion - {name}, {cfg.PUBLISHED_YEARS[0]}-{cfg.PUBLISHED_YEARS[-1]}")
     ax.set_axis_off()
     handles = [Patch(color=c, label=p[2]) for c, p in zip(cfg.PERIOD_COLORS, cfg.PERIODS)]
     ax.legend(handles=handles, loc="lower left", fontsize=8, frameon=True)
@@ -77,9 +77,11 @@ def run_city(city: str) -> None:
     print("  share of pixels without clear observation (%):", dict(missing))
 
     first_year = pp.urbanisation_year(stack, cfg.YEARS, cfg.PERSISTENCE_RATIO)
+    # Built only in the last year: not confirmed yet, so not published (counted as not built)
+    first_year[first_year > cfg.PUBLISHED_YEARS[-1]] = 0
     save_geotiff(first_year, profile, out_dir / cfg.FIRST_YEAR_TIF)
 
-    stats = pp.area_by_year(first_year, cfg.YEARS, pixel_area)
+    stats = pp.area_by_year(first_year, cfg.PUBLISHED_YEARS, pixel_area)
     stats.to_csv(out_dir / cfg.STATS_CSV, index=False)
     print(stats.to_string(index=False))
 
