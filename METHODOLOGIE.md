@@ -437,9 +437,9 @@ Au dernier calcul :
 
 - **Population modélisée, pas recensée.** Les totaux sont des projections ; leur répartition
   dans l'unité administrative suit le bâti vu par satellite. À l'échelle d'une commune, la
-  population et notre surface bâtie ne sont donc pas indépendantes : le rapport m²/habitant
-  y est moins informatif qu'à l'échelle de la ville. Contrôle prévu avec le RGPH-5 2023 sur
-  les communes entièrement dans les zones.
+  population et notre surface bâtie ne sont donc pas indépendantes. Le contrôle avec le
+  RGPH-5 (§13.4) confirme que les **totaux** sont bons mais que la **répartition entre
+  communes** est fausse d'un facteur 0,35 à 2,9.
 - WorldPop et SamaReew n'utilisent pas la même carte du bâti : une partie de l'écart de
   croissance entre bâti et population peut venir de là.
 - La croissance du bâti en 2025 est probablement surestimée (§10) : l'ODD 11.3.1 2020 → 2025
@@ -527,6 +527,54 @@ forcément absent.
 Les tables sont dans `outputs/crosscheck/` (`built_area_sources.csv`, `agreement.csv`) ; la
 série GHSL 1975–2030 par ville peut servir de contexte historique sur le site.
 
+### 13.4 Population : WorldPop face au recensement (RGPH-5, 2023)
+
+**Source.** Le « Répertoire des localités » de l'ANSD donne la population recensée de chaque
+quartier et village, avec sa commune, pour 1988, 2002, 2013 et 2023 (export CSV par région
+et par année, `CENSUS_URL`). Les données publiées par l'ANSD sont sous **CC BY 4.0** (« Les
+informations publiées sur le site web de l'ANSD sont sous licence ouverte », Flash de
+M@demba n° 022/2024). La somme des localités de la région de Thiès (2 463 679 habitants)
+correspond au rapport régional définitif (2 463 677).
+
+**Méthode.** Seules les communes **entièrement** dans une zone (`share_of_commune` ≥ 0,99,
+`CENSUS_MIN_SHARE`) sont comparées : pour elles, la population WorldPop de l'étape 4 et le
+recensement portent sur le même territoire, aux écarts près entre limites OSM et limites
+officielles. Les noms OSM et ANSD sont rapprochés sans accents, majuscules, tirets ni
+apostrophes ; sept variantes d'orthographe sont listées dans `CENSUS_COMMUNE_ALIASES`
+(Bambylor / BAMBILOR, Yenne / YENE…). Comparaison : WorldPop 2023 / recensement 2023.
+
+**Résultats au dernier calcul** (`outputs/crosscheck/population_census.csv`) :
+
+| Ville | Communes comparées | Recensement 2023 | WorldPop 2023 | Rapport des totaux | Rapport médian |
+|---|---|---|---|---|---|
+| Dakar | 51 | 3 796 096 | 3 674 840 | 0,97 | 0,92 |
+| Touba (Mbacké seule) | 1 | 101 451 | 104 585 | 1,03 | 1,03 |
+| Thiès | 3 | 391 253 | 305 232 | 0,78 | 0,94 |
+| Mbour | 5 | 396 470 | 463 377 | 1,17 | 1,98 |
+
+**Lecture.**
+- **Les totaux tiennent** là où l'échantillon est grand : 97 % de la population recensée
+  pour les 51 communes de Dakar. Touba Mosquée (1 120 824 habitants recensés) n'est pas
+  entièrement dans la zone et ne peut pas être comparée.
+- **La répartition entre communes est mauvaise** : le rapport va de **0,35** à **2,9**.
+  WorldPop **surestime** les quartiers d'affaires, aisés ou touristiques, où le bâti est
+  étendu mais peu habité : Fann-Point E-Amitié et Ngor (×2,9), Dakar-Plateau (×1,9),
+  Hann Bel-Air (×1,8, port et industries), Saly (×2,4), La Somone (×2,3). Il **sous-estime**
+  les quartiers populaires denses : Biscuiterie (×0,35), Grand-Dakar (×0,38), Médina et
+  Parcelles Assainies (×0,57). C'est l'effet attendu d'une répartition proportionnelle au
+  bâti, qui ignore la densité des logements. À Thiès, l'écart entre Thiès Est (×0,43) et
+  Thiès Nord (×1,10) vient aussi des limites OSM, imprécises dans cette ville.
+- **La croissance de WorldPop suit le bâti, pas la population** : dans les communes déjà
+  entièrement bâties du centre de Dakar, WorldPop donne partout environ 0,23 % par an, quel
+  que soit le recensement (de −1,4 % à +3,1 % par an entre 2013 et 2023). Le recensement de
+  2013 n'est pas disponible sous le même nom pour toutes les communes (communes créées ou
+  renommées depuis).
+
+**Conséquence.** Les indicateurs de population (population, m² bâtis par habitant,
+ODD 11.3.1) sont fiables à l'échelle de la **ville**, pas à celle de la commune, du secteur,
+de la direction ou de l'anneau : à ces échelles, ils reflètent surtout la répartition du
+bâti. Le choix de ce qui est publié est une décision ouverte (ROADMAP §8).
+
 ---
 
 ## Références
@@ -547,6 +595,8 @@ série GHSL 1975–2030 par ville peut servir de contexte historique sur le site
   des terres au taux de croissance de la population).
 - Bondarenko, M. et al. (2025). Constrained estimates of 2015–2030 total number of people per
   grid square, WorldPop Global 2, R2025A v1. Université de Southampton. doi:10.5258/SOTON/WP00839.
+- ANSD (2025–2026). Cinquième Recensement général de la population et de l'habitat (RGPH-5,
+  2023) : rapports régionaux définitifs et répertoire des localités. Dakar, ANSD.
 - Pesaresi, M., Politis, P. (2023). GHS-BUILT-S R2023A — GHS built-up surface grid, derived
   from Sentinel-2 composite and Landsat, multitemporal (1975–2030). Commission européenne,
   JRC. doi:10.2905/9F06F36F-4B11-47EC-ABB0-4F8B7B1D72EA.

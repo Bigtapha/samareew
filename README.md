@@ -40,7 +40,12 @@ Buildings roofs fall in our built-up area, and growth 2016-2023 is close to Open
 in Dakar (+36 % vs +33 %) and Mbour (+56 % vs +54 %), higher in Touba (2017 jump) and Thiès.
 GHSL grows 2-4 times slower because its 2015 and 2020 epochs are interpolated, not observed.
 
-**Next step (J3)**: check WorldPop against the 2023 census (RGPH-5); then J4 (validation).
+**Population check** against the 2023 census (RGPH-5, ANSD directory of localities,
+CC BY 4.0): WorldPop totals hold (97 % of the census for the 51 Dakar communes entirely in the
+zone) but its split between communes is off by a factor 0.35 to 2.9.
+
+**Next step (J3)**: decide at which scale population indicators are published (ROADMAP §8);
+then J4 (validation).
 
 ## Study zones
 
@@ -180,7 +185,8 @@ in favour of the national one.
   indicators cover 2016–2025. Growth in 2025 is probably still overestimated.
 - Sentinel-2A was launched in June 2015, so the series cannot start before the 2016 dry season.
 - Population is modelled (WorldPop), not counted: it is spread over built-up areas seen
-  from space, so built-up m² per inhabitant is less informative at commune level.
+  from space. City totals match the 2023 census, but commune figures are off by a factor
+  0.35 (dense working-class areas) to 2.9 (business, wealthy or resort areas).
 - Leapfrog growth includes growth around villages and most of the remaining isolated
   false detections; its reliability depends on the city (65 % confirmed by Open Buildings
   roofs in Touba, 36 % in Thiès).
@@ -202,4 +208,4 @@ Code: [MIT](LICENSE). Produced data: [CC BY 4.0](LICENSE-DATA.md), except
 
 **Moustapha Cisse** — Geomatics engineer, remote sensing and geospatial data engineering.
 Contains modified Copernicus Sentinel data (2016–2026). Population: WorldPop Global 2
-(R2025A, doi:10.5258/SOTON/WP00839), CC BY 4.0.
+(R2025A, doi:10.5258/SOTON/WP00839), CC BY 4.0; census: ANSD, RGPH-5 2023, CC BY 4.0.

@@ -6,10 +6,13 @@ References (brought to our 10 m grid by Earth Engine, downloaded once):
   are projections).
 Both measure roofs; our map measures built-up pixels: the areas differ by definition, so
 the checks measure where the maps agree (src/crosscheck.py, METHODOLOGIE §13).
+The WorldPop population of step 4 is also checked against the 2013 and 2023 censuses (ANSD
+directory of localities) on the communes entirely inside a zone.
 
-Inputs : outputs/cities/<city>/urbanisation_year.tif (step 3)
+Inputs : outputs/cities/<city>/urbanisation_year.tif (step 3), outputs/tables/indicators.csv (step 4)
 Outputs: outputs/crosscheck/built_area_sources.csv   area per city, source and year
          outputs/crosscheck/agreement.csv            agreement measures per city
+         outputs/crosscheck/population_census.csv    WorldPop and census per commune
          data/cities/<city>/reference_roofs.tif, ghsl_built_surface.json (downloads)
          data/j3_crosscheck.png                      growth of the three sources (control)
 
@@ -24,13 +27,16 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import geopandas as gpd
 import pandas as pd
 import rasterio
+import requests
 
 import config as cfg
 from src import crosscheck as cc
 from src import indicators as ind
 
+CENSUS_DIR = cfg.DATA_DIR / "raw" / "rgph5"
 _ee_ready = False
 
 
@@ -139,6 +145,51 @@ def run_city(city: str) -> tuple:
     return areas, agreement
 
 
+def census_table(region: str, year: int) -> pd.DataFrame:
+    """Census population of every neighbourhood / village of a region (ANSD, cached)."""
+    path = CENSUS_DIR / f"localites_{region.lower()}_{year}.csv"
+    if not path.exists():
+        CENSUS_DIR.mkdir(parents=True, exist_ok=True)
+        url = cfg.CENSUS_URL.format(year=year, region=region)
+        print(f"  downloading {url}")
+        # The ANSD server does not send its intermediate certificate: verification fails
+        response = requests.get(url, headers={"User-Agent": cfg.HTTP_USER_AGENT}, timeout=600,
+                                verify=False)
+        response.raise_for_status()
+        path.write_bytes(response.content)
+    return pd.read_csv(path)
+
+
+def census_check(indicators: pd.DataFrame) -> pd.DataFrame:
+    """WorldPop (step 4) against the census, on the communes entirely inside a zone."""
+    communes = gpd.read_file(cfg.ZONES_DIR / "communes.geojson")
+    communes = communes[communes["share_of_commune"] >= cfg.CENSUS_MIN_SHARE]
+    pop = indicators[(indicators["indicator"] == "population") & (indicators["unit_type"] == "commune")]
+    pop = pop.set_index(["city", "unit", "year"])["value"]
+    first = cfg.PUBLISHED_YEARS[0]
+    rows = []
+    for city, group in communes.groupby("city", sort=False):
+        census = {}
+        for year in cfg.CENSUS_YEARS:
+            table = pd.concat([census_table(r, year) for r in cfg.CITIES[city]["census_regions"]])
+            census[year] = table.groupby(table["COMMUNE"].map(cc.name_key))["POPULATION"].sum()
+        for commune in group["commune"]:
+            key = cc.name_key(cfg.CENSUS_COMMUNE_ALIASES.get(commune, commune))
+            c13, c23 = census[2013].get(key, np.nan), census[2023].get(key, np.nan)
+            w16, w23 = pop.get((city, commune, first), np.nan), pop.get((city, commune, 2023), np.nan)
+            rows.append({"city": city, "commune": commune, "census_2013": c13, "census_2023": c23,
+                         f"worldpop_{first}": w16, "worldpop_2023": w23,
+                         "worldpop_to_census": round(w23 / c23, 3) if c23 > 0 else np.nan,
+                         "census_annual_growth_pct": round(cc.annual_growth_pct(c13, c23, 10), 2),
+                         "worldpop_annual_growth_pct": round(cc.annual_growth_pct(w16, w23, 2023 - first), 2)})
+    table = pd.DataFrame(rows)
+    missing = table.loc[table["census_2023"].isna(), "commune"].tolist()
+    if missing:
+        raise ValueError(f"communes not found in the 2023 census: {missing}; "
+                         "add them to CENSUS_COMMUNE_ALIASES in config/settings.py")
+    return table
+
+
 def growth_chart(areas: pd.DataFrame, path) -> None:
     styles = {"samareew": ("SamaReew (pixels bâtis)", "#d95f0e", "-"),
               "open_buildings": ("Open Buildings (toits)", "#2b8cbe", "-"),
@@ -178,6 +229,16 @@ def main(refresh: bool):
     areas.to_csv(cfg.CROSSCHECK_DIR / "built_area_sources.csv", index=False)
     agreement.to_csv(cfg.CROSSCHECK_DIR / "agreement.csv", index=False)
     growth_chart(areas, cfg.DATA_DIR / "j3_crosscheck.png")
+
+    if not cfg.INDICATORS_CSV.exists():
+        raise SystemExit(f"{cfg.INDICATORS_CSV} not found: run python -m pipeline.s4_indicators")
+    census = census_check(pd.read_csv(cfg.INDICATORS_CSV))
+    census.to_csv(cfg.CROSSCHECK_DIR / "population_census.csv", index=False)
+    by_city = census.groupby("city", sort=False).agg(
+        communes=("commune", "size"), census_2023=("census_2023", "sum"),
+        worldpop_2023=("worldpop_2023", "sum"), median_ratio=("worldpop_to_census", "median"))
+    by_city["ratio_of_sums"] = (by_city["worldpop_2023"] / by_city["census_2023"]).round(3)
+    print(by_city.to_string())
     print(agreement.pivot_table(index=["metric", "reference", "group", "year"], columns="city",
                                 values="value").round(2).to_string())
 

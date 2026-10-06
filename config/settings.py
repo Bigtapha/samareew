@@ -119,6 +119,24 @@ GHSL_LAST_OBSERVED_EPOCH = 2020
 CHECK_WINDOW_PX = 3
 CHECK_MIN_ROOF_PCT = 5
 CHECK_CELL_PX = 10                   # 1 ha cells for the correlation of the two maps
+# Population check: WorldPop against the 2023 census (RGPH-5, ANSD, CC BY 4.0), on the
+# communes entirely inside a zone. Source: the ANSD directory of localities (population of
+# every neighbourhood and village with its commune), one CSV per region and census year.
+CENSUS_URL = ("https://www.ansd.sn/data-recensement.csv?field_liste_annee_value={year}"
+              "&field_regions_value={region}&_format=csv")
+CENSUS_YEARS = [2013, 2023]          # RGPH-4 and RGPH-5
+CENSUS_MIN_SHARE = 0.99              # share of the commune's land inside the zone
+# OSM commune name -> ANSD commune name, where spellings differ (other names match once
+# accents, case, hyphens and apostrophes are removed)
+CENSUS_COMMUNE_ALIASES = {
+    "Bambylor": "BAMBILOR",
+    "Djidah Thiaroye Kaw": "DJIDAH THIAROYE KAO",
+    "La Somone": "SOMONE",
+    "Popenguine-Ndayane": "POPENGUINE",
+    "Sébikhotane": "SEBIKOTANE",
+    "Tivaouane Peulh-Niaga": "TIVAOUANE PEULH NIAGHA",
+    "Yenne": "YENE",
+}
 
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"

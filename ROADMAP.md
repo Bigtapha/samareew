@@ -159,7 +159,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [x] Post-traitement (filtre temporel) pour chaque ville (fait pendant J2)
 - [x] Définir les règles du type de croissance (seuil extension / saut) : règle Atlas of Urban Expansion
 - [x] Choisir la source de population (WorldPop ou RGPH-5) : WorldPop Global 2, RGPH-5 en contrôle
-- [ ] Contrôler WorldPop avec le RGPH-5 2023 (communes entièrement dans les zones ; licence à vérifier)
+- [x] Contrôler WorldPop avec le RGPH-5 2023 (communes entièrement dans les zones ; licence ANSD : CC BY 4.0) : totaux bons, répartition entre communes fausse (×0,35 à ×2,9), METHODOLOGIE §13.4
 - [x] Calculer les indicateurs v1 (§4.3) par ville, commune et secteur (aussi par direction et anneau ; `pipeline/s4_indicators.py`)
 - [x] Comparer avec GHSL et Open Buildings (`pipeline/s6_crosscheck.py`, METHODOLOGIE §13 ; écart GHSL : époques interpolées)
 - [x] Produire la table longue et les fiches indicateurs (`outputs/tables/`, format 0.1)
@@ -243,6 +243,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
+| Échelle de publication des indicateurs de population (population, m²/habitant, ODD 11.3.1). Proposé : ville seulement ; par commune, publier la population **recensée** 2023 (RGPH-5) et les m² bâtis par habitant 2023 qui en découlent, pour les communes entièrement dans les zones. Alternatives : garder WorldPop par commune avec un avertissement ; ou ville seulement, sans rien par commune | J3 |
 | Outils du site | J5 |
 
 ---
