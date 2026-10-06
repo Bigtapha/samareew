@@ -168,7 +168,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : la table longue est complète pour les 4 villes, et les écarts avec GHSL sont expliqués.
 
 ### J4 — Validation nationale
-- [ ] Tirer l'échantillon stratifié ville × classe (~480 points)
+- [ ] Décider le plan d'échantillonnage (§8), à partir des points faibles vus en J3 : nouveau bâti confirmé à ~50 % seulement par Open Buildings, saut peu sûr à Thiès (36 %) et Dakar (43 %), saut de Touba en 2017, année 2025
+- [ ] Tirer l'échantillon stratifié ville × classe (~480 points ; `src/validation.py` repris de l'étude Dakar : strates non bâti / bâti 2016 / nouveau bâti)
 - [ ] Photo-interprétation à l'aveugle dans Google Earth Pro
 - [ ] Calculer la précision par ville (avec marge d'erreur) et la précision nationale
 - [ ] Intégrer les résultats aux fiches indicateurs et à la page Méthode
@@ -185,6 +186,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [ ] 4 fiches villes
 - [ ] Fiche Touba : préciser que l'agglomération inclut Mbacké (« un seul ensemble bâti ») ; onglets par secteur et par commune
 - [ ] Page Données & méthode (sources, licences, limites, validation)
+- [ ] Préciser dans les fiches que les chiffres par commune reposent sur des limites OpenStreetMap (ODbL, citer « © OpenStreetMap contributors »)
+- [ ] Ne pas classer Dakar, Touba et Mbour entre elles sur la densification (écarts de 1–2 points, inférieurs à la sensibilité aux paramètres, METHODOLOGIE §11.2)
 - [ ] Tests sur mobile et connexion lente
 
 **Critère de fin** : le site fonctionne en local, il est lisible sur téléphone et chaque chiffre renvoie à sa source.
@@ -244,6 +247,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
+| Plan d'échantillonnage de la validation. Proposé : garder ~120 points par ville, mais découper la strate « nouveau bâti » par type de croissance (densification / extension / saut), pour mesurer la précision du saut ville par ville ; même plan partout (pas de sur-échantillonnage de Thiès seule, par comparabilité). Alternative : plan initial (non bâti / bâti 2016 / nouveau bâti) ; ou points supplémentaires à Thiès, signalés | J4 |
 | Outils du site | J5 |
 
 ---

@@ -23,32 +23,36 @@ read it first.
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
 
-**J2 so far**: steps 1 to 3 have run for the four cities. National model agreement with the
-reference products: 0.924 (kappa 0.849), from 0.906 (Dakar) to 0.946 (Touba). Built-up area
-2016 → 2025: Dakar +50 %, Touba +71 %, Thiès +83 %, Mbour +80 %. The dry season now runs
-from November to May, the last year (2026) only confirms the previous ones, and the
-temporal filter requires two consecutive built years (see [METHODOLOGIE.md](METHODOLOGIE.md)).
+**Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
 
-**J3 so far**: step 4 computes the v1 indicators by city, commune, Touba sector, direction
-and 2 km distance ring, into a long table with one fact sheet per indicator
-(`outputs/tables/`). Growth types follow the Atlas of Urban Expansion; population comes from
-WorldPop Global 2. From 2016 to 2025, built-up area grew about twice as fast as population
-in every city (SDG 11.3.1: Touba 1.7, Dakar 2.2, Mbour 2.3, Thiès 2.8).
+| | Dakar | Touba | Thiès | Mbour |
+|---|---|---|---|---|
+| Built-up area 2016 → 2025 (ha) | 21,134 → 31,775 | 8,542 → 14,578 | 3,721 → 6,813 | 4,330 → 7,813 |
+| Growth | +50 % | +71 % | +83 % | +80 % |
+| Population (WorldPop) 2016 → 2025 | 3.50 → 4.20 M | 0.97 → 1.34 M | 0.44 → 0.55 M | 0.49 → 0.64 M |
+| Built-up m² per inhabitant | 60 → 76 | 88 → 109 | 84 → 124 | 88 → 123 |
+| SDG 11.3.1 (land / population growth) | 2.24 | 1.69 | 2.77 | 2.32 |
+| Densification / extension / leapfrog | 36 / 26 / 38 % | 37 / 35 / 27 % | 28 / 22 / 51 % | 37 / 27 / 36 % |
+| New built-up confirmed by Open Buildings roofs | 48 % | 57 % | 43 % | 56 % |
 
-**Cross-check** (step 6) with Google Open Buildings Temporal and GHSL: 93-96 % of Open
-Buildings roofs fall in our built-up area, and growth 2016-2023 is close to Open Buildings
-in Dakar (+36 % vs +33 %) and Mbour (+56 % vs +54 %), higher in Touba (2017 jump) and Thiès.
-GHSL grows 2-4 times slower because its 2015 and 2020 epochs are interpolated, not observed.
+- **Model** (J2): agreement with reference products 0.924 (kappa 0.849), 0.906 to 0.946 by city.
+- **Indicators** (J3, step 4): by city, commune, Touba sector, direction and 2 km ring, in a
+  long table with one fact sheet per indicator (`outputs/tables/`, format 0.1). WorldPop
+  indicators are published for whole cities only; by commune, the 2023 census (RGPH-5) for
+  the 60 communes entirely inside a zone.
+- **Growth types** follow the Atlas of Urban Expansion rule. Their values move by up to
+  20 points with the settings, but the ranking of cities is stable (Thiès always leaps most,
+  Touba always extends most).
+- **Cross-check** (step 6): 93–96 % of Open Buildings roofs fall in our built-up area; growth
+  2016–2023 is close to Open Buildings in Dakar and Mbour, higher in Touba (artificial 2017
+  jump) and Thiès (least reliable city). GHSL grows 2–4 times slower because its 2015 and
+  2020 epochs are interpolated. WorldPop matches the census for city totals, not by commune.
 
-**Population check** against the 2023 census (RGPH-5, ANSD directory of localities,
-CC BY 4.0): WorldPop totals hold (97 % of the census for the 51 Dakar communes entirely in the
-zone) but its split between communes is off by a factor 0.35 to 2.9.
+**Weak points for J4 to measure**: new built-up area (only about half confirmed by roofs),
+leapfrog growth in Thiès and Dakar, the 2017 jump in Touba, and 2025 (confirmed by 2026 only).
 
-WorldPop indicators are therefore published for whole cities only; by commune, the 2023
-census population and built-up m² per counted inhabitant are published for the 60 communes
-entirely inside a zone.
-
-**Next step**: merge J3, then J4 (national validation, ~480 photo-interpreted points).
+**Next step**: merge `j3-indicateurs`, then J4 (national validation): first decide the
+sampling design (ROADMAP §8), then draw the sample from the urbanisation maps.
 
 ## Study zones
 

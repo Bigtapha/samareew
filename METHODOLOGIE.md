@@ -380,6 +380,26 @@ Au dernier calcul (part du nouveau bâti 2016 → 2025, %) :
 | Thiès | 27,6 | 21,8 | 50,6 |
 | Mbour | 36,9 | 26,9 | 36,2 |
 
+**Sensibilité aux paramètres.** Le calcul 2016 → 2025 a été refait avec un seuil de densité
+de 20, 25 et 30 %, une frange de 50, 100 et 150 m, et des trous enclavés de 100, 200 et
+400 ha (11 combinaisons) :
+
+| Part du nouveau bâti (%) | Dakar | Touba | Thiès | Mbour |
+|---|---|---|---|---|
+| Densification (min – max) | 26,6 – 44,9 | 29,6 – 46,2 | 20,8 – 35,1 | 27,6 – 47,7 |
+| Extension (min – max) | 21,6 – 30,2 | 27,5 – 42,9 | 17,0 – 26,7 | 20,6 – 31,8 |
+| Saut (min – max) | 33,5 – 43,2 | 26,3 – 27,5 | 48,0 – 52,6 | 31,7 – 40,5 |
+
+- Les **valeurs** dépendent des paramètres : la densification varie de 14 à 20 points selon
+  la ville (un seuil plus bas ou une frange plus large l'augmentent). La taille des trous
+  enclavés ne change presque rien (moins d'un demi-point).
+- Le **classement des villes** est stable : dans les 11 combinaisons, Thiès a le plus de saut
+  et le moins de densification et d'extension, Touba le plus d'extension, et l'ordre du saut
+  (Thiès, Dakar, Mbour, Touba) ne change jamais. En revanche Dakar, Touba et Mbour sont trop
+  proches en densification (1 à 2 points) pour être classées entre elles.
+- On garde les valeurs de l'Atlas (25 %, 100 m, 200 ha) ; les écarts de quelques points
+  entre villes ne sont pas à commenter.
+
 **À lire avec prudence :**
 - l'emprise est celle du **début** de la période : sur dix ans, la densification est plus
   faible que sur les sous-périodes (environ 50 % en 2016 → 2020 et 2020 → 2025), car le bâti

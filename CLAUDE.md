@@ -46,10 +46,19 @@ python -m pipeline.s0_zones        # zones (cached downloads in data/raw/)
 python -m pipeline.s1_train        # samples + national model -> outputs/model/
 python -m pipeline.s2_classify     # --city <slug>, --drive
 python -m pipeline.s3_postprocess  # --city <slug>
-python -m pipeline.s4_indicators   # all cities -> outputs/tables/
-python -m pipeline.s6_crosscheck    # Open Buildings + GHSL -> outputs/crosscheck/
+python -m pipeline.s4_indicators   # all cities -> outputs/tables/ (+ data/worldpop_by_commune.csv)
+python -m pipeline.s6_crosscheck   # Open Buildings, GHSL, census -> outputs/crosscheck/ (after s4)
 pytest
 ```
 
+Step numbers follow ROADMAP §4.1: `s5` is kept for the national validation (J4), which can
+start from `src/validation.py` (strata and area-weighted accuracy, kept from the Dakar study).
+
 Earth Engine project: `tieufmaps` (already authenticated on this machine). Public Overpass
 servers are often busy (step 0 tries three mirrors); Nominatim works for single places.
+
+Downloads are cached in `data/` (WorldPop in `data/raw/worldpop/`, census in
+`data/raw/rgph5/`, reference roofs in `data/cities/<city>/`). The ANSD server sends an
+incomplete certificate: census downloads run with `verify=False`, and WebFetch cannot read
+ansd.sn (use `curl -k`). Python 3.10 is no longer supported by Google's libraries since
+October 2026: move to 3.11+ when convenient.
