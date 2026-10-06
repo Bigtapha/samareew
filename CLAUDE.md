@@ -39,7 +39,9 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
 
 ## Commands
 
-Run from the project root with the venv (`source myvenv/bin/activate`, Python 3.10):
+Run from the project root with the venv (`source .venv/bin/activate`, Python 3.12, created
+with `uv`; install packages with `uv pip install --python .venv ...` and update
+`requirements-lock.txt` with `uv pip freeze --python .venv`):
 
 ```bash
 python -m pipeline.s0_zones        # zones (cached downloads in data/raw/)
@@ -60,5 +62,4 @@ servers are often busy (step 0 tries three mirrors); Nominatim works for single 
 Downloads are cached in `data/` (WorldPop in `data/raw/worldpop/`, census in
 `data/raw/rgph5/`, reference roofs in `data/cities/<city>/`). The ANSD server sends an
 incomplete certificate: census downloads run with `verify=False`, and WebFetch cannot read
-ansd.sn (use `curl -k`). Python 3.10 is no longer supported by Google's libraries since
-October 2026: move to 3.11+ when convenient.
+ansd.sn (use `curl -k`). The old Python 3.10 venv `myvenv/` is kept until the user deletes it.

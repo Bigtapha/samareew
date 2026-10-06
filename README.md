@@ -142,8 +142,10 @@ docs/                old Dakar web map (GitHub Pages), to be replaced by the sit
 ## How to run
 
 ```bash
-python -m venv myvenv && source myvenv/bin/activate
-pip install -r requirements.txt
+# Python 3.12 with uv (https://docs.astral.sh/uv/); exact tested versions in requirements-lock.txt
+uv venv .venv --python 3.12 && source .venv/bin/activate
+uv pip install -r requirements-lock.txt
+# or, without uv: python3.12 -m venv .venv && pip install -r requirements-lock.txt
 # set GEE_PROJECT in config/settings.py (a Google Cloud project registered for Earth Engine)
 
 python -m pipeline.s0_zones           # only to change the zones (they are frozen in zones/)
@@ -166,8 +168,9 @@ Practical notes:
 - Step 6 downloads the reference maps once per city through Earth Engine (about 5 minutes for
   Touba, longer for Dakar) into `data/cities/<city>/`. Step 5 is reserved for the national
   validation (J4).
-- The virtual environment uses Python 3.10, no longer supported by Google's libraries since
-  October 2026 (it still works, with a warning): move to Python 3.11+ when convenient.
+- `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
+  tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
+  uses a geedim function marked as deprecated: keep the pinned versions until it is updated.
 
 ## First case study: Dakar region (legacy)
 
