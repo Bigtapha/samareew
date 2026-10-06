@@ -101,9 +101,32 @@ GROWTH_MAX_HOLE_HA = 200
 WORLDPOP_URL = ("https://data.worldpop.org/GIS/Population/Global_2015_2030/R2025A/{year}/SEN/"
                 "v1/100m/constrained/sen_pop_{year}_CN_100m_R2025A_v1.tif")
 WORLDPOP_RELEASE = "WorldPop Global 2, R2025A v1"
+# WorldPop is published for whole cities only: its split between communes is off by a factor
+# 0.35 to 2.9 against the census (METHODOLOGIE §13.4). By commune, the census is published.
 # Built-up m² per inhabitant and SDG 11.3.1 are not published for units with fewer people
 # (a few hundred inhabitants give meaningless ratios)
 MIN_POPULATION = 1000
+
+# Census (RGPH-5 2023, ANSD, CC BY 4.0): published by commune for the communes entirely
+# inside a zone, and used to check WorldPop (step 6). Source: the ANSD directory of
+# localities (population of every neighbourhood and village with its commune), one CSV per
+# region and census year.
+CENSUS_URL = ("https://www.ansd.sn/data-recensement.csv?field_liste_annee_value={year}"
+              "&field_regions_value={region}&_format=csv")
+CENSUS_YEARS = [2013, 2023]          # RGPH-4 and RGPH-5
+CENSUS_PUBLISHED_YEAR = 2023         # published by commune (RGPH-5)
+CENSUS_MIN_SHARE = 0.99              # share of the commune's land inside the zone
+# OSM commune name -> ANSD commune name, where spellings differ (other names match once
+# accents, case, hyphens and apostrophes are removed)
+CENSUS_COMMUNE_ALIASES = {
+    "Bambylor": "BAMBILOR",
+    "Djidah Thiaroye Kaw": "DJIDAH THIAROYE KAO",
+    "La Somone": "SOMONE",
+    "Popenguine-Ndayane": "POPENGUINE",
+    "Sébikhotane": "SEBIKOTANE",
+    "Tivaouane Peulh-Niaga": "TIVAOUANE PEULH NIAGHA",
+    "Yenne": "YENE",
+}
 
 # --- Cross-check (step 6) -----------------------------------------------
 # Reference building maps, brought to our 10 m grid as roof fractions (0-100 %)
@@ -119,24 +142,6 @@ GHSL_LAST_OBSERVED_EPOCH = 2020
 CHECK_WINDOW_PX = 3
 CHECK_MIN_ROOF_PCT = 5
 CHECK_CELL_PX = 10                   # 1 ha cells for the correlation of the two maps
-# Population check: WorldPop against the 2023 census (RGPH-5, ANSD, CC BY 4.0), on the
-# communes entirely inside a zone. Source: the ANSD directory of localities (population of
-# every neighbourhood and village with its commune), one CSV per region and census year.
-CENSUS_URL = ("https://www.ansd.sn/data-recensement.csv?field_liste_annee_value={year}"
-              "&field_regions_value={region}&_format=csv")
-CENSUS_YEARS = [2013, 2023]          # RGPH-4 and RGPH-5
-CENSUS_MIN_SHARE = 0.99              # share of the commune's land inside the zone
-# OSM commune name -> ANSD commune name, where spellings differ (other names match once
-# accents, case, hyphens and apostrophes are removed)
-CENSUS_COMMUNE_ALIASES = {
-    "Bambylor": "BAMBILOR",
-    "Djidah Thiaroye Kaw": "DJIDAH THIAROYE KAO",
-    "La Somone": "SOMONE",
-    "Popenguine-Ndayane": "POPENGUINE",
-    "Sébikhotane": "SEBIKOTANE",
-    "Tivaouane Peulh-Niaga": "TIVAOUANE PEULH NIAGHA",
-    "Yenne": "YENE",
-}
 
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
@@ -155,6 +160,8 @@ TABLES_DIR = OUTPUT_DIR / "tables"
 INDICATORS_CSV = TABLES_DIR / "indicators.csv"       # long table: one value per row
 UNITS_CSV = TABLES_DIR / "units.csv"                 # spatial units: names and land area
 INDICATORS_JSON = TABLES_DIR / "indicators.json"     # one fact sheet per indicator
+# WorldPop by commune: not published, kept for the census check of step 6
+WORLDPOP_COMMUNES_CSV = DATA_DIR / "worldpop_by_commune.csv"
 
 # Cross-check (step 6)
 REFERENCE_ROOFS_TIF = "reference_roofs.tif"          # data/cities/<city>/: ob_<year>, ghsl_2018 bands

@@ -66,3 +66,14 @@ def test_north_sector_points_north():
     north = [s for s in secs if s["direction"] == "N" and s["ring_min"] == 2000][0]
     c = north["geometry"].centroid
     assert c.y > 2000 and abs(c.x) < 100
+
+
+@pytest.mark.parametrize("osm, ansd", [
+    ("Mermoz-Sacré-Cœur", "MERMOZ SACRE COEUR"),
+    ("M'bour", "MBOUR"),
+    ("Patte d'Oie", "PATTE D'OIE"),
+    ("Jaxaay - Parcelles", "JAXAAY PARCELLES"),
+    ("Thiès Nord", "THIES NORD"),
+])
+def test_name_key(osm, ansd):
+    assert zn.name_key(osm) == zn.name_key(ansd)

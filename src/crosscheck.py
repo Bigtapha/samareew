@@ -1,13 +1,10 @@
-"""Cross-check with reference building maps and the census: pure functions, no Earth Engine needed.
+"""Cross-check with reference building maps: pure NumPy / SciPy, no Earth Engine needed.
 
 References are roof fractions (0-100 % of each 10 m pixel covered by buildings) on the
 same grid as our map. Our map shows built-up *pixels* (roofs, yards, streets between
 houses), so its area is larger than a roof area by definition: the checks below measure
 where the two agree, not whether the areas are equal.
 """
-import re
-import unicodedata
-
 import numpy as np
 from scipy import ndimage
 
@@ -62,11 +59,3 @@ def annual_growth_pct(start: float, end: float, years: float) -> float:
     """Compound annual growth rate in % (to compare periods of different lengths)."""
     return ((end / start) ** (1 / years) - 1) * 100 if start > 0 and years > 0 else float("nan")
 
-
-def name_key(name: str) -> str:
-    """Comparable commune name: 'Mermoz-Sacré-Cœur' and 'MERMOZ SACRE COEUR' give the same key."""
-    s = str(name).replace("œ", "oe").replace("Œ", "OE")
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().upper()
-    s = re.sub(r"['’`]", "", s)            # M'bour -> MBOUR
-    s = re.sub(r"[-_./]", " ", s)
-    return re.sub(r"\s+", " ", s).strip()

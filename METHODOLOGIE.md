@@ -409,11 +409,22 @@ voisin sur la grille de la ville, puis multipliée par 100 m². Les totaux par z
 
 ### 12.2 Indicateurs
 
-| Indicateur | Calcul |
-|---|---|
-| Population | Somme des habitants dans l'unité |
-| Surface bâtie par habitant (m²) | Surface bâtie / population |
-| ODD 11.3.1 | Taux de consommation des terres / taux de croissance de la population, sur une période |
+| Indicateur | Calcul | Unités |
+|---|---|---|
+| Population | Somme des habitants WorldPop dans la zone | Ville seulement |
+| Surface bâtie par habitant (m²) | Surface bâtie / population | Ville seulement |
+| ODD 11.3.1 | Taux de consommation des terres / taux de croissance de la population, sur une période | Ville seulement |
+| Population recensée 2023 | Population du RGPH-5 (§13.4) | Communes entièrement dans la zone |
+| Surface bâtie par habitant recensé 2023 (m²) | Surface bâtie 2023 / population recensée 2023 | Communes entièrement dans la zone |
+
+**WorldPop n'est publié que pour les villes entières** : le contrôle avec le recensement
+(§13.4) montre que ses totaux sont bons mais que sa répartition entre communes est fausse
+d'un facteur 0,35 à 2,9 ; il en va de même pour les secteurs, directions et anneaux. Par
+commune, on publie à la place le **recensement de 2023**, pour les communes entièrement
+dans la zone d'étude (60 communes : 51 à Dakar, 5 à Mbour, 3 à Thiès, Mbacké). Ses valeurs
+de m² bâtis par habitant vont de 16 (Biscuiterie) à 331 (La Somone, station balnéaire).
+WorldPop par commune reste calculé pour ce contrôle (`data/worldpop_by_commune.csv`, non
+publié).
 
 ODD 11.3.1 (méthode ONU-Habitat) : taux de consommation des terres = ln(B_F / B_D) / n,
 taux de croissance de la population = ln(P_F / P_D) / n, où B est la surface bâtie, P la
@@ -421,8 +432,9 @@ population et n le nombre d'années (il s'annule dans le rapport). **Au-dessus d
 s'étend plus vite que la population : la ville s'étale et sa densité baisse. Le rapport
 n'est pas publié si la population baisse ou ne change pas.
 
-Ces deux indicateurs ne sont pas publiés pour les unités de moins de **1 000 habitants**
-(`MIN_POPULATION`) : quelques centaines d'habitants donnent des rapports sans signification.
+Les m² bâtis par habitant ne sont pas publiés pour les communes de moins de **1 000
+habitants** (`MIN_POPULATION`) : quelques centaines d'habitants donnent des rapports sans
+signification.
 
 Au dernier calcul :
 
@@ -436,10 +448,11 @@ Au dernier calcul :
 ### 12.3 Limites
 
 - **Population modélisée, pas recensée.** Les totaux sont des projections ; leur répartition
-  dans l'unité administrative suit le bâti vu par satellite. À l'échelle d'une commune, la
-  population et notre surface bâtie ne sont donc pas indépendantes. Le contrôle avec le
-  RGPH-5 (§13.4) confirme que les **totaux** sont bons mais que la **répartition entre
-  communes** est fausse d'un facteur 0,35 à 2,9.
+  dans l'unité administrative suit le bâti vu par satellite. Le contrôle avec le RGPH-5
+  (§13.4) confirme que les **totaux** sont bons mais que la **répartition entre communes**
+  est fausse d'un facteur 0,35 à 2,9 : d'où la publication par ville seulement.
+- Le recensement ne donne qu'une date (2023) et ne couvre que les communes entièrement dans
+  une zone : Touba Mosquée (58 % de sa surface dans la zone) n'a pas de valeur par commune.
 - WorldPop et SamaReew n'utilisent pas la même carte du bâti : une partie de l'écart de
   croissance entre bâti et population peut venir de là.
 - La croissance du bâti en 2025 est probablement surestimée (§10) : l'ODD 11.3.1 2020 → 2025
@@ -570,10 +583,9 @@ apostrophes ; sept variantes d'orthographe sont listées dans `CENSUS_COMMUNE_AL
   2013 n'est pas disponible sous le même nom pour toutes les communes (communes créées ou
   renommées depuis).
 
-**Conséquence.** Les indicateurs de population (population, m² bâtis par habitant,
-ODD 11.3.1) sont fiables à l'échelle de la **ville**, pas à celle de la commune, du secteur,
-de la direction ou de l'anneau : à ces échelles, ils reflètent surtout la répartition du
-bâti. Le choix de ce qui est publié est une décision ouverte (ROADMAP §8).
+**Conséquence** (décision du 06/10/2026, ROADMAP §9). Les indicateurs WorldPop (population,
+m² bâtis par habitant, ODD 11.3.1) ne sont publiés que pour les **villes** ; par commune, on
+publie la population recensée en 2023 et les m² bâtis par habitant qui en découlent (§12.2).
 
 ---
 

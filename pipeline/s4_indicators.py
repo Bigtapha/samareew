@@ -1,11 +1,16 @@
 """Step 4 - Indicators by city, commune, sector, direction and distance ring (ROADMAP §4.3).
 
 Inputs : outputs/cities/<city>/urbanisation_year.tif (step 3), zones/ (step 0),
-         WorldPop Global 2 population (downloaded once to data/raw/worldpop/)
+         WorldPop Global 2 population (downloaded once to data/raw/worldpop/),
+         2023 census by locality (ANSD, downloaded once to data/raw/rgph5/)
 Outputs: outputs/tables/indicators.csv   long table: indicator, city, unit_type, unit, year_start, year, value
          outputs/tables/units.csv        spatial units: name and land area
          outputs/tables/indicators.json  format version, sources, one fact sheet per indicator
          outputs/cities/<city>/growth_type_<start>_<end>.tif, data/j3_growth_<city>.png (control map)
+         data/worldpop_by_commune.csv    WorldPop by commune, not published (census check, step 6)
+
+Population: WorldPop for whole cities only (its split between communes is unreliable); by
+commune, the 2023 census for the communes entirely inside a zone.
 
 Usage
     python -m pipeline.s4_indicators     # always every city: the tables cover all of them
@@ -23,6 +28,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import requests
+import urllib3
 from rasterio import features
 from rasterio.warp import Resampling, reproject, transform_bounds
 from rasterio.windows import Window, from_bounds
@@ -30,9 +36,11 @@ from rasterio.windows import Window, from_bounds
 import config as cfg
 from config.indicators import INDICATORS, SOURCES, UNIT_TYPES
 from src import indicators as ind
-from src.zones import DIRECTION_NAMES, DIRECTIONS_8
+from src.zones import DIRECTION_NAMES, DIRECTIONS_8, name_key
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # ANSD server, see census_table
 WORLDPOP_DIR = cfg.DATA_DIR / "raw" / "worldpop"
+CENSUS_DIR = cfg.DATA_DIR / "raw" / "rgph5"
 GROWTH_COLORS = {ind.DENSIFICATION: "#2b8cbe", ind.EXTENSION: "#fe9929", ind.LEAPFROG: "#d7301f"}
 GROWTH_LABELS_FR = {ind.DENSIFICATION: "Densification", ind.EXTENSION: "Extension",
                     ind.LEAPFROG: "Saut"}
@@ -111,10 +119,46 @@ def population_grid(year: int, shape, transform, crs) -> np.ndarray:
     return out * abs(transform.a * transform.e)
 
 
+def census_table(region: str, year: int) -> pd.DataFrame:
+    """Census population of every neighbourhood / village of a region (ANSD, cached)."""
+    path = CENSUS_DIR / f"localites_{region.lower()}_{year}.csv"
+    if not path.exists():
+        CENSUS_DIR.mkdir(parents=True, exist_ok=True)
+        url = cfg.CENSUS_URL.format(year=year, region=region)
+        print(f"  downloading {url}")
+        # The ANSD server does not send its intermediate certificate: verification fails
+        response = requests.get(url, headers={"User-Agent": cfg.HTTP_USER_AGENT}, timeout=600,
+                                verify=False)
+        response.raise_for_status()
+        path.write_bytes(response.content)
+    return pd.read_csv(path)
+
+
+def census_by_commune(city: str, year: int) -> pd.Series:
+    """Census population per commune (indexed by ``name_key``) in the regions of a city."""
+    table = pd.concat([census_table(r, year) for r in cfg.CITIES[city]["census_regions"]])
+    return table.groupby(table["COMMUNE"].map(name_key))["POPULATION"].sum()
+
+
+def census_key(commune: str) -> str:
+    """Census key of an OSM commune name (spelling variants in CENSUS_COMMUNE_ALIASES)."""
+    return name_key(cfg.CENSUS_COMMUNE_ALIASES.get(commune, commune))
+
+
+def whole_communes(city: str) -> list:
+    """Communes entirely inside the zone of a city (the census can be compared there)."""
+    communes = gpd.read_file(cfg.ZONES_DIR / "communes.geojson")
+    keep = (communes["city"] == city) & (communes["share_of_commune"] >= cfg.CENSUS_MIN_SHARE)
+    return communes.loc[keep, "commune"].tolist()
+
+
 # --- Indicators ------------------------------------------------------------------
 
 def indicator_rows(city, unit_type, labels, units, first_year, pixel_area, pop, growth):
-    """Long-table rows of every indicator for one set of units (``pop``: (n_units, n_years))."""
+    """Long-table rows of every indicator for one set of units.
+
+    ``pop`` (n_units, n_years) gives the WorldPop indicators; None to leave them out.
+    """
     years = cfg.PUBLISHED_YEARS
     n = len(units)
     built_px, land_px = ind.built_counts(first_year, labels, n, years)
@@ -132,7 +176,8 @@ def indicator_rows(city, unit_type, labels, units, first_year, pixel_area, pop, 
     with np.errstate(divide="ignore", invalid="ignore"):
         index = np.where(built[:, :1] > 0, built / built[:, :1] * 100, np.nan)
         share = np.where(land[:, None] > 0, built / land[:, None] * 100, np.nan)
-        per_capita = np.where(pop >= cfg.MIN_POPULATION, built * 10_000 / pop, np.nan)
+        per_capita = (np.where(pop >= cfg.MIN_POPULATION, built * 10_000 / pop, np.nan)
+                      if pop is not None else None)
     for i in range(n):
         if land[i] == 0:
             continue
@@ -142,8 +187,9 @@ def indicator_rows(city, unit_type, labels, units, first_year, pixel_area, pop, 
                 add("new_built_ha", i, year, built[i, j] - built[i, j - 1], 1)
             add("growth_index", i, year, index[i, j], 1)
             add("built_share_pct", i, year, share[i, j], 1)
-            add("population", i, year, pop[i, j], 0)
-            add("built_m2_per_capita", i, year, per_capita[i, j], 1)
+            if pop is not None:
+                add("population", i, year, pop[i, j], 0)
+                add("built_m2_per_capita", i, year, per_capita[i, j], 1)
 
     for (start, end), types in growth.items():
         area = {t: ind.unit_sums((types == t).astype(np.float64), labels, n) * pixel_area / 10_000
@@ -157,12 +203,32 @@ def indicator_rows(city, unit_type, labels, units, first_year, pixel_area, pop, 
                 add(f"growth_{name}_ha", i, end, area[t][i], 1, start)
                 if total[i] > 0:
                     add(f"growth_{name}_share_pct", i, end, area[t][i] / total[i] * 100, 1, start)
-            if pop[i, s] >= cfg.MIN_POPULATION:
+            if pop is not None and pop[i, s] >= cfg.MIN_POPULATION:
                 add("sdg_11_3_1", i, end, ind.sdg_11_3_1(built[i, s], built[i, e], pop[i, s], pop[i, e]),
                     2, start)
     unit_rows = [{"city": city, "unit_type": unit_type, "unit": u, "label": label,
                   "land_ha": round(float(land[i]), 1)} for i, (u, label) in enumerate(units) if land[i] > 0]
     return rows, unit_rows
+
+
+def census_rows(city: str, rows: list) -> list:
+    """Census population and built-up m² per inhabitant of the communes entirely in the zone."""
+    year = cfg.CENSUS_PUBLISHED_YEAR
+    census = census_by_commune(city, year)
+    built = {r["unit"]: r["value"] for r in rows if r["unit_type"] == "commune"
+             and r["indicator"] == "built_area_ha" and r["year"] == year}
+    out = []
+    for commune in whole_communes(city):
+        people = census.get(census_key(commune))
+        if people is None:
+            raise ValueError(f"{commune} ({city}) not found in the {year} census: "
+                             "add it to CENSUS_COMMUNE_ALIASES in config/settings.py")
+        values = {"census_population": round(float(people))}
+        if people >= cfg.MIN_POPULATION and commune in built:
+            values["census_built_m2_per_capita"] = round(built[commune] * 10_000 / people, 1)
+        out += [{"indicator": k, "city": city, "unit_type": "commune", "unit": commune,
+                 "year_start": None, "year": year, "value": v} for k, v in values.items()]
+    return out
 
 
 def growth_map(first_year, types, name, start, end, path):
@@ -220,10 +286,16 @@ def run_city(city: str) -> tuple:
     rows, unit_rows = [], []
     for unit_type, labels, units in unit_sets:
         r, u = indicator_rows(city, unit_type, labels, units, first_year, pixel_area,
-                              pop[unit_type], growth)
+                              pop[unit_type] if unit_type == "city" else None, growth)
         rows += r
         unit_rows += u
-    return rows, unit_rows
+    rows += census_rows(city, rows)
+    communes = next(units for unit_type, _, units in unit_sets if unit_type == "commune")
+    worldpop = pd.DataFrame(pop["commune"], columns=cfg.PUBLISHED_YEARS,
+                            index=pd.Index([u for u, _ in communes], name="commune"))
+    worldpop = worldpop.reset_index().melt(id_vars="commune", var_name="year", value_name="population")
+    worldpop.insert(0, "city", city)
+    return rows, unit_rows, worldpop.round({"population": 0})
 
 
 def summary(table: pd.DataFrame) -> None:
@@ -254,12 +326,14 @@ def main():
     missing = [c for c in cfg.CITIES if not (cfg.city_output_dir(c) / cfg.FIRST_YEAR_TIF).exists()]
     if missing:
         raise SystemExit(f"No urbanisation map for {missing}: run python -m pipeline.s3_postprocess")
-    rows, unit_rows = [], []
+    rows, unit_rows, worldpop = [], [], []
     for city in cfg.CITIES:
         print(f"Indicators for {city}...")
-        r, u = run_city(city)
+        r, u, w = run_city(city)
         rows += r
         unit_rows += u
+        worldpop.append(w)
+    pd.concat(worldpop).to_csv(cfg.WORLDPOP_COMMUNES_CSV, index=False)
 
     cfg.TABLES_DIR.mkdir(parents=True, exist_ok=True)
     table = pd.DataFrame(rows).astype({"year_start": "Int64"})

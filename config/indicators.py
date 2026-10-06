@@ -17,6 +17,11 @@ SOURCES = {
         "name": "SamaReew, d'après Copernicus Sentinel-2 (2016–2026)",
         "licence": "CC BY 4.0",
     },
+    "ansd": {
+        "name": ("ANSD, cinquième Recensement général de la population et de l'habitat "
+                 "(RGPH-5, 2023), répertoire des localités"),
+        "licence": "CC BY 4.0",
+    },
     "worldpop": {
         "name": ("WorldPop Global 2, R2025A v1 (Bondarenko et al., 2025, Université de "
                  "Southampton, doi:10.5258/SOTON/WP00839)"),
@@ -35,7 +40,11 @@ UNIT_TYPES = {
 _MAP_RELIABILITY = ("Provisoire : concordance de 0,92 avec deux produits de référence ; "
                     "la précision réelle viendra de la validation nationale (J4).")
 _POP_RELIABILITY = ("Population modélisée (projection répartie sur le bâti), pas un "
-                    "recensement : à lire comme un ordre de grandeur.")
+                    "recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur "
+                    "les communes de Dakar), publiée seulement pour les villes entières.")
+_CENSUS_RELIABILITY = ("Recensement : population résidente comptée en 2023. Publiée seulement "
+                       "pour les communes entièrement dans la zone d'étude ; limites des "
+                       "communes d'après OpenStreetMap, pas les limites officielles.")
 
 INDICATORS = {
     "built_area_ha": {
@@ -134,7 +143,7 @@ INDICATORS = {
     "population": {
         "title": "Population",
         "unit": "habitants",
-        "definition": "Somme des habitants estimés par WorldPop dans l'unité.",
+        "definition": "Somme des habitants estimés par WorldPop dans la ville (zone d'étude entière).",
         "period": "year",
         "sources": ["worldpop"],
         "method": "METHODOLOGIE.md#12",
@@ -143,7 +152,7 @@ INDICATORS = {
     "built_m2_per_capita": {
         "title": "Surface bâtie par habitant",
         "unit": "m²/hab.",
-        "definition": "Surface bâtie divisée par la population (unités de plus de 1 000 habitants).",
+        "definition": "Surface bâtie de la ville divisée par sa population estimée par WorldPop.",
         "period": "year",
         "sources": ["samareew", "worldpop"],
         "method": "METHODOLOGIE.md#12",
@@ -158,5 +167,23 @@ INDICATORS = {
         "sources": ["samareew", "worldpop"],
         "method": "METHODOLOGIE.md#12",
         "reliability": _MAP_RELIABILITY + " " + _POP_RELIABILITY,
+    },
+    "census_population": {
+        "title": "Population recensée en 2023",
+        "unit": "habitants",
+        "definition": "Population résidente de la commune au recensement de 2023 (RGPH-5).",
+        "period": "year",
+        "sources": ["ansd"],
+        "method": "METHODOLOGIE.md#13",
+        "reliability": _CENSUS_RELIABILITY,
+    },
+    "census_built_m2_per_capita": {
+        "title": "Surface bâtie par habitant recensé (2023)",
+        "unit": "m²/hab.",
+        "definition": "Surface bâtie de la commune en 2023 divisée par sa population recensée en 2023.",
+        "period": "year",
+        "sources": ["samareew", "ansd"],
+        "method": "METHODOLOGIE.md#13",
+        "reliability": _MAP_RELIABILITY + " " + _CENSUS_RELIABILITY,
     },
 }

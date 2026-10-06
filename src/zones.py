@@ -4,6 +4,7 @@ All geometries are expected in a projected CRS in metres (config.ANALYSIS_CRS).
 """
 import math
 import re
+import unicodedata
 
 import shapely
 from shapely.geometry import LineString, MultiPoint
@@ -68,6 +69,18 @@ _PREFIXES = re.compile(r"^(commune|communauté rurale|communaute rurale|ville)\s
 def clean_name(name: str) -> str:
     """'Communauté rurale de Fandène' -> 'Fandène' (all were turned into communes in 2013)."""
     return _PREFIXES.sub("", name.strip()).strip()
+
+
+def name_key(name: str) -> str:
+    """Comparable commune name: 'Mermoz-Sacré-Cœur' and 'MERMOZ SACRE COEUR' give the same key.
+
+    Used to match OSM communes with the census (ANSD writes names in capitals, without accents).
+    """
+    s = str(name).replace("œ", "oe").replace("Œ", "OE")
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().upper()
+    s = re.sub(r"['’`]", "", s)            # M'bour -> MBOUR
+    s = re.sub(r"[-_./]", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
 
 
 def remove_overlaps(geoms: list) -> list:

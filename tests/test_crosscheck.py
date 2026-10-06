@@ -56,13 +56,3 @@ def test_growth_rates():
     assert cc.annual_growth_pct(100, 121, 2) == pytest.approx(10)
     assert math.isnan(cc.growth_pct(0, 10))
 
-
-@pytest.mark.parametrize("osm, ansd", [
-    ("Mermoz-Sacré-Cœur", "MERMOZ SACRE COEUR"),
-    ("M'bour", "MBOUR"),
-    ("Patte d'Oie", "PATTE D'OIE"),
-    ("Jaxaay - Parcelles", "JAXAAY PARCELLES"),
-    ("Thiès Nord", "THIES NORD"),
-])
-def test_name_key(osm, ansd):
-    assert cc.name_key(osm) == cc.name_key(ansd)

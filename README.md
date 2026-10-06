@@ -18,7 +18,7 @@ read it first.
 | J0 — Setup (git, GitHub, licences) | Done |
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
 | J2 — National model and classification | Done |
-| **J3 — Indicators and cross-check with GHSL / Open Buildings** | **In progress** on branch `j3-indicateurs` |
+| **J3 — Indicators and cross-check with GHSL / Open Buildings** | **Done** on branch `j3-indicateurs` (to merge) |
 | J4 — National validation (~480 photo-interpreted points) | To do |
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
@@ -44,8 +44,11 @@ GHSL grows 2-4 times slower because its 2015 and 2020 epochs are interpolated, n
 CC BY 4.0): WorldPop totals hold (97 % of the census for the 51 Dakar communes entirely in the
 zone) but its split between communes is off by a factor 0.35 to 2.9.
 
-**Next step (J3)**: decide at which scale population indicators are published (ROADMAP §8);
-then J4 (validation).
+WorldPop indicators are therefore published for whole cities only; by commune, the 2023
+census population and built-up m² per counted inhabitant are published for the 60 communes
+entirely inside a zone.
+
+**Next step**: merge J3, then J4 (national validation, ~480 photo-interpreted points).
 
 ## Study zones
 
@@ -100,8 +103,9 @@ Yearly built-up maps ──► temporal consistency filter ──► year of urb
    period (see `tests/test_postprocess.py`). The last year only confirms the previous ones:
    indicators cover 2016–2025.
 5. **Indicators** — built-up area, base-100 growth, new built-up area, built-up share,
-   growth type (densification / extension / leapfrog, Atlas of Urban Expansion rule),
-   population (WorldPop Global 2), built-up m² per inhabitant and SDG 11.3.1.
+   growth type (densification / extension / leapfrog, Atlas of Urban Expansion rule);
+   by city, population (WorldPop Global 2), built-up m² per inhabitant and SDG 11.3.1; by
+   commune, the 2023 census population (RGPH-5) and built-up m² per counted inhabitant.
 6. **Accuracy** — the 30 % test points only measure agreement with the reference products.
    True accuracy will come from a national sample photo-interpreted blind in Google Earth
    Pro (J4), with area-weighted accuracy per city.
@@ -186,7 +190,9 @@ in favour of the national one.
 - Sentinel-2A was launched in June 2015, so the series cannot start before the 2016 dry season.
 - Population is modelled (WorldPop), not counted: it is spread over built-up areas seen
   from space. City totals match the 2023 census, but commune figures are off by a factor
-  0.35 (dense working-class areas) to 2.9 (business, wealthy or resort areas).
+  0.35 (dense working-class areas) to 2.9 (business, wealthy or resort areas), so WorldPop
+  is published for whole cities only. The census covers only 2023 and only the communes
+  entirely inside a zone (not Touba Mosquée).
 - Leapfrog growth includes growth around villages and most of the remaining isolated
   false detections; its reliability depends on the city (65 % confirmed by Open Buildings
   roofs in Touba, 36 % in Thiès).
