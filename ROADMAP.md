@@ -161,7 +161,7 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [x] Choisir la source de population (WorldPop ou RGPH-5) : WorldPop Global 2, RGPH-5 en contrôle
 - [ ] Contrôler WorldPop avec le RGPH-5 2023 (communes entièrement dans les zones ; licence à vérifier)
 - [x] Calculer les indicateurs v1 (§4.3) par ville, commune et secteur (aussi par direction et anneau ; `pipeline/s4_indicators.py`)
-- [ ] Comparer avec GHSL et Open Buildings
+- [x] Comparer avec GHSL et Open Buildings (`pipeline/s6_crosscheck.py`, METHODOLOGIE §13 ; écart GHSL : époques interpolées)
 - [x] Produire la table longue et les fiches indicateurs (`outputs/tables/`, format 0.1)
 
 **Critère de fin** : la table longue est complète pour les 4 villes, et les écarts avec GHSL sont expliqués.

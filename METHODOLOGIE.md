@@ -312,7 +312,7 @@ Google Earth Pro. Chaque strate est ensuite pondérée par sa part de la surface
 | Résolution 10 m (SWIR à 20 m) | On détecte des ensembles de bâtiments plutôt que des maisons isolées |
 | Sable, plages, tannes | Confusions possibles avec le bâti, réduites mais pas supprimées |
 | 2016 (Sentinel-2A seul), 2017 (peu de scènes claires) | Composites moins bons ; le saut 2016 → 2017 est probablement exagéré |
-| Années sèches (2017, 2019 à Dakar) | Fausses détections en périphérie ; le filtre (dont la condition « année suivante ») les retire en grande partie, mais le saut 2016 → 2017 reste fort à Touba (+14 %), peut-être une base 2016 sous-estimée : à vérifier à la validation (J4). Remède de fond si besoin : entraîner le modèle sur plusieurs années |
+| Années sèches (2017, 2019 à Dakar) | Fausses détections en périphérie ; le filtre (dont la condition « année suivante ») les retire en grande partie, mais le saut 2016 → 2017 reste fort à Touba (+14 %, contre +1 % de toits dans Open Buildings, §13) : base 2016 probablement sous-estimée ou 2017 surestimée, à vérifier à la validation (J4). Remède de fond si besoin : entraîner le modèle sur plusieurs années |
 | Filtre temporel en fin de période | Moins d'années pour confirmer : la dernière année publiée (2025) n'est confirmée que par 2026, sa croissance est probablement surestimée. La dernière année classée n'est pas publiée (§8) : avec une saison janvier–mai, non filtrée, elle donnait à Thiès +1 865 ha en 2026 contre environ 200 ha par an avant |
 | Comptage de pixels | Surface « cartographiée », pas encore corrigée des erreurs ; l'estimation corrigée viendra de la validation (J4) |
 
@@ -387,7 +387,10 @@ Au dernier calcul (part du nouveau bâti 2016 → 2025, %) :
 - le nouveau bâti autour d'un **village** compte comme saut (le village est du bâti rural) :
   c'est une part importante du saut à Thiès, dont la zone contient beaucoup de villages ;
 - les **fausses détections** isolées qui passent le filtre temporel tombent surtout dans le
-  saut : c'est la catégorie la moins fiable (à vérifier à la validation, J4).
+  saut. Le contrôle avec Open Buildings (§13) montre que la fiabilité du saut **dépend de la
+  ville** : 65 % des pixels de saut sont confirmés par des toits à Touba (plus que la
+  densification), mais 36 % seulement à Thiès et 43 % à Dakar. Le saut de Thiès (51 % du
+  nouveau bâti) est donc à prendre avec le plus de prudence.
 
 ## 12. Population et consommation d'espace
 
@@ -444,6 +447,88 @@ Au dernier calcul :
 
 ---
 
+## 13. Contrôle croisé avec GHSL et Open Buildings (étape 6)
+
+`pipeline/s6_crosscheck.py` compare nos cartes à deux produits indépendants de notre modèle,
+ramenés par Earth Engine sur notre grille de 10 m :
+
+| Référence | Ce qu'elle mesure | Années | Licence |
+|---|---|---|---|
+| **Open Buildings Temporal v1** (Google, Sirko et al., 2023) | Confiance « bâtiment » de sous-pixels de 0,5 m (résolution effective 4 m), déduite de Sentinel-2 | Une carte par an, 2016–2023 | CC BY 4.0 (ou ODbL) |
+| **GHSL GHS-BUILT-S** R2023A (Pesaresi et Politis, 2023) | Surface de bâtiments (m²) par cellule | 10 m en 2018 ; 100 m tous les 5 ans de 1975 à 2030 | Réutilisation libre avec citation (Commission européenne) |
+
+Pour Open Buildings, un sous-pixel est un toit si sa confiance est ≥ **0,5**
+(`OB_PRESENCE_THRESHOLD`) ; la **part de toits** de chaque pixel de 10 m est la moyenne de ses
+sous-pixels. Les confiances ne sont pas calibrées : le seuil change la surface de toits, pas
+la logique des comparaisons.
+
+**Les surfaces ne sont pas comparables directement.** Les deux références mesurent des
+**toits** ; notre carte mesure des **pixels bâtis** (toits, cours, rues entre les maisons).
+Notre surface est donc 2 à 5 fois plus grande, par définition (Dakar 2023 : 28 711 ha de
+pixels bâtis, 7 561 ha de toits selon Open Buildings). On compare donc **où** les cartes
+s'accordent et **à quel rythme** elles grandissent.
+
+### 13.1 Mesures (`src/crosscheck.py`)
+
+| Mesure | Calcul | Ce qu'elle dit |
+|---|---|---|
+| Toits dans notre bâti | Part de la surface de toits de la référence qui tombe dans nos pixels bâtis | Proche de 100 % : on oublie peu de bâtiments |
+| Taux de confirmation | Part de nos pixels qui ont des toits à proximité : au moins **5 %** de toits en moyenne dans une fenêtre de **30 m × 30 m** (`CHECK_MIN_ROOF_PCT`, `CHECK_WINDOW_PX`), soit environ une petite maison | Élevé : nos pixels bâtis correspondent à de vrais bâtiments ; calculé par groupe (bâti 2016, nouveau bâti par type de croissance, non bâti pour comparaison) |
+| Corrélation par hectare | Corrélation entre notre part bâtie et la part de toits, sur des mailles de 1 ha entièrement dans la zone | Les deux cartes placent-elles le bâti dense au même endroit ? |
+| Croissance | Croissance de la surface sur une période commune | Les deux sources racontent-elles la même évolution ? |
+
+La fenêtre de 30 m absorbe les petits décalages entre les deux cartes. Le taux de
+confirmation n'est pas une précision : une maison neuve sur une grande parcelle ne
+confirme que les pixels proches d'elle, et un bâtiment qu'Open Buildings rate n'est pas
+forcément absent.
+
+### 13.2 Résultats au dernier calcul
+
+| Mesure | Dakar | Touba | Thiès | Mbour |
+|---|---|---|---|---|
+| Toits Open Buildings 2023 dans notre bâti | 96 % | 94 % | 93 % | 93 % |
+| Toits GHSL 2018 (10 m) dans notre bâti | 87 % | 78 % | 77 % | 74 % |
+| Corrélation par hectare, Open Buildings 2023 | 0,79 | 0,84 | 0,86 | 0,88 |
+| Corrélation par hectare, GHSL 2018 | 0,88 | 0,92 | 0,92 | 0,92 |
+| Confirmés (Open Buildings 2023) : bâti 2016 | 75 % | 84 % | 80 % | 80 % |
+| — nouveau bâti 2017–2023 | 48 % | 57 % | 43 % | 56 % |
+| — dont densification | 48 % | 50 % | 55 % | 57 % |
+| — dont extension | 55 % | 59 % | 45 % | 59 % |
+| — dont saut | 43 % | 65 % | 36 % | 54 % |
+| — non bâti (pour comparaison) | 4 % | 5 % | 2 % | 4 % |
+| Croissance 2016 → 2023 : SamaReew | +36 % | +52 % | +63 % | +56 % |
+| Croissance 2016 → 2023 : Open Buildings (toits) | +33 % | +44 % | +51 % | +54 % |
+| Croissance annuelle : SamaReew 2016 → 2020 | 5,1 % | 6,7 % | 8,3 % | 7,0 % |
+| Croissance annuelle : GHSL 2015 → 2020 | 2,5 % | 3,2 % | 2,0 % | 2,3 % |
+
+### 13.3 Lecture
+
+- **Peu d'oublis.** 93 à 96 % des toits d'Open Buildings tombent dans notre bâti ; un peu
+  moins pour GHSL (74 à 87 %), qui voit plus de petits bâtiments épars.
+- **Le nouveau bâti est moins sûr que l'ancien.** Environ la moitié de notre nouveau bâti a
+  des toits à moins de 30 m dans Open Buildings 2023, contre 75 à 84 % du bâti de 2016 et
+  2 à 5 % du non-bâti. Le nouveau bâti comprend des parcelles en chantier ou clôturées,
+  encore sans toit visible à 4 m, mais aussi des fausses détections : la validation (J4)
+  fera la part des deux.
+- **Même rythme qu'Open Buildings à Dakar et à Mbour** (+36 % contre +33 %, +56 % contre
+  +54 %). À **Touba**, l'écart vient de 2017 : +14 % chez nous, +1 % de toits ; ensuite les
+  pentes sont parallèles. À **Thiès**, notre croissance est plus forte à partir de 2019
+  (+63 % contre +51 %), en accord avec le taux de confirmation le plus faible : c'est la ville
+  où la carte est la moins sûre.
+- **L'écart avec GHSL vient de sa méthode, pas de notre carte.** GHSL n'observe vraiment que
+  1975, 1990, 2000, 2014 (Landsat) et 2018 (Sentinel-2) ; les époques intermédiaires sont
+  interpolées et 2025–2030 extrapolées. Sa croissance 2015 → 2020 est donc reconstruite, pas
+  observée, et elle est deux à quatre fois plus faible que la nôtre comme que celle d'Open
+  Buildings (qui, lui, est observé chaque année). GHSL reste utile pour le **recul
+  historique** (1975–2015) et pour la position du bâti en 2018 (corrélation 0,88 à 0,92).
+- Open Buildings a ses propres irrégularités : sa surface de toits baisse en 2022 à Dakar
+  et à Mbour, ce qui est très improbable.
+
+Les tables sont dans `outputs/crosscheck/` (`built_area_sources.csv`, `agreement.csv`) ; la
+série GHSL 1975–2030 par ville peut servir de contexte historique sur le site.
+
+---
+
 ## Références
 
 - Breiman, L. (2001). Random Forests. _Machine Learning_, 45, 5–32.
@@ -462,5 +547,10 @@ Au dernier calcul :
   des terres au taux de croissance de la population).
 - Bondarenko, M. et al. (2025). Constrained estimates of 2015–2030 total number of people per
   grid square, WorldPop Global 2, R2025A v1. Université de Southampton. doi:10.5258/SOTON/WP00839.
+- Pesaresi, M., Politis, P. (2023). GHS-BUILT-S R2023A — GHS built-up surface grid, derived
+  from Sentinel-2 composite and Landsat, multitemporal (1975–2030). Commission européenne,
+  JRC. doi:10.2905/9F06F36F-4B11-47EC-ABB0-4F8B7B1D72EA.
+- Sirko, W. et al. (2023). High-Resolution Building and Road Detection from Sentinel-2
+  (Open Buildings Temporal). arXiv:2310.11622.
 - Olofsson, P. et al. (2014). Good practices for estimating area and assessing accuracy of
   land change. _Remote Sensing of Environment_, 148, 42–57.

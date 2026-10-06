@@ -35,8 +35,12 @@ and 2 km distance ring, into a long table with one fact sheet per indicator
 WorldPop Global 2. From 2016 to 2025, built-up area grew about twice as fast as population
 in every city (SDG 11.3.1: Touba 1.7, Dakar 2.2, Mbour 2.3, Thiès 2.8).
 
-**Next step (J3)**: cross-check with GHSL and Open Buildings; check WorldPop against the
-2023 census (RGPH-5).
+**Cross-check** (step 6) with Google Open Buildings Temporal and GHSL: 93-96 % of Open
+Buildings roofs fall in our built-up area, and growth 2016-2023 is close to Open Buildings
+in Dakar (+36 % vs +33 %) and Mbour (+56 % vs +54 %), higher in Touba (2017 jump) and Thiès.
+GHSL grows 2-4 times slower because its 2015 and 2020 epochs are interpolated, not observed.
+
+**Next step (J3)**: check WorldPop against the 2023 census (RGPH-5); then J4 (validation).
 
 ## Study zones
 
@@ -110,11 +114,14 @@ pipeline/            one step = one module, run from the project root
   s2_classify.py     yearly built-up stacks per city
   s3_postprocess.py  urbanisation year, statistics, static map per city
   s4_indicators.py   indicators of every city -> long table + fact sheets in outputs/tables/
-src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators, validation
+  s6_crosscheck.py   comparison with Open Buildings Temporal and GHSL -> outputs/crosscheck/
+src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators,
+                     crosscheck, validation
 tests/               unit tests (pure functions, no Earth Engine needed)
 zones/               frozen study zones (GeoJSON, versioned)
 data/                ignored by git: downloads (data/raw/), training samples, stacks (data/cities/<city>/)
 outputs/             model/ (evaluation), cities/<city>/ (results), tables/ (indicators for the site),
+                     crosscheck/ (comparison with reference products),
                      legacy_dakar/ (first case study)
 docs/                old Dakar web map (GitHub Pages), to be replaced by the site in J5
 ```
@@ -131,6 +138,7 @@ python -m pipeline.s1_train           # samples + national model -> outputs/mode
 python -m pipeline.s2_classify        # all cities; --city touba for one; --drive to export via Drive
 python -m pipeline.s3_postprocess     # all cities with a stack; --city touba for one
 python -m pipeline.s4_indicators      # indicators of all cities -> outputs/tables/
+python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
 pytest
 ```
 
@@ -142,6 +150,9 @@ Practical notes:
   evaluated in step 1. Run step 1 first.
 - Step 4 downloads the WorldPop population of Senegal once (10 files of 17 MB) into
   `data/raw/worldpop/`.
+- Step 6 downloads the reference maps once per city through Earth Engine (about 5 minutes for
+  Touba, longer for Dakar) into `data/cities/<city>/`. Step 5 is reserved for the national
+  validation (J4).
 - The virtual environment uses Python 3.10, no longer supported by Google's libraries since
   October 2026 (it still works, with a warning): move to Python 3.11+ when convenient.
 
@@ -171,7 +182,10 @@ in favour of the national one.
 - Population is modelled (WorldPop), not counted: it is spread over built-up areas seen
   from space, so built-up m² per inhabitant is less informative at commune level.
 - Leapfrog growth includes growth around villages and most of the remaining isolated
-  false detections: it is the least reliable growth type.
+  false detections; its reliability depends on the city (65 % confirmed by Open Buildings
+  roofs in Touba, 36 % in Thiès).
+- About half of the new built-up area has Open Buildings roofs within 30 m (75-84 % for the
+  2016 built-up area): plots under construction, but also false detections (J4 will tell).
 - Commune boundaries come from OpenStreetMap and are not official (least reliable around Thiès).
 
 ## Tools

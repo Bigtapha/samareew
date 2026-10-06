@@ -109,3 +109,44 @@ def reference_labels(aoi: ee.Geometry, year: int) -> ee.Image:
     return (ee.Image(0).where(built, 1)
             .updateMask(built.Or(not_built))
             .rename("label").toByte().clip(aoi))
+
+
+GHSL_BUILT_10M = "JRC/GHSL/P2023A/GHS_BUILT_S_10m"         # 2018 only
+OPEN_BUILDINGS_TEMPORAL = "GOOGLE/Research/open-buildings-temporal/v1"
+
+
+def roof_fraction_layers(aoi: ee.Geometry, ob_years: list, presence_threshold: float,
+                         crs: str, scale: float) -> ee.Image:
+    """Share of each pixel covered by buildings (0-100 %) in two reference products.
+
+    - ``ob_<year>``: Open Buildings Temporal (Google, yearly, 4 m effective): share of the
+      0.5 m sub-pixels whose building confidence is at least ``presence_threshold``;
+    - ``ghsl_2018``: GHSL built-up surface at 10 m (m² of buildings per 100 m² cell).
+    """
+    layers = []
+    for year in ob_years:
+        presence = (ee.ImageCollection(OPEN_BUILDINGS_TEMPORAL)
+                    .filterBounds(aoi)
+                    .filterDate(f"{year}-01-01", f"{year + 1}-01-01")
+                    .select("building_presence")
+                    .mosaic())
+        roof = (presence.gte(presence_threshold)
+                .setDefaultProjection(crs="EPSG:32628", scale=0.5)
+                .reduceResolution(ee.Reducer.mean(), maxPixels=1024)
+                .reproject(crs=crs, scale=scale)
+                .multiply(100))
+        layers.append(roof.rename(f"ob_{year}"))
+    ghsl = ee.ImageCollection(GHSL_BUILT_10M).first().select("built_surface")
+    layers.append(ghsl.rename("ghsl_2018"))
+    return ee.Image.cat(layers).unmask(0).round().toByte().clip(aoi)
+
+
+def ghsl_built_surface_series(aoi: ee.Geometry, collection: str) -> dict:
+    """GHSL built-up surface (ha) inside ``aoi`` for every epoch of the collection (100 m)."""
+    images = ee.ImageCollection(collection).select("built_surface")
+    def area(img):
+        total = img.reduceRegion(ee.Reducer.sum(), aoi, scale=100, maxPixels=1e10)
+        return ee.Feature(None, {"epoch": img.get("system:index"),
+                                 "ha": ee.Number(total.get("built_surface")).divide(10_000)})
+    rows = ee.FeatureCollection(images.map(area)).getInfo()["features"]
+    return {int(f["properties"]["epoch"]): f["properties"]["ha"] for f in rows}

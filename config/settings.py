@@ -105,6 +105,21 @@ WORLDPOP_RELEASE = "WorldPop Global 2, R2025A v1"
 # (a few hundred inhabitants give meaningless ratios)
 MIN_POPULATION = 1000
 
+# --- Cross-check (step 6) -----------------------------------------------
+# Reference building maps, brought to our 10 m grid as roof fractions (0-100 %)
+OB_YEARS = list(range(2016, 2024))   # Open Buildings Temporal v1 (Google): 2016 ... 2023
+OB_PRESENCE_THRESHOLD = 0.5          # building confidence of a 0.5 m sub-pixel (uncalibrated)
+GHSL_BUILT_COLLECTION = "JRC/GHSL/P2023A/GHS_BUILT_S"   # 100 m, epochs 1975 ... 2030
+# GHSL observes 1975, 1990, 2000, 2014 (Landsat) and 2018 (Sentinel-2); the 5-year epochs in
+# between are interpolated, and the epochs after 2020 are extrapolated ("projected" in outputs)
+GHSL_LAST_OBSERVED_EPOCH = 2020
+# A pixel of our map is "confirmed" if the reference has at least CHECK_MIN_ROOF_PCT of
+# roofs on average in a window of CHECK_WINDOW_PX x CHECK_WINDOW_PX pixels around it (30 m:
+# absorbs small misregistrations; 5 % of 900 m² = 45 m², a small house).
+CHECK_WINDOW_PX = 3
+CHECK_MIN_ROOF_PCT = 5
+CHECK_CELL_PX = 10                   # 1 ha cells for the correlation of the two maps
+
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
 TRAINING_SAMPLES_CSV = DATA_DIR / "training_samples.csv"   # written by step 1, read by step 2
@@ -122,6 +137,11 @@ TABLES_DIR = OUTPUT_DIR / "tables"
 INDICATORS_CSV = TABLES_DIR / "indicators.csv"       # long table: one value per row
 UNITS_CSV = TABLES_DIR / "units.csv"                 # spatial units: names and land area
 INDICATORS_JSON = TABLES_DIR / "indicators.json"     # one fact sheet per indicator
+
+# Cross-check (step 6)
+REFERENCE_ROOFS_TIF = "reference_roofs.tif"          # data/cities/<city>/: ob_<year>, ghsl_2018 bands
+GHSL_SERIES_JSON = "ghsl_built_surface.json"         # data/cities/<city>/: GHSL roofs (ha) per epoch
+CROSSCHECK_DIR = OUTPUT_DIR / "crosscheck"
 
 
 def city_data_dir(city: str) -> Path:
