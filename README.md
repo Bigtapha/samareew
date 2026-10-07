@@ -51,8 +51,11 @@ read it first.
 **Weak points for J4 to measure**: new built-up area (only about half confirmed by roofs),
 leapfrog growth in Thiès and Dakar, the 2017 jump in Touba, and 2025 (confirmed by 2026 only).
 
-**Next step**: label the 480 points of `outputs/validation/labels.csv` blind in Google Earth
-Pro (protocol in METHODOLOGIE §14.2), then run `python -m pipeline.s5_validation`.
+**Next step** (J4, sample drawn on 06/10/2026): confirm the labelling rule of METHODOLOGIE
+§14.2, label the 480 points of `outputs/validation/labels.csv` blind in Google Earth Pro
+(`points.kml`; do not open `sample_key.csv`), then run `python -m pipeline.s5_validation` and
+report the results in METHODOLOGIE §14.4, the indicator fact sheets and this README. Only the
+random sample counts: no hand-picked points (ROADMAP §9).
 
 ## Study zones
 

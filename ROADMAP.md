@@ -170,9 +170,11 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 ### J4 — Validation nationale
 - [x] Décider le plan d'échantillonnage : 120 points par ville, nouveau bâti découpé par type de croissance (densification / extension / saut), même plan partout, année d'apparition notée si possible (METHODOLOGIE §14.1)
 - [x] Tirer l'échantillon stratifié ville × strate (480 points, `pipeline/s5_validation.py --draw` → `outputs/validation/`)
-- [ ] Photo-interprétation à l'aveugle dans Google Earth Pro
-- [ ] Calculer la précision par ville (avec marge d'erreur) et la précision nationale
-- [ ] Intégrer les résultats aux fiches indicateurs et à la page Méthode
+- [ ] Confirmer la règle d'étiquetage avant de commencer (METHODOLOGIE §14.2) : pixel bâti si au moins la moitié du carré est construite ; parcelle seulement clôturée = non bâti (proposé, pas encore validé)
+- [ ] Photo-interprétation à l'aveugle dans Google Earth Pro : remplir `outputs/validation/labels.csv` à partir de `points.kml`, sans ouvrir `sample_key.csv` ; noter `year_built` pour le nouveau bâti quand les images le permettent
+- [ ] Calculer la précision par ville (avec marge d'erreur) et la précision nationale : `python -m pipeline.s5_validation` → `outputs/validation/accuracy.json`
+- [ ] Lire les résultats sur les points faibles de J3 : saut par ville et au niveau national, surface corrigée du nouveau bâti, dates (pic 2017 de Touba et de Dakar, année 2025)
+- [ ] Intégrer les résultats : METHODOLOGIE §14.4 (et §9, §10), fiabilité des fiches indicateurs (`config/indicators.py`, `_MAP_RELIABILITY`, puis relancer l'étape 4), README
 
 **Critère de fin** : chaque ville a une précision pondérée par la surface et sa marge d'erreur.
 
@@ -278,3 +280,4 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 06/10/2026 | Type de croissance : l'emprise de départ ne part que du bâti urbain ou périurbain (≥ 25 % de bâti dans un cercle de 1 km², comme l'Atlas), pas de tout le bâti | À 10 m, la frange de 100 m autour du bâti épars couvrait presque toute la périphérie : 81 à 86 % de densification partout ; avec le seuil, 28 à 38 % selon la ville (cartes `data/j3_growth_<ville>.png`) |
 | 06/10/2026 | Indicateurs de population : WorldPop publié par ville seulement ; par commune, recensement 2023 (communes entièrement dans les zones) | Contrôle avec le RGPH-5 : totaux WorldPop bons (97 % sur les 51 communes de Dakar) mais répartition entre communes fausse d'un facteur 0,35 à 2,9 ; le recensement ne donne qu'une année mais il est juste |
 | 06/10/2026 | Validation : 120 points par ville en 5 strates (non bâti 40, bâti 2016 32, densification / extension / saut 16 chacun), même plan dans les 4 villes ; année d'apparition du bâti notée si les images le permettent | Mesurer la fiabilité du saut, point faible vu en J3 (36 % confirmé à Thiès) ; précision du saut indicative par ville (±20 points), mieux cernée au niveau national (±11 points) ; pas de points en plus à Thiès, par comparabilité ; l'année notée teste le saut de Touba en 2017 et l'année 2025 sans points supplémentaires |
+| 07/10/2026 | Pas de points ajoutés à la main (changements choisis sur les images) : on garde uniquement l'échantillon aléatoire | Des points choisis n'ont pas de poids connu et favorisent les changements évidents, ce qui rendrait la précision trop optimiste ; une strate tampon tirée au hasard (non-bâti à moins de ~200 m du bâti, Olofsson et al., 2014) reste en réserve si la précision producteur du nouveau bâti ressort trop imprécise |

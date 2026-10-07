@@ -667,6 +667,11 @@ point, avec l'imagerie historique (icône horloge) :
 4. **`sure`** : 1 si l'interprétation est sûre, 0 sinon (image floue, pixel à cheval sur un
    bord, chantier ambigu). `note` : remarque libre (« chantier », « clôture », « sable »…).
 
+**Seuls les points tirés au hasard comptent** : aucun point n'est ajouté à la main, même là
+où un changement est évident sur les images (décision du 07/10/2026). Un point choisi n'a pas
+de poids connu dans l'estimation et favorise les changements faciles à voir, donc ceux que la
+carte trouve le mieux.
+
 La **classe de référence** se déduit des deux dates, comme pour la carte : non bâti en 2025 →
 non bâti ; bâti en 2016 et en 2025 → bâti dès 2016 ; bâti en 2025 seulement → nouveau bâti
 (`src/validation.py`, `reference_class`).
