@@ -19,7 +19,7 @@ read it first.
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
 | J2 — National model and classification | Done |
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
-| J4 — National validation (480 photo-interpreted points) | Done (branch `j4-validation`) |
+| **J4 — National validation (480 photo-interpreted points)** | **In progress** on branch `j4-validation`: accuracy done, second reading of the cover in 2025 to do |
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
 
@@ -68,8 +68,13 @@ read it first.
 The tables keep the mapped values, consistent with the maps; the corrected areas are
 published next to them, and each indicator fact sheet gives the measured accuracy.
 
-**Next step** (J5): the website v1, reading only `outputs/`; its tools are still to be
-chosen (ROADMAP §8).
+**Next step** (J4, second reading decided on 07/10/2026): for the 228 points labelled not
+built in 2025, note what covers the pixel on the 2025 image (closed list of METHODOLOGIE
+§14.2: building on less than half, construction site, unbuilt subdivision, track, bare soil,
+vegetation, water, other) in `outputs/validation/cover_2025.csv`, with
+`outputs/validation/cover_2025.kml`, still blind. The report then adds a tolerant accuracy
+where land being urbanised counts as built; the strict accuracy stays official. Then J5,
+the website v1 (tools still to be chosen, ROADMAP §8).
 
 ## Study zones
 
@@ -145,7 +150,7 @@ pipeline/            one step = one module, run from the project root
   s2_classify.py     yearly built-up stacks per city
   s3_postprocess.py  urbanisation year, statistics, static map per city
   s4_indicators.py   indicators of every city -> long table + fact sheets in outputs/tables/
-  s5_validation.py   validation sample (--draw), then accuracy from the labels -> outputs/validation/
+  s5_validation.py   validation sample (--draw), accuracy from the labels, second reading (--cover) -> outputs/validation/
   s6_crosscheck.py   comparison with Open Buildings Temporal and GHSL -> outputs/crosscheck/
 src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators,
                      crosscheck, validation
@@ -172,8 +177,9 @@ python -m pipeline.s1_train           # samples + national model -> outputs/mode
 python -m pipeline.s2_classify        # all cities; --city touba for one; --drive to export via Drive
 python -m pipeline.s3_postprocess     # all cities with a stack; --city touba for one
 python -m pipeline.s4_indicators      # indicators of all cities -> outputs/tables/
-python -m pipeline.s5_validation --draw # validation sample, once -> outputs/validation/
-python -m pipeline.s5_validation      # accuracy from the labels entered so far
+python -m pipeline.s5_validation --draw  # validation sample, once -> outputs/validation/
+python -m pipeline.s5_validation --cover # second reading sheet (points not built in 2025), once
+python -m pipeline.s5_validation         # accuracy from the labels entered so far
 python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
 pytest
 ```
@@ -194,7 +200,10 @@ Practical notes:
   the map class of each point; the accuracy can be computed at any time on the points labelled
   so far (`year_built` is entered as `YYYY` or `YYYY-MM`). The report
   (`outputs/validation/accuracy.json`) also gives the built / not-built accuracy and the
-  corrected built-up area at each date, and the accuracy on sure labels only.
+  corrected built-up area at each date, and the accuracy on sure labels only. After the
+  labelling, `--cover` prepares a second reading of the points labelled not built in 2025
+  (`cover_2025.csv`, `cover_2025.kml`); once it is complete, the report adds a `tolerant`
+  section.
 - `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
   tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
   uses a geedim function marked as deprecated: keep the pinned versions until it is updated.

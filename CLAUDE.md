@@ -49,7 +49,7 @@ python -m pipeline.s1_train        # samples + national model -> outputs/model/
 python -m pipeline.s2_classify     # --city <slug>, --drive
 python -m pipeline.s3_postprocess  # --city <slug>
 python -m pipeline.s4_indicators   # all cities -> outputs/tables/ (+ data/worldpop_by_commune.csv)
-python -m pipeline.s5_validation   # --draw once (sample), then accuracy from outputs/validation/labels.csv
+python -m pipeline.s5_validation   # --draw once (sample), accuracy from labels.csv; --cover once (second reading)
 python -m pipeline.s6_crosscheck   # Open Buildings, GHSL, census -> outputs/crosscheck/ (after s4)
 pytest
 ```

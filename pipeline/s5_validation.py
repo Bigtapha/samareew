@@ -8,6 +8,9 @@
 3. Without ``--draw``, the labels are compared with the map: area-weighted accuracies,
    corrected areas and their 95 % margins, by city and for the four cities together
    (src/validation.py, METHODOLOGIE §14).
+4. ``--cover`` prepares a second blind reading of the points labelled not built at the end:
+   what covers them (config.settings VALIDATION_COVER_CLASSES). Once it is complete, the
+   report adds a tolerant accuracy where land being urbanised counts as built.
 
 Inputs : outputs/cities/<city>/urbanisation_year.tif (step 3), growth_type_<start>_<end>.tif (step 4)
 Outputs: outputs/validation/labels.csv      sheet to fill (id, city, lon, lat, empty label columns)
@@ -15,14 +18,18 @@ Outputs: outputs/validation/labels.csv      sheet to fill (id, city, lon, lat, e
          outputs/validation/strata.csv      pixels, area, weight and points per city and stratum
          outputs/validation/points.kml      points and their 10 m pixel, one folder per city
          outputs/validation/accuracy.json   accuracy report (after labelling)
+         outputs/validation/cover_2025.csv  second reading sheet (--cover)
+         outputs/validation/cover_2025.kml  its points, for Google Earth Pro
          data/j4_sample_<city>.png          control map of the sample
 
 Usage
     python -m pipeline.s5_validation --draw          # once; refuses to erase labels already entered
+    python -m pipeline.s5_validation --cover         # once, after labelling: second reading sheet
     python -m pipeline.s5_validation                 # accuracy from the labels entered so far
 """
 import argparse
 import json
+import re
 from datetime import date
 
 import matplotlib
@@ -162,6 +169,71 @@ def draw(force: bool) -> None:
     print(pd.DataFrame(strata).pivot(index="stratum", columns="city", values="weight").round(3).to_string())
 
 
+# --- 4. Second reading: cover of the points not built at the end ----------------------
+
+def cover(force: bool) -> None:
+    """Sheet and KML of the points labelled not built at the end, without the map class.
+    The points are chosen from the labels only, never from the map, so the reading stays blind."""
+    if cfg.VALIDATION_COVER_CSV.exists() and not force:
+        done = pd.read_csv(cfg.VALIDATION_COVER_CSV, dtype=str)
+        if done[f"cover_{END}"].notna().any():
+            raise SystemExit(f"{cfg.VALIDATION_COVER_CSV} already holds covers (use --force only "
+                             "if you really mean to erase them)")
+    labels = pd.read_csv(cfg.VALIDATION_LABELS_CSV, dtype=str)
+    sheet = labels[labels[f"built_{END}"] == "0"][["id", "city", "lon", "lat", f"image_date_{END}"]].copy()
+    sheet.insert(4, f"cover_{END}", "")
+    sheet["note"] = ""
+    sheet.to_csv(cfg.VALIDATION_COVER_CSV, index=False)
+    # Same placemarks as points.kml (pixel outline included), only the selected ids
+    kml = cfg.VALIDATION_KML.read_text(encoding="utf-8")
+    keep = set(sheet["id"])
+    kml = re.sub(r"<Placemark><name>([^<]+)</name>.*?</Placemark>\n?",
+                 lambda m: m.group(0) if m.group(1) in keep else "", kml)
+    kml = kml.replace("<name>SamaReew - validation</name>", f"<name>SamaReew - occupation {END}</name>")
+    cfg.VALIDATION_COVER_KML.write_text(kml, encoding="utf-8")
+    print(f"{len(sheet)} points to read again -> {cfg.VALIDATION_COVER_CSV.name}, {cfg.VALIDATION_COVER_KML.name}")
+    print("covers: " + ", ".join(cfg.VALIDATION_COVER_CLASSES))
+
+
+def with_covers(points: pd.DataFrame):
+    """Add the cover of the second reading, or return None while it is missing or incomplete."""
+    if not cfg.VALIDATION_COVER_CSV.exists():
+        return None
+    covers = pd.read_csv(cfg.VALIDATION_COVER_CSV, dtype=str)
+    col = f"cover_{END}"
+    bad = covers[covers[col].notna() & ~covers[col].isin(list(cfg.VALIDATION_COVER_CLASSES))]
+    if len(bad):
+        raise SystemExit(f"unknown covers {sorted(bad[col].unique())} for {bad['id'].tolist()}")
+    todo = int(covers[col].isna().sum())
+    if todo:
+        print(f"second reading: {len(covers) - todo} of {len(covers)} covers entered")
+        return None
+    p = points.merge(covers[["id", col]], on="id", how="left", validate="one_to_one")
+    missing = p[(p[f"built_{END}"] == 0) & p[col].isna()]
+    if len(missing):
+        raise SystemExit(f"{cfg.VALIDATION_COVER_CSV.name} misses points labelled not built: "
+                         f"{missing['id'].tolist()} (run --cover again?)")
+    p[col] = p[col].fillna("built")
+    p["built_end_tolerant"] = va.tolerant_built(p[f"built_{END}"], p[col], cfg.VALIDATION_URBANISING)
+    p["ref_class"] = va.reference_class(p[f"built_{START}"], p["built_end_tolerant"])
+    return p
+
+
+def tolerant_measures(points: pd.DataFrame, weights: dict, total_area_ha: float) -> dict:
+    """Accuracy when land being urbanised counts as built, and what covers each map class."""
+    r = va.accuracy_report(points, weights, total_area_ha)
+    col = f"cover_{END}"
+    return {"urbanising_covers": list(cfg.VALIDATION_URBANISING),
+            "overall_accuracy": r["overall_accuracy"],
+            "users_accuracy": r["users_accuracy"],
+            "producers_accuracy": r["producers_accuracy"],
+            "area_ha": r["area_ha"],
+            "date_accuracy_end": va.date_accuracy(points.rename(columns={
+                f"built_{START}": "ref_start", "built_end_tolerant": "ref_end"}), weights)["end"],
+            "cover_of_map_class": {name: va.class_shares(points, weights, k, col)
+                                   for k, name in va.CLASS_NAMES.items()}}
+
+
 # --- 3. Accuracy ---------------------------------------------------------------------
 
 def year_check(points: pd.DataFrame) -> dict:
@@ -219,6 +291,7 @@ def labelled_points() -> pd.DataFrame:
 
 def report() -> None:
     points = labelled_points()
+    tolerant = with_covers(points)
     strata = pd.read_csv(cfg.VALIDATION_STRATA_CSV)
     print(f"{len(points)} labelled points out of {int(strata['points'].sum())}")
     result = {"date": date.today().isoformat(), "period": [START, END],
@@ -236,6 +309,8 @@ def report() -> None:
         r["year_check"] = year_check(p)
         r.update(extra_measures(p, weights, s["area_ha"].sum()))
         r["unsure_labels"] = int((p["sure"] == 0).sum())
+        if tolerant is not None:
+            r["tolerant"] = tolerant_measures(tolerant[tolerant["city"] == city], weights, s["area_ha"].sum())
         result["cities"][city] = r
         complete.append(city)
         oa = r["overall_accuracy"]
@@ -249,9 +324,17 @@ def report() -> None:
         r["year_check"] = year_check(points)
         r.update(extra_measures(national, weights, strata["area_ha"].sum()))
         r["unsure_labels"] = int((points["sure"] == 0).sum())
+        if tolerant is not None:
+            r["tolerant"] = tolerant_measures(
+                tolerant.assign(stratum=list(zip(tolerant["city"], tolerant["stratum"]))),
+                weights, strata["area_ha"].sum())
         result["national"] = r
         oa = r["overall_accuracy"]
         print(f"national: overall accuracy {oa['estimate']:.3f} ± {oa['margin95']:.3f}")
+        if tolerant is not None:
+            t = r["tolerant"]
+            print(f"national, tolerant: overall accuracy {t['overall_accuracy']['estimate']:.3f}, "
+                  f"user's accuracy of new built-up {t['users_accuracy']['new_built']['estimate']:.3f}")
     cfg.VALIDATION_REPORT_JSON.write_text(json.dumps(result, indent=2, ensure_ascii=False))
 
 
@@ -259,6 +342,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--draw", action="store_true", help="draw the sample (once)")
-    parser.add_argument("--force", action="store_true", help="with --draw: erase the labels entered")
+    parser.add_argument("--cover", action="store_true",
+                        help="prepare the second reading of the points labelled not built (once)")
+    parser.add_argument("--force", action="store_true",
+                        help="with --draw or --cover: erase what was entered")
     args = parser.parse_args()
-    draw(args.force) if args.draw else report()
+    if args.draw:
+        draw(args.force)
+    elif args.cover:
+        cover(args.force)
+    else:
+        report()

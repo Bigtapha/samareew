@@ -681,6 +681,33 @@ La **classe de référence** se déduit des deux dates, comme pour la carte : no
 non bâti ; bâti en 2016 et en 2025 → bâti dès 2016 ; bâti en 2025 seulement → nouveau bâti
 (`src/validation.py`, `reference_class`).
 
+**Seconde lecture : occupation du sol en 2025** (décision du 07/10/2026). La première passe
+dit seulement « non bâti » ; or une parcelle de lotissement nivelée ou un chantier sont, pour
+l'expansion urbaine, de l'urbanisation en cours, que Sentinel-2 voit à 10 m comme du sol nu
+et clair. Pour faire la part des fausses détections et de ces terrains, on reprend **les 228
+points étiquetés non bâti en 2025**, sur l'image de 2025 seulement, et on note dans
+`outputs/validation/cover_2025.csv` (`cover_2025`) ce qui couvre le carré, dans une **liste
+fermée fixée avant la lecture** (`VALIDATION_COVER_CLASSES`) :
+
+| Code | Occupation | Urbanisation en cours ? |
+|---|---|---|
+| `partly_built` | bâti, mais sur moins de la moitié du carré | oui |
+| `construction` | chantier : fondations, dalle ou murs bas (pas encore « murs montés ») | oui |
+| `subdivision` | lotissement non construit : parcelles nivelées, bornées ou clôturées, rues tracées | oui |
+| `dirt_track` | piste ou route en terre hors du tissu bâti et hors lotissement | non |
+| `bare_soil` | sol nu, sable, dune, plage, carrière | non |
+| `vegetation` | champ, jachère, arbres, herbe | non |
+| `water` | eau, zone humide, tanne | non |
+| `other` | autre (préciser dans `note`) | non |
+
+Règles : la lecture reste **à l'aveugle** (les points sont choisis d'après la première
+étiquette, jamais d'après la carte ; ne pas ouvrir `sample_key.csv`) ; on ne change pas les
+étiquettes de la première passe ; en cas d'hésitation entre deux codes, prendre le plus
+« naturel » (par exemple `bare_soil` plutôt que `subdivision` si aucune parcelle n'est
+visible) et l'écrire dans `note`. Une rue en terre **dans le tissu bâti** est déjà « bâti » (règle
+2 ci-dessus) : elle ne devrait pas apparaître ici. Préparation : `python -m
+pipeline.s5_validation --cover` (fiche et `cover_2025.kml`, les mêmes carrés que `points.kml`).
+
 ### 14.3 Estimations (`src/validation.py`)
 
 Chaque strate *h* pèse sa part *W_h* de la surface de la ville. Pour un indicateur 0/1
@@ -706,6 +733,16 @@ les quatre villes : la précision bâti / non bâti à chaque date (sans tenir c
 du changement, `date_accuracy`), la surface bâtie corrigée en 2016 et en 2025, la précision
 globale sur les seuls points marqués sûrs, et la part de nouveau bâti vrai selon l'année
 d'urbanisation de la carte.
+
+Une fois la seconde lecture complète, le rapport ajoute une **précision tolérante**
+(`tolerant`) : un point non bâti en 2025 mais en urbanisation (`VALIDATION_URBANISING` :
+`partly_built`, `construction`, `subdivision`) compte comme bâti, puis les mêmes estimations
+sont refaites (précision globale, utilisateur et producteur, surfaces, bâti / non bâti 2025).
+Elle s'inspire de l'évaluation « floue » de Gopal et Woodcock (1994). La précision
+**stricte reste le chiffre officiel** ; la tolérante dit combien des erreurs de la carte
+sont des terrains en cours d'urbanisation. Le rapport donne aussi, pour chaque classe de la
+carte, la part pondérée de chaque occupation (`cover_of_map_class`) : par exemple, de quoi
+est fait le nouveau bâti cartographié qui n'est pas bâti en réalité.
 
 ### 14.4 Résultats
 
@@ -821,6 +858,8 @@ marge est publiée à côté (README, site) ; les types de croissance, surtout l
   (Open Buildings Temporal). arXiv:2310.11622.
 - Olofsson, P. et al. (2014). Good practices for estimating area and assessing accuracy of
   land change. _Remote Sensing of Environment_, 148, 42–57.
+- Gopal, S., Woodcock, C. (1994). Theory and methods for accuracy assessment of thematic
+  maps using fuzzy sets. _Photogrammetric Engineering and Remote Sensing_, 60(2), 181–188.
 - Stehman, S. V. (2014). Estimating area and map accuracy for stratified random sampling
   when the strata are different from the map classes. _International Journal of Remote
   Sensing_, 35(13), 4923–4939.

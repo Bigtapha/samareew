@@ -173,6 +173,26 @@ def date_accuracy(points: pd.DataFrame, weights: dict) -> dict:
     return out
 
 
+def tolerant_built(built_end, cover, urbanising) -> np.ndarray:
+    """Built at the end in the tolerant sense: built (1), or land being urbanised according
+    to the cover noted at the second reading (e.g. an unbuilt subdivision)."""
+    built_end = np.asarray(built_end)
+    return np.where((built_end == 1) | pd.Series(cover).isin(urbanising).to_numpy(), 1, 0)
+
+
+def class_shares(points: pd.DataFrame, weights: dict, map_class: int, col: str) -> dict:
+    """Area-weighted share of each value of ``col`` inside one map class, with its 95 % margin
+    (e.g. what covers the area the map calls new built-up)."""
+    p = points.copy()
+    p["is_map"] = (p["map_class"] == map_class).astype(float)
+    out = {}
+    for value in p.loc[p["is_map"] == 1, col].dropna().unique():
+        p["both"] = p["is_map"] * (p[col] == value)
+        est, se = stratified_ratio(p, weights, "both", "is_map")
+        out[str(value)] = {"estimate": round(est, 3), "margin95": round(Z95 * se, 3)}
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]["estimate"]))
+
+
 def binomial_margin(k: int, n: int) -> float:
     """95 % margin of a simple proportion k / n (normal approximation), NaN if n < 2."""
     if n < 2:

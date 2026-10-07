@@ -176,6 +176,9 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [x] Lire les résultats sur les points faibles de J3 : saut par ville et au niveau national, surface corrigée du nouveau bâti, dates (pic 2017 de Touba et de Dakar, année 2025)
 - [x] Intégrer les résultats : METHODOLOGIE §14.4 (et §9, §10), fiabilité des fiches indicateurs (`config/indicators.py`, `_MAP_RELIABILITY`, puis relancer l'étape 4), README
 
+- [ ] Seconde lecture à l'aveugle des 228 points non bâtis en 2025 : occupation du sol dans une liste fermée (`outputs/validation/cover_2025.csv`, `cover_2025.kml`, METHODOLOGIE §14.2)
+- [ ] Précision tolérante (urbanisation en cours comptée comme bâti) et occupation du nouveau bâti cartographié : relancer `python -m pipeline.s5_validation`, puis METHODOLOGIE §14.4, fiches indicateurs, README
+
 **Critère de fin** : chaque ville a une précision pondérée par la surface et sa marge d'erreur.
 
 > J3 et J4 peuvent se chevaucher : étiqueter pendant que les indicateurs se construisent.
@@ -283,3 +286,4 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 07/10/2026 | Pas de points ajoutés à la main (changements choisis sur les images) : on garde uniquement l'échantillon aléatoire | Des points choisis n'ont pas de poids connu et favorisent les changements évidents, ce qui rendrait la précision trop optimiste ; une strate tampon tirée au hasard (non-bâti à moins de ~200 m du bâti, Olofsson et al., 2014) reste en réserve si la précision producteur du nouveau bâti ressort trop imprécise |
 | 07/10/2026 | Règle d'étiquetage confirmée (§14.2 de METHODOLOGIE), appliquée aux 480 points | Même définition que la carte : pixels bâtis, pas seulement des toits |
 | 07/10/2026 | Publication après la validation : les tableaux gardent les valeurs de la carte ; les fiches donnent la précision mesurée ; les surfaces corrigées par ville, avec leur marge, sont publiées à côté ; types de croissance indicatifs, année 2025 provisoire | Surface bâtie 2025 juste en moyenne (60 400 ± 7 400 ha corrigés, 61 000 cartographiés) mais nouveau bâti juste à 51 % seulement et saut à 45 % ; les surfaces corrigées sont plus justes en moyenne mais trop incertaines par ville (± 40 % sur le nouveau bâti) pour remplacer la carte |
+| 07/10/2026 | Seconde lecture des 228 points non bâtis en 2025 : occupation du sol dans une liste fermée de 8 codes fixée avant la lecture ; précision « tolérante » où chantier, lotissement non construit et pixel bâti à moins de moitié comptent comme bâti ; la précision stricte reste officielle | Les erreurs du nouveau bâti ne viennent pas de la qualité des images anciennes (précision utilisateur 0,53 sur les seuls points sûrs, contre 0,51) : 67 des 88 erreurs sont des points vus non bâtis sur les images de 2025, probablement des terrains en cours d'urbanisation que Sentinel-2 voit comme du bâti ; pondérer par la confiance aurait biaisé la précision vers le haut sans traiter ce cas |

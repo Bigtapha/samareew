@@ -156,6 +156,20 @@ VALIDATION_POINTS = {             # points per stratum and per city (120 per cit
     "leapfrog": 16,
 }
 VALIDATION_SEED = SEED
+# Second reading (decided 07/10/2026): what covers each point labelled not built at the end,
+# from the end image only. Closed list, fixed before the reading.
+VALIDATION_COVER_CLASSES = {
+    "partly_built": "bâti, mais sur moins de la moitié du carré",
+    "construction": "chantier : fondations, dalle ou murs bas (pas encore « murs montés »)",
+    "subdivision": "lotissement non construit : parcelles nivelées, bornées ou clôturées, rues tracées",
+    "dirt_track": "piste ou route en terre hors du tissu bâti et hors lotissement",
+    "bare_soil": "sol nu, sable, dune, plage, carrière",
+    "vegetation": "champ, jachère, arbres, herbe",
+    "water": "eau, zone humide, tanne",
+    "other": "autre (préciser dans note)",
+}
+# Covers counted as land being urbanised in the tolerant accuracy (the strict one is official)
+VALIDATION_URBANISING = ("partly_built", "construction", "subdivision")
 
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
@@ -189,6 +203,8 @@ VALIDATION_KEY_CSV = VALIDATION_DIR / "sample_key.csv"    # map class of each po
 VALIDATION_STRATA_CSV = VALIDATION_DIR / "strata.csv"     # pixels and points per city and stratum
 VALIDATION_KML = VALIDATION_DIR / "points.kml"            # points and their 10 m pixel, for Google Earth Pro
 VALIDATION_REPORT_JSON = VALIDATION_DIR / "accuracy.json"
+VALIDATION_COVER_CSV = VALIDATION_DIR / "cover_2025.csv"  # second reading: cover of the points not built at the end
+VALIDATION_COVER_KML = VALIDATION_DIR / "cover_2025.kml"  # the same points, for Google Earth Pro
 
 
 def city_data_dir(city: str) -> Path:

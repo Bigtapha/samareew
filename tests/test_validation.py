@@ -87,3 +87,23 @@ def test_date_accuracy_ignores_timing_errors():
     acc = va.date_accuracy(points, weights)
     assert acc["end"]["estimate"] == pytest.approx(0.9 * 0.5 + 0.1)
     assert acc["start"]["estimate"] == pytest.approx(0.9 + 0.1 * 0.5)
+
+
+def test_tolerant_built():
+    built = [1, 0, 0, 0]
+    cover = [None, "subdivision", "bare_soil", None]
+    assert va.tolerant_built(built, cover, ("subdivision", "construction")).tolist() == [1, 1, 0, 0]
+
+
+def test_class_shares():
+    points = pd.DataFrame({
+        "stratum":   ["not_built"] * 2 + ["leapfrog"] * 2 + ["extension"] * 2,
+        "map_class": [0, 0, 2, 2, 2, 2],
+        "kind":      ["a", "a", "b", "c", "b", "b"],
+    })
+    weights = {"not_built": 0.8, "leapfrog": 0.1, "extension": 0.1}
+    shares = va.class_shares(points, weights, 2, "kind")
+    # New built-up: half of leapfrog and all of extension are "b"
+    assert shares["b"]["estimate"] == pytest.approx(0.75)
+    assert shares["c"]["estimate"] == pytest.approx(0.25)
+    assert "a" not in shares
