@@ -1,6 +1,6 @@
 {
   "format_version": "0.1",
-  "generated": "2026-10-06",
+  "generated": "2026-10-07",
   "years": [
     2016,
     2017,
@@ -62,7 +62,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#8",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar."
     },
     "new_built_ha": {
       "title": "Nouveau bâti dans l'année",
@@ -73,7 +73,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#8",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4). 2017 et 2025 sont probablement surestimées."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. 2025 est provisoire (52 % des points datés de 2025 ne sont pas bâtis) et 2017 surestimée à Touba."
     },
     "growth_index": {
       "title": "Croissance du bâti (2016 = 100)",
@@ -84,7 +84,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar."
     },
     "built_share_pct": {
       "title": "Part de la surface bâtie",
@@ -95,7 +95,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar."
     },
     "growth_densification_ha": {
       "title": "Nouveau bâti en densification",
@@ -106,7 +106,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "growth_extension_ha": {
       "title": "Nouveau bâti en extension",
@@ -117,7 +117,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "growth_leapfrog_ha": {
       "title": "Nouveau bâti par saut",
@@ -128,7 +128,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4). Les petits îlots isolés sont les plus sujets aux erreurs."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "growth_densification_share_pct": {
       "title": "Part du nouveau bâti en densification",
@@ -139,7 +139,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "growth_extension_share_pct": {
       "title": "Part du nouveau bâti en extension",
@@ -150,7 +150,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "growth_leapfrog_share_pct": {
       "title": "Part du nouveau bâti par saut",
@@ -161,7 +161,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4)."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de celui de la carte est vrai, mais la carte en oublie autant ailleurs, et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3. Indicatif : seuls 45 % des points de saut sont vraiment du nouveau bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % pour l'extension."
     },
     "population": {
       "title": "Population",
@@ -184,7 +184,7 @@
         "worldpop"
       ],
       "method": "METHODOLOGIE.md#12",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4). Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
     },
     "sdg_11_3_1": {
       "title": "Consommation d'espace rapportée à la croissance de la population (ODD 11.3.1)",
@@ -196,7 +196,7 @@
         "worldpop"
       ],
       "method": "METHODOLOGIE.md#12",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4). Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
     },
     "census_population": {
       "title": "Population recensée en 2023",
@@ -219,7 +219,7 @@
         "ansd"
       ],
       "method": "METHODOLOGIE.md#13",
-      "reliability": "Provisoire : concordance de 0,92 avec deux produits de référence ; la précision réelle viendra de la validation nationale (J4). Recensement : population résidente comptée en 2023. Publiée seulement pour les communes entièrement dans la zone d'étude ; limites des communes d'après OpenStreetMap, pas les limites officielles."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Recensement : population résidente comptée en 2023. Publiée seulement pour les communes entièrement dans la zone d'étude ; limites des communes d'après OpenStreetMap, pas les limites officielles."
     }
   }
 }

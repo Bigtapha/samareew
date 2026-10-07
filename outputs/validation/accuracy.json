@@ -1,0 +1,789 @@
+{
+  "date": "2026-10-07",
+  "period": [
+    2016,
+    2025
+  ],
+  "points_per_stratum": {
+    "not_built": 40,
+    "built_at_start": 32,
+    "densification": 16,
+    "extension": 16,
+    "leapfrog": 16
+  },
+  "cities": {
+    "dakar": {
+      "n_points": 120,
+      "overall_accuracy": {
+        "estimate": 0.845,
+        "margin95": 0.066
+      },
+      "users_accuracy": {
+        "not_built": {
+          "estimate": 0.925,
+          "margin95": 0.083
+        },
+        "built_at_start": {
+          "estimate": 0.781,
+          "margin95": 0.146
+        },
+        "new_built": {
+          "estimate": 0.547,
+          "margin95": 0.145
+        }
+      },
+      "producers_accuracy": {
+        "not_built": {
+          "estimate": 0.882,
+          "margin95": 0.045
+        },
+        "built_at_start": {
+          "estimate": 0.97,
+          "margin95": 0.039
+        },
+        "new_built": {
+          "estimate": 0.485,
+          "margin95": 0.217
+        }
+      },
+      "area_ha": {
+        "not_built": {
+          "estimate": 58827.0,
+          "margin95": 5470.0
+        },
+        "built_at_start": {
+          "estimate": 17019.0,
+          "margin95": 3150.0
+        },
+        "new_built": {
+          "estimate": 12007.0,
+          "margin95": 5346.0
+        }
+      },
+      "mapped_area_ha": {
+        "not_built": 56079,
+        "built_at_start": 21134,
+        "new_built": 10641
+      },
+      "by_stratum": {
+        "not_built": {
+          "n": 40,
+          "weight": 0.6383,
+          "accuracy": 0.925
+        },
+        "built_at_start": {
+          "n": 32,
+          "weight": 0.2406,
+          "accuracy": 0.781
+        },
+        "densification": {
+          "n": 16,
+          "weight": 0.0436,
+          "accuracy": 0.562
+        },
+        "extension": {
+          "n": 16,
+          "weight": 0.0312,
+          "accuracy": 0.688
+        },
+        "leapfrog": {
+          "n": 16,
+          "weight": 0.0463,
+          "accuracy": 0.438
+        }
+      },
+      "year_check": {
+        "n_points": 21,
+        "within_one_year": 0.619,
+        "within_one_year_margin95": 0.213,
+        "mean_map_minus_imagery": -0.76,
+        "new_built_by_map_year": {
+          "2017": {
+            "n": 5,
+            "new_built": 1.0,
+            "not_built": 0.0
+          },
+          "2018": {
+            "n": 1,
+            "new_built": 0.0,
+            "not_built": 1.0
+          },
+          "2019": {
+            "n": 12,
+            "new_built": 0.5,
+            "not_built": 0.5
+          },
+          "2020": {
+            "n": 2,
+            "new_built": 0.5,
+            "not_built": 0.5
+          },
+          "2021": {
+            "n": 5,
+            "new_built": 0.6,
+            "not_built": 0.4
+          },
+          "2022": {
+            "n": 5,
+            "new_built": 0.4,
+            "not_built": 0.6
+          },
+          "2023": {
+            "n": 2,
+            "new_built": 1.0,
+            "not_built": 0.0
+          },
+          "2024": {
+            "n": 11,
+            "new_built": 0.545,
+            "not_built": 0.273
+          },
+          "2025": {
+            "n": 5,
+            "new_built": 0.4,
+            "not_built": 0.6
+          }
+        }
+      },
+      "date_accuracy": {
+        "start": {
+          "estimate": 0.942,
+          "margin95": 0.036
+        },
+        "end": {
+          "estimate": 0.873,
+          "margin95": 0.062
+        }
+      },
+      "built_area_ha": {
+        "2016": {
+          "estimate": 17019,
+          "margin95": 3150
+        },
+        "2025": {
+          "estimate": 29026,
+          "margin95": 5470
+        }
+      },
+      "overall_accuracy_sure_only": {
+        "estimate": 0.888,
+        "margin95": 0.058,
+        "n_points": 86
+      },
+      "unsure_labels": 34
+    },
+    "touba": {
+      "n_points": 120,
+      "overall_accuracy": {
+        "estimate": 0.776,
+        "margin95": 0.073
+      },
+      "users_accuracy": {
+        "not_built": {
+          "estimate": 0.9,
+          "margin95": 0.094
+        },
+        "built_at_start": {
+          "estimate": 0.656,
+          "margin95": 0.167
+        },
+        "new_built": {
+          "estimate": 0.397,
+          "margin95": 0.138
+        }
+      },
+      "producers_accuracy": {
+        "not_built": {
+          "estimate": 0.85,
+          "margin95": 0.043
+        },
+        "built_at_start": {
+          "estimate": 0.801,
+          "margin95": 0.168
+        },
+        "new_built": {
+          "estimate": 0.399,
+          "margin95": 0.186
+        }
+      },
+      "area_ha": {
+        "not_built": {
+          "estimate": 28338.0,
+          "margin95": 2871.0
+        },
+        "built_at_start": {
+          "estimate": 6998.0,
+          "margin95": 2019.0
+        },
+        "new_built": {
+          "estimate": 6007.0,
+          "margin95": 2639.0
+        }
+      },
+      "mapped_area_ha": {
+        "not_built": 26766,
+        "built_at_start": 8542,
+        "new_built": 6036
+      },
+      "by_stratum": {
+        "built_at_start": {
+          "n": 32,
+          "weight": 0.2066,
+          "accuracy": 0.656
+        },
+        "leapfrog": {
+          "n": 16,
+          "weight": 0.0396,
+          "accuracy": 0.625
+        },
+        "not_built": {
+          "n": 40,
+          "weight": 0.6474,
+          "accuracy": 0.9
+        },
+        "densification": {
+          "n": 16,
+          "weight": 0.0548,
+          "accuracy": 0.312
+        },
+        "extension": {
+          "n": 16,
+          "weight": 0.0516,
+          "accuracy": 0.312
+        }
+      },
+      "year_check": {
+        "n_points": 5,
+        "within_one_year": 0.6,
+        "within_one_year_margin95": 0.48,
+        "mean_map_minus_imagery": 0.8,
+        "new_built_by_map_year": {
+          "2017": {
+            "n": 8,
+            "new_built": 0.375,
+            "not_built": 0.5
+          },
+          "2018": {
+            "n": 2,
+            "new_built": 1.0,
+            "not_built": 0.0
+          },
+          "2019": {
+            "n": 1,
+            "new_built": 1.0,
+            "not_built": 0.0
+          },
+          "2020": {
+            "n": 5,
+            "new_built": 0.4,
+            "not_built": 0.4
+          },
+          "2021": {
+            "n": 7,
+            "new_built": 0.286,
+            "not_built": 0.429
+          },
+          "2022": {
+            "n": 11,
+            "new_built": 0.455,
+            "not_built": 0.455
+          },
+          "2023": {
+            "n": 3,
+            "new_built": 0.667,
+            "not_built": 0.333
+          },
+          "2024": {
+            "n": 4,
+            "new_built": 0.25,
+            "not_built": 0.75
+          },
+          "2025": {
+            "n": 7,
+            "new_built": 0.286,
+            "not_built": 0.571
+          }
+        }
+      },
+      "date_accuracy": {
+        "start": {
+          "estimate": 0.895,
+          "margin95": 0.049
+        },
+        "end": {
+          "estimate": 0.832,
+          "margin95": 0.069
+        }
+      },
+      "built_area_ha": {
+        "2016": {
+          "estimate": 6998,
+          "margin95": 2019
+        },
+        "2025": {
+          "estimate": 13005,
+          "margin95": 2871
+        }
+      },
+      "overall_accuracy_sure_only": {
+        "estimate": 0.872,
+        "margin95": 0.081,
+        "n_points": 53
+      },
+      "unsure_labels": 67
+    },
+    "thies": {
+      "n_points": 120,
+      "overall_accuracy": {
+        "estimate": 0.836,
+        "margin95": 0.087
+      },
+      "users_accuracy": {
+        "not_built": {
+          "estimate": 0.875,
+          "margin95": 0.104
+        },
+        "built_at_start": {
+          "estimate": 0.781,
+          "margin95": 0.146
+        },
+        "new_built": {
+          "estimate": 0.518,
+          "margin95": 0.14
+        }
+      },
+      "producers_accuracy": {
+        "not_built": {
+          "estimate": 0.955,
+          "margin95": 0.019
+        },
+        "built_at_start": {
+          "estimate": 0.513,
+          "margin95": 0.236
+        },
+        "new_built": {
+          "estimate": 0.431,
+          "margin95": 0.258
+        }
+      },
+      "area_ha": {
+        "not_built": {
+          "estimate": 28076.0,
+          "margin95": 3225.0
+        },
+        "built_at_start": {
+          "estimate": 5668.0,
+          "margin95": 2611.0
+        },
+        "new_built": {
+          "estimate": 3714.0,
+          "margin95": 2193.0
+        }
+      },
+      "mapped_area_ha": {
+        "not_built": 30645,
+        "built_at_start": 3721,
+        "new_built": 3092
+      },
+      "by_stratum": {
+        "leapfrog": {
+          "n": 16,
+          "weight": 0.0418,
+          "accuracy": 0.312
+        },
+        "not_built": {
+          "n": 40,
+          "weight": 0.8181,
+          "accuracy": 0.875
+        },
+        "extension": {
+          "n": 16,
+          "weight": 0.018,
+          "accuracy": 0.938
+        },
+        "densification": {
+          "n": 16,
+          "weight": 0.0228,
+          "accuracy": 0.562
+        },
+        "built_at_start": {
+          "n": 32,
+          "weight": 0.0993,
+          "accuracy": 0.781
+        }
+      },
+      "year_check": {
+        "n_points": 12,
+        "within_one_year": 0.583,
+        "within_one_year_margin95": 0.291,
+        "mean_map_minus_imagery": 0.08,
+        "new_built_by_map_year": {
+          "2017": {
+            "n": 5,
+            "new_built": 0.8,
+            "not_built": 0.2
+          },
+          "2018": {
+            "n": 2,
+            "new_built": 0.0,
+            "not_built": 0.5
+          },
+          "2019": {
+            "n": 9,
+            "new_built": 0.667,
+            "not_built": 0.222
+          },
+          "2020": {
+            "n": 6,
+            "new_built": 0.5,
+            "not_built": 0.333
+          },
+          "2021": {
+            "n": 7,
+            "new_built": 0.571,
+            "not_built": 0.286
+          },
+          "2022": {
+            "n": 3,
+            "new_built": 0.333,
+            "not_built": 0.667
+          },
+          "2023": {
+            "n": 6,
+            "new_built": 0.5,
+            "not_built": 0.167
+          },
+          "2024": {
+            "n": 3,
+            "new_built": 0.667,
+            "not_built": 0.0
+          },
+          "2025": {
+            "n": 7,
+            "new_built": 0.857,
+            "not_built": 0.143
+          }
+        }
+      },
+      "date_accuracy": {
+        "start": {
+          "estimate": 0.905,
+          "margin95": 0.07
+        },
+        "end": {
+          "estimate": 0.864,
+          "margin95": 0.086
+        }
+      },
+      "built_area_ha": {
+        "2016": {
+          "estimate": 5668,
+          "margin95": 2611
+        },
+        "2025": {
+          "estimate": 9382,
+          "margin95": 3225
+        }
+      },
+      "overall_accuracy_sure_only": {
+        "estimate": 0.91,
+        "margin95": 0.065,
+        "n_points": 62
+      },
+      "unsure_labels": 58
+    },
+    "mbour": {
+      "n_points": 120,
+      "overall_accuracy": {
+        "estimate": 0.774,
+        "margin95": 0.088
+      },
+      "users_accuracy": {
+        "not_built": {
+          "estimate": 0.85,
+          "margin95": 0.112
+        },
+        "built_at_start": {
+          "estimate": 0.562,
+          "margin95": 0.175
+        },
+        "new_built": {
+          "estimate": 0.561,
+          "margin95": 0.141
+        }
+      },
+      "producers_accuracy": {
+        "not_built": {
+          "estimate": 0.897,
+          "margin95": 0.036
+        },
+        "built_at_start": {
+          "estimate": 0.704,
+          "margin95": 0.235
+        },
+        "new_built": {
+          "estimate": 0.356,
+          "margin95": 0.162
+        }
+      },
+      "area_ha": {
+        "not_built": {
+          "estimate": 20623.0,
+          "margin95": 2562.0
+        },
+        "built_at_start": {
+          "estimate": 3461.0,
+          "margin95": 1344.0
+        },
+        "new_built": {
+          "estimate": 5487.0,
+          "margin95": 2386.0
+        }
+      },
+      "mapped_area_ha": {
+        "not_built": 21758,
+        "built_at_start": 4330,
+        "new_built": 3483
+      },
+      "by_stratum": {
+        "leapfrog": {
+          "n": 16,
+          "weight": 0.0427,
+          "accuracy": 0.438
+        },
+        "built_at_start": {
+          "n": 32,
+          "weight": 0.1464,
+          "accuracy": 0.562
+        },
+        "not_built": {
+          "n": 40,
+          "weight": 0.7358,
+          "accuracy": 0.85
+        },
+        "extension": {
+          "n": 16,
+          "weight": 0.0317,
+          "accuracy": 0.812
+        },
+        "densification": {
+          "n": 16,
+          "weight": 0.0434,
+          "accuracy": 0.5
+        }
+      },
+      "year_check": {
+        "n_points": 18,
+        "within_one_year": 0.778,
+        "within_one_year_margin95": 0.198,
+        "mean_map_minus_imagery": 0.67,
+        "new_built_by_map_year": {
+          "2017": {
+            "n": 4,
+            "new_built": 0.25,
+            "not_built": 0.0
+          },
+          "2018": {
+            "n": 1,
+            "new_built": 0.0,
+            "not_built": 1.0
+          },
+          "2019": {
+            "n": 8,
+            "new_built": 0.75,
+            "not_built": 0.125
+          },
+          "2020": {
+            "n": 7,
+            "new_built": 0.714,
+            "not_built": 0.286
+          },
+          "2021": {
+            "n": 5,
+            "new_built": 0.6,
+            "not_built": 0.2
+          },
+          "2022": {
+            "n": 5,
+            "new_built": 0.6,
+            "not_built": 0.2
+          },
+          "2023": {
+            "n": 6,
+            "new_built": 0.833,
+            "not_built": 0.167
+          },
+          "2024": {
+            "n": 4,
+            "new_built": 0.75,
+            "not_built": 0.25
+          },
+          "2025": {
+            "n": 8,
+            "new_built": 0.25,
+            "not_built": 0.75
+          }
+        }
+      },
+      "date_accuracy": {
+        "start": {
+          "estimate": 0.901,
+          "margin95": 0.045
+        },
+        "end": {
+          "estimate": 0.818,
+          "margin95": 0.087
+        }
+      },
+      "built_area_ha": {
+        "2016": {
+          "estimate": 3461,
+          "margin95": 1344
+        },
+        "2025": {
+          "estimate": 8948,
+          "margin95": 2562
+        }
+      },
+      "overall_accuracy_sure_only": {
+        "estimate": 0.859,
+        "margin95": 0.119,
+        "n_points": 42
+      },
+      "unsure_labels": 78
+    }
+  },
+  "national": {
+    "n_points": 480,
+    "overall_accuracy": {
+      "estimate": 0.818,
+      "margin95": 0.039
+    },
+    "users_accuracy": {
+      "not_built": {
+        "estimate": 0.897,
+        "margin95": 0.049
+      },
+      "built_at_start": {
+        "estimate": 0.728,
+        "margin95": 0.093
+      },
+      "new_built": {
+        "estimate": 0.506,
+        "margin95": 0.081
+      }
+    },
+    "producers_accuracy": {
+      "not_built": {
+        "estimate": 0.893,
+        "margin95": 0.023
+      },
+      "built_at_start": {
+        "estimate": 0.828,
+        "margin95": 0.082
+      },
+      "new_built": {
+        "estimate": 0.433,
+        "margin95": 0.111
+      }
+    },
+    "area_ha": {
+      "not_built": {
+        "estimate": 135864.0,
+        "margin95": 7425.0
+      },
+      "built_at_start": {
+        "estimate": 33147.0,
+        "margin95": 4757.0
+      },
+      "new_built": {
+        "estimate": 27214.0,
+        "margin95": 6786.0
+      }
+    },
+    "mapped_area_ha": {
+      "not_built": 135247,
+      "built_at_start": 37727,
+      "new_built": 23252
+    },
+    "year_check": {
+      "n_points": 56,
+      "within_one_year": 0.661,
+      "within_one_year_margin95": 0.125,
+      "mean_map_minus_imagery": 0.02,
+      "new_built_by_map_year": {
+        "2017": {
+          "n": 22,
+          "new_built": 0.591,
+          "not_built": 0.227
+        },
+        "2018": {
+          "n": 6,
+          "new_built": 0.333,
+          "not_built": 0.5
+        },
+        "2019": {
+          "n": 30,
+          "new_built": 0.633,
+          "not_built": 0.3
+        },
+        "2020": {
+          "n": 20,
+          "new_built": 0.55,
+          "not_built": 0.35
+        },
+        "2021": {
+          "n": 24,
+          "new_built": 0.5,
+          "not_built": 0.333
+        },
+        "2022": {
+          "n": 24,
+          "new_built": 0.458,
+          "not_built": 0.458
+        },
+        "2023": {
+          "n": 17,
+          "new_built": 0.706,
+          "not_built": 0.176
+        },
+        "2024": {
+          "n": 22,
+          "new_built": 0.545,
+          "not_built": 0.318
+        },
+        "2025": {
+          "n": 27,
+          "new_built": 0.444,
+          "not_built": 0.519
+        }
+      }
+    },
+    "date_accuracy": {
+      "start": {
+        "estimate": 0.919,
+        "margin95": 0.024
+      },
+      "end": {
+        "estimate": 0.854,
+        "margin95": 0.038
+      }
+    },
+    "built_area_ha": {
+      "2016": {
+        "estimate": 33147,
+        "margin95": 4757
+      },
+      "2025": {
+        "estimate": 60361,
+        "margin95": 7425
+      }
+    },
+    "overall_accuracy_sure_only": {
+      "estimate": 0.884,
+      "margin95": 0.038,
+      "n_points": 243
+    },
+    "unsure_labels": 237
+  }
+}

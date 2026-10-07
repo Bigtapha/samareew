@@ -171,10 +171,36 @@ def year_check(points: pd.DataFrame) -> dict:
                & points["year_built"].notna()]
     diff = p["map_year"] - p["year_built"]
     within = int((diff.abs() <= 1).sum())
+    # Per urbanisation year of the map (points, not area-weighted): is the new built-up real?
+    new = points[points["map_class"] == va.NEW_BUILT]
+    by_year = {str(y): {"n": int(len(g)),
+                        "new_built": round(float((g["ref_class"] == va.NEW_BUILT).mean()), 3),
+                        "not_built": round(float((g["ref_class"] == va.NOT_BUILT).mean()), 3)}
+               for y, g in new.groupby("map_year")}
     return {"n_points": int(len(p)),
             "within_one_year": round(within / len(p), 3) if len(p) else None,
             "within_one_year_margin95": round(va.binomial_margin(within, len(p)), 3) if len(p) > 1 else None,
-            "mean_map_minus_imagery": round(float(diff.mean()), 2) if len(p) else None}
+            "mean_map_minus_imagery": round(float(diff.mean()), 2) if len(p) else None,
+            "new_built_by_map_year": by_year}
+
+
+def extra_measures(points: pd.DataFrame, weights: dict, total_area_ha: float) -> dict:
+    """Built / not-built accuracy and corrected built-up area at each date, and the overall
+    accuracy on sure labels only (an upper bound: the unsure points are the hard ones)."""
+    out = {"date_accuracy": va.date_accuracy(
+        points.rename(columns={f"built_{START}": "ref_start", f"built_{END}": "ref_end"}), weights),
+        "built_area_ha": {}}
+    for year in (START, END):
+        est, se = va.stratified_mean(points, weights, f"built_{year}")
+        out["built_area_ha"][str(year)] = {"estimate": round(est * total_area_ha),
+                                           "margin95": round(va.Z95 * se * total_area_ha)}
+    sure = points[points["sure"] == 1]
+    try:
+        oa = va.accuracy_report(sure, weights, 1.0)["overall_accuracy"]
+        out["overall_accuracy_sure_only"] = {**oa, "n_points": int(len(sure))}
+    except ValueError:                       # a stratum without any sure label
+        out["overall_accuracy_sure_only"] = None
+    return out
 
 
 def labelled_points() -> pd.DataFrame:
@@ -186,6 +212,8 @@ def labelled_points() -> pd.DataFrame:
         raise SystemExit(f"labels must be 0 or 1: {bad['id'].tolist()}")
     points = done.drop(columns=["city", "lon", "lat"]).merge(key, on="id", validate="one_to_one")
     points["ref_class"] = va.reference_class(points[f"built_{START}"], points[f"built_{END}"])
+    # year_built is entered as YYYY or YYYY-MM (date of the first image showing the building)
+    points["year_built"] = pd.to_numeric(points["year_built"].astype("string").str[:4], errors="coerce")
     return points
 
 
@@ -206,6 +234,7 @@ def report() -> None:
         weights = dict(zip(s["stratum"], s["weight"]))
         r = va.accuracy_report(p.assign(stratum=p["stratum"]), weights, s["area_ha"].sum())
         r["year_check"] = year_check(p)
+        r.update(extra_measures(p, weights, s["area_ha"].sum()))
         r["unsure_labels"] = int((p["sure"] == 0).sum())
         result["cities"][city] = r
         complete.append(city)
@@ -218,6 +247,8 @@ def report() -> None:
         r = va.accuracy_report(national, weights, strata["area_ha"].sum())
         r.pop("by_stratum")
         r["year_check"] = year_check(points)
+        r.update(extra_measures(national, weights, strata["area_ha"].sum()))
+        r["unsure_labels"] = int((points["sure"] == 0).sum())
         result["national"] = r
         oa = r["overall_accuracy"]
         print(f"national: overall accuracy {oa['estimate']:.3f} ± {oa['margin95']:.3f}")

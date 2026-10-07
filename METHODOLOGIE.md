@@ -296,8 +296,11 @@ trop de non-bâti en bâti.
 
 ### 9.2 La validation nationale (J4)
 
-La vraie précision viendra d'un échantillon **tiré dans notre propre carte** et
-**photo-interprété à l'aveugle**, avec une marge d'erreur par ville : voir §14.
+La vraie précision vient d'un échantillon de 480 points **tiré dans notre propre carte** et
+**photo-interprété à l'aveugle**, avec une marge d'erreur par ville (§14). Elle est plus
+basse que la concordance : **0,85 ± 0,04** pour le bâti / non bâti en 2025, **0,82 ± 0,04**
+pour les trois classes 2016 → 2025, de 0,77 (Mbour) à 0,85 (Dakar). Le point faible est le
+nouveau bâti : la moitié seulement de celui de la carte est vrai (§14.4).
 
 ---
 
@@ -310,9 +313,9 @@ La vraie précision viendra d'un échantillon **tiré dans notre propre carte** 
 | Résolution 10 m (SWIR à 20 m) | On détecte des ensembles de bâtiments plutôt que des maisons isolées |
 | Sable, plages, tannes | Confusions possibles avec le bâti, réduites mais pas supprimées |
 | 2016 (Sentinel-2A seul), 2017 (peu de scènes claires) | Composites moins bons ; le saut 2016 → 2017 est probablement exagéré |
-| Années sèches (2017, 2019 à Dakar) | Fausses détections en périphérie ; le filtre (dont la condition « année suivante ») les retire en grande partie, mais le saut 2016 → 2017 reste fort à Touba (+14 %, contre +1 % de toits dans Open Buildings, §13) : base 2016 probablement sous-estimée ou 2017 surestimée, à vérifier à la validation (J4). Remède de fond si besoin : entraîner le modèle sur plusieurs années |
+| Années sèches (2017, 2019 à Dakar) | Fausses détections en périphérie ; le filtre (dont la condition « année suivante ») les retire en grande partie, mais le saut 2016 → 2017 reste fort à Touba (+14 %, contre +1 % de toits dans Open Buildings, §13) : la validation montre que 4 des 8 points datés de 2017 à Touba ne sont pas bâtis, donc 2017 est en partie surestimée (§14.4). Remède de fond si besoin : entraîner le modèle sur plusieurs années |
 | Filtre temporel en fin de période | Moins d'années pour confirmer : la dernière année publiée (2025) n'est confirmée que par 2026, sa croissance est probablement surestimée. La dernière année classée n'est pas publiée (§8) : avec une saison janvier–mai, non filtrée, elle donnait à Thiès +1 865 ha en 2026 contre environ 200 ha par an avant |
-| Comptage de pixels | Surface « cartographiée », pas encore corrigée des erreurs ; l'estimation corrigée viendra de la validation (J4) |
+| Comptage de pixels | Surface « cartographiée », pas corrigée des erreurs. La validation donne la surface corrigée et sa marge (§14.4) : juste en 2025 pour chaque ville, bâti 2016 surestimé à Dakar |
 
 ---
 
@@ -407,8 +410,10 @@ de 20, 25 et 30 %, une frange de 50, 100 et 150 m, et des trous enclavés de 100
 - les **fausses détections** isolées qui passent le filtre temporel tombent surtout dans le
   saut. Le contrôle avec Open Buildings (§13) montre que la fiabilité du saut **dépend de la
   ville** : 65 % des pixels de saut sont confirmés par des toits à Touba (plus que la
-  densification), mais 36 % seulement à Thiès et 43 % à Dakar. Le saut de Thiès (51 % du
-  nouveau bâti) est donc à prendre avec le plus de prudence.
+  densification), mais 36 % seulement à Thiès et 43 % à Dakar. La validation (§14.4) le
+  confirme : 45 % seulement des points de saut sont vraiment du nouveau bâti (5 sur 16 à
+  Thiès), contre 69 % pour l'extension. Les types de croissance sont donc **indicatifs**, et
+  le saut de Thiès (51 % du nouveau bâti) en grande partie une erreur.
 
 ## 12. Population et consommation d'espace
 
@@ -539,8 +544,8 @@ forcément absent.
 - **Le nouveau bâti est moins sûr que l'ancien.** Environ la moitié de notre nouveau bâti a
   des toits à moins de 30 m dans Open Buildings 2023, contre 75 à 84 % du bâti de 2016 et
   2 à 5 % du non-bâti. Le nouveau bâti comprend des parcelles en chantier ou clôturées,
-  encore sans toit visible à 4 m, mais aussi des fausses détections : la validation (J4)
-  fera la part des deux.
+  encore sans toit visible à 4 m, mais aussi des fausses détections : la validation (§14.4)
+  montre que ce sont surtout des erreurs (51 % du nouveau bâti cartographié est vrai).
 - **Même rythme qu'Open Buildings à Dakar et à Mbour** (+36 % contre +33 %, +56 % contre
   +54 %). À **Touba**, l'écart vient de 2017 : +14 % chez nous, +1 % de toits ; ensuite les
   pentes sont parallèles. À **Thiès**, notre croissance est plus forte à partir de 2019
@@ -696,11 +701,96 @@ Toutes les valeurs sont données avec leur **marge à 95 %** (1,96 erreur type) 
 Le niveau national traite les 20 strates ville × strate comme un seul tirage, pondéré par
 la surface de chaque zone. Lancement : `python -m pipeline.s5_validation` (sur les points
 déjà étiquetés ; une ville n'est estimée que si chaque strate a au moins deux points),
-résultats dans `outputs/validation/accuracy.json`.
+résultats dans `outputs/validation/accuracy.json`. Le rapport donne aussi, par ville et pour
+les quatre villes : la précision bâti / non bâti à chaque date (sans tenir compte de la date
+du changement, `date_accuracy`), la surface bâtie corrigée en 2016 et en 2025, la précision
+globale sur les seuls points marqués sûrs, et la part de nouveau bâti vrai selon l'année
+d'urbanisation de la carte.
 
 ### 14.4 Résultats
 
-_À venir, après la photo-interprétation._
+Étiquetage du 07/10/2026 : les 480 points, à l'aveugle, en suivant la règle du §14.2
+(confirmée le même jour). Dates des images : janvier à mars 2016 pour 2016, janvier à
+mars 2025 pour 2025, sauf **21 points** (8 à Dakar, 13 à Thiès) sans image de 2025, étiquetés
+sur une image de 2023 : un bâtiment construit entre 2023 et 2025 y est compté non bâti.
+**237 points sur 480 sont marqués « pas sûr »** (34 à Dakar, 67 à Touba, 58 à Thiès, 78 à
+Mbour) : pixels à cheval sur un bord, chantiers, images de 2016 floues. Ils sont gardés dans
+toutes les estimations.
+
+**Précision pondérée par la surface** (marge à 95 %, `outputs/validation/accuracy.json`) :
+
+| | Dakar | Touba | Thiès | Mbour | Quatre villes |
+|---|---|---|---|---|---|
+| Globale, 3 classes (non bâti / bâti 2016 / nouveau) | 0,85 ± 0,07 | 0,78 ± 0,07 | 0,84 ± 0,09 | 0,77 ± 0,09 | **0,82 ± 0,04** |
+| Bâti / non bâti en 2025 | 0,87 ± 0,06 | 0,83 ± 0,07 | 0,86 ± 0,09 | 0,82 ± 0,09 | **0,85 ± 0,04** |
+| Bâti / non bâti en 2016 | 0,94 ± 0,04 | 0,90 ± 0,05 | 0,91 ± 0,07 | 0,90 ± 0,05 | 0,92 ± 0,02 |
+| Globale, points sûrs seulement | 0,89 | 0,87 | 0,91 | 0,86 | 0,88 ± 0,04 |
+| Nouveau bâti : précision utilisateur | 0,55 ± 0,15 | 0,40 ± 0,14 | 0,52 ± 0,14 | 0,56 ± 0,14 | **0,51 ± 0,08** |
+| Nouveau bâti : précision producteur | 0,49 ± 0,22 | 0,40 ± 0,19 | 0,43 ± 0,26 | 0,36 ± 0,16 | 0,43 ± 0,11 |
+| Bâti 2016 : précision utilisateur | 0,78 | 0,66 | 0,78 | 0,56 | 0,73 ± 0,09 |
+| Non bâti : précision utilisateur | 0,93 | 0,90 | 0,88 | 0,85 | 0,90 ± 0,05 |
+
+La précision sur les seuls points sûrs est une **borne haute** : les points douteux sont
+justement les cas difficiles.
+
+**Surfaces corrigées** (ha, d'après les points ; « carte » = comptage de pixels) :
+
+| | Dakar | Touba | Thiès | Mbour | Quatre villes |
+|---|---|---|---|---|---|
+| Bâti 2016 corrigé | 17 019 ± 3 150 | 6 998 ± 2 019 | 5 668 ± 2 611 | 3 461 ± 1 344 | 33 147 ± 4 757 |
+| Bâti 2016 carte | 21 134 | 8 542 | 3 721 | 4 330 | 37 727 |
+| Bâti 2025 corrigé | 29 026 ± 5 470 | 13 005 ± 2 871 | 9 382 ± 3 225 | 8 948 ± 2 562 | 60 361 ± 7 425 |
+| Bâti 2025 carte | 31 775 | 14 578 | 6 813 | 7 813 | 60 979 |
+| Nouveau bâti 2016–2025 corrigé | 12 007 ± 5 346 | 6 007 ± 2 639 | 3 714 ± 2 193 | 5 487 ± 2 386 | 27 214 ± 6 786 |
+| Nouveau bâti 2016–2025 carte | 10 641 | 6 036 | 3 092 | 3 483 | 23 252 |
+
+**Par strate** (points dont la référence est « nouveau bâti », sur 16 par ville et 64 au total ;
+non pondéré) :
+
+| Strate | Dakar | Touba | Thiès | Mbour | Total | Non bâti en réalité | Déjà bâti en 2016 |
+|---|---|---|---|---|---|---|---|
+| Densification | 9 | 5 | 9 | 8 | 31 (48 %) | 20 | 13 |
+| Extension | 11 | 5 | 15 | 13 | 44 (69 %) | 19 | 1 |
+| Saut | 7 | 10 | 5 | 7 | 29 (45 %) | 28 | 7 |
+
+**Année d'urbanisation** : sur les 56 points vraiment nouveaux dont l'année a pu être lue sur
+les images, la carte est juste **à ±1 an près pour 66 % (± 12 points)**, sans décalage moyen
+(+0,02 an). Parmi les points que la carte date de 2025, 14 sur 27 ne sont pas bâtis
+(52 %, la plus forte part avec 2018, 3 sur 6 ; de 18 à 46 % les autres années) ; pour 2017, 13 sur 22 sont vraiment nouveaux.
+
+**Lecture :**
+
+- **La surface bâtie totale est juste.** En 2025, la surface corrigée des quatre villes
+  (60 400 ha) est presque égale à la surface cartographiée (61 000 ha), et chaque ville est
+  dans sa marge. Les fausses alarmes et les oublis se compensent.
+- **Le nouveau bâti est mal localisé, mais son total tient.** La moitié seulement du nouveau
+  bâti cartographié l'est vraiment (le reste : non bâti en 2025, ou déjà bâti en 2016) ; à
+  l'inverse, la carte classe en « non bâti » ou en « bâti 2016 » du vrai nouveau bâti, en
+  quantité comparable. La surface corrigée (27 200 ± 6 800 ha) est même un peu plus forte que
+  la carte : la croissance cartographiée n'est pas exagérée au total, malgré les erreurs
+  pixel par pixel. Le taux d'environ 50 % confirmé par Open Buildings (§13) est donc surtout
+  fait de vraies erreurs, pas seulement de chantiers sans toit.
+- **Le bâti 2016 est surestimé à Dakar** (21 100 ha sur la carte, 17 000 ± 3 200 corrigés) :
+  la croissance réelle de Dakar est probablement plus forte que les +50 % cartographiés.
+  Dans les autres villes, l'écart reste dans la marge.
+- **Le saut est le type le moins fiable** : 28 points de saut sur 64 ne sont pas bâtis du
+  tout. Ce sont les fausses détections isolées prévues au §11.2. À Thiès, 5 points de saut sur
+  16 seulement sont vrais : la forte part de saut de Thiès (51 %) est en grande partie une
+  erreur. L'**extension** est le type le plus sûr. La densification contient des pixels déjà
+  bâtis en 2016 (13 sur 64) : erreurs de date plutôt que de bâti.
+- **Touba est la ville la moins précise** (0,78) : sable et bâti bas se confondent. Plus de la
+  moitié des points de densification et d'extension n'y sont pas bâtis (19 sur 32), et 4 des 8 points datés de
+  2017 non plus : le saut de 2017 à Touba (§10) vient en partie de fausses détections, et
+  pas seulement d'une base 2016 trop basse. À Dakar, les 5 points datés de 2017 sont vrais.
+- **L'année 2025 est fragile**, comme prévu (confirmée par 2026 seulement, §8).
+- Les marges par ville sont larges (± 7 à 9 points pour la précision globale, ± 14 à 26 pour
+  le nouveau bâti) : les comparaisons fines entre villes ne sont pas significatives.
+
+**Conséquences pour la publication** (décision du 07/10/2026, ROADMAP §9) : les tableaux
+gardent les valeurs de la carte, cohérentes avec les cartes publiées ; les fiches
+indicateurs donnent la précision mesurée, et la surface corrigée de chaque ville avec sa
+marge est publiée à côté (README, site) ; les types de croissance, surtout le saut, sont
+**indicatifs** ; l'année 2025 est **provisoire**.
 
 ---
 

@@ -73,3 +73,17 @@ def test_accuracy_report():
     assert report["mapped_area_ha"] == {"not_built": 800, "built_at_start": 150, "new_built": 50}
     # Producer's accuracy of new built-up: found 0.025 of 0.225
     assert report["producers_accuracy"]["new_built"]["estimate"] == pytest.approx(0.025 / 0.225, abs=1e-3)
+
+
+def test_date_accuracy_ignores_timing_errors():
+    points = pd.DataFrame({
+        "stratum":   ["not_built"] * 2 + ["leapfrog"] * 2,
+        "map_class": [0, 0, 2, 2],
+        # Second leapfrog point: built in 2016 already, so wrong class but right at the end
+        "ref_start": [0, 0, 0, 1],
+        "ref_end":   [0, 1, 1, 1],
+    })
+    weights = {"not_built": 0.9, "leapfrog": 0.1}
+    acc = va.date_accuracy(points, weights)
+    assert acc["end"]["estimate"] == pytest.approx(0.9 * 0.5 + 0.1)
+    assert acc["start"]["estimate"] == pytest.approx(0.9 + 0.1 * 0.5)

@@ -157,6 +157,22 @@ def accuracy_report(points: pd.DataFrame, weights: dict, total_area_ha: float) -
     return report
 
 
+def date_accuracy(points: pd.DataFrame, weights: dict) -> dict:
+    """Area-weighted built / not-built accuracy at each date, ignoring when the change happened.
+
+    ``points`` columns: stratum, map_class, ref_start, ref_end (photo-interpreted 0/1). The map
+    is built at the start for class 1, at the end for classes 1 and 2.
+    """
+    p = points.copy()
+    p["ok_start"] = ((p["map_class"] == BUILT_AT_START).astype(int) == p["ref_start"]).astype(float)
+    p["ok_end"] = ((p["map_class"] != NOT_BUILT).astype(int) == p["ref_end"]).astype(float)
+    out = {}
+    for name, col in [("start", "ok_start"), ("end", "ok_end")]:
+        est, se = stratified_mean(p, weights, col)
+        out[name] = {"estimate": round(est, 3), "margin95": round(Z95 * se, 3)}
+    return out
+
+
 def binomial_margin(k: int, n: int) -> float:
     """95 % margin of a simple proportion k / n (normal approximation), NaN if n < 2."""
     if n < 2:
