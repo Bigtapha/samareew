@@ -187,6 +187,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 ### J5 — Site v1
 - [x] Choisir les outils : Astro, Observable Plot, MapLibre GL + PMTiles (§2)
 - [x] Étape 7, données du site (§4.1) : couches cartographiques (année d'urbanisation, types de croissance) en PMTiles et limites (zones, communes, secteurs de Touba) dans `outputs/`, car le site ne lit que `outputs/` ; surfaces corrigées de la validation dans le format d'échange
+- [ ] Créer `site/` avec Astro (Node 20 installé) : lecture de `outputs/site/manifest.json` et de `outputs/tables/` à la construction, jamais de `pipeline/` ni de `src/`
+- [ ] Choisir le fond de carte : léger, sans clé d'accès, licence vérifiée (par exemple un fond OpenStreetMap, attribution ODbL) ; même fond clair en mode sombre ou fond sombre dédié, à décider en le voyant
 - [ ] Gabarit de graphique OWID (onglets, sélection de villes, URL avec état, téléchargement)
 - [ ] Page thème « Expansion urbaine » avec 4 ou 5 points clés
 - [ ] Les graphiques des indicateurs v1
@@ -195,13 +197,15 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [ ] Page Données & méthode (sources, licences, limites, validation)
 - [ ] Préciser dans les fiches que les chiffres par commune reposent sur des limites OpenStreetMap (ODbL, citer « © OpenStreetMap contributors »)
 - [ ] Ne pas classer Dakar, Touba et Mbour entre elles sur la densification (écarts de 1–2 points, inférieurs à la sensibilité aux paramètres, METHODOLOGIE §11.2)
+- [ ] Chaque carte a sa légende (couleurs et libellés de `manifest.json`) et un tableau à côté : l'orangé clair et le vert d'eau sont peu contrastés sur fond clair (METHODOLOGIE §15.1)
+- [ ] Afficher les surfaces corrigées de la validation à côté des valeurs de la carte (`outputs/site/validation.json`), types de croissance « indicatifs », 2025 « provisoire » (§9, 07/10/2026)
 - [ ] Tests sur mobile et connexion lente
 
 **Critère de fin** : le site fonctionne en local, il est lisible sur téléphone et chaque chiffre renvoie à sa source.
 
 ### J6 — Publication
 - [ ] Rendre public le dépôt GitHub (vérifier avant qu'aucun secret ni fichier lourd n'y figure)
-- [ ] Déploiement (GitHub Pages)
+- [ ] Déploiement (GitHub Pages) ; les archives PMTiles ne sont pas dans git : les reconstruire avec l'étape 7 au déploiement ou les publier en release
 - [ ] Données téléchargeables publiées (releases)
 - [ ] README mis à jour, avec la manière de citer le projet
 - [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)

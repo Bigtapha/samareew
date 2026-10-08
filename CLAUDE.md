@@ -32,7 +32,10 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
   pipeline steps in `pipeline/` stay thin.
 - `zones/` is frozen and versioned: re-run step 0 only to change a rule, and check that
   the geometries are otherwise identical.
-- `site/` (J5) will read only `outputs/`, never import from `pipeline/` or `src/`.
+- `site/` (J5) will read only `outputs/`, never import from `pipeline/` or `src/`. Tools
+  (decided 09/10/2026): Astro, Observable Plot, MapLibre GL + PMTiles; mobile first, slow
+  connections. Entry points: `outputs/site/manifest.json` and `outputs/tables/indicators.json`.
+  The `.pmtiles` archives are ignored by git: rebuild them with step 7. Node 20 is installed.
 - Large files (GeoTIFF, tiles) never go into git (`*.tif` and `data/` are ignored).
 - Licences: code MIT, produced data CC BY 4.0, `zones/communes.geojson` ODbL (OSM-derived).
   Check the licence of any new source before using it (GADM was rejected for that reason).

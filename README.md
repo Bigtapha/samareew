@@ -19,8 +19,8 @@ read it first.
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
 | J2 — National model and classification | Done |
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
-| J4 — National validation (480 photo-interpreted points) | Done (branch `j4-validation`) |
-| J5 — Website v1 | To do |
+| J4 — National validation (480 photo-interpreted points) | Done |
+| **J5 — Website v1** | **In progress** on branch `j5-site`: tools chosen, site data ready (step 7); the site itself (`site/`) is still to build |
 | J6 — Publication | To do |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
@@ -73,8 +73,15 @@ read it first.
 The tables keep the mapped values, consistent with the maps; the corrected areas are
 published next to them, and each indicator fact sheet gives the measured accuracy.
 
-**Next step** (J5): the website v1, reading only `outputs/`; its tools are still to be
-chosen (ROADMAP §8).
+**Next step** (J5, branch `j5-site`): create `site/` with **Astro** (static pages),
+**Observable Plot** (charts) and **MapLibre GL + PMTiles** (maps), decided on 09/10/2026 for
+slow mobile connections (ROADMAP §2). The site reads only `outputs/`: start from
+`outputs/site/manifest.json` (cities, map layers and legends, boundaries, validation) and
+`outputs/tables/indicators.json` (fact sheets, exchange format 0.2). Order of work: the
+OWID-style chart template (tabs Chart / Map / Table / Sources / Download, state in the URL),
+a first map on the PMTiles layers with a light basemap whose licence is checked, then the
+pages of ROADMAP §4.5. The map tiles are not in git: run `python -m pipeline.s7_site_data`
+first on a new machine.
 
 ## Study zones
 
