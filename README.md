@@ -19,7 +19,7 @@ read it first.
 | J1 — Study zones (zones, communes, centres, Touba sectors) | Done, frozen in [`zones/`](zones/README.md) |
 | J2 — National model and classification | Done |
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
-| **J4 — National validation (480 photo-interpreted points)** | **In progress** on branch `j4-validation`: accuracy done, second reading of the cover in 2025 to do |
+| J4 — National validation (480 photo-interpreted points) | Done (branch `j4-validation`) |
 | J5 — Website v1 | To do |
 | J6 — Publication | To do |
 
@@ -57,24 +57,24 @@ read it first.
   not built / built in 2016 / new). The total built-up area is right: 60,400 ± 7,400 ha
   corrected against 61,000 ha mapped in 2025, every city within its margin. The 2016
   built-up area is overestimated in Dakar, so its real growth is probably above +50 %.
-- **Weak points confirmed by J4**: only half (0.51 ± 0.08) of the mapped new built-up area is
-  real, but the map misses about as much elsewhere, so the corrected total (27,200 ± 6,800 ha)
-  is close to the map (23,300 ha). Leapfrog is the least reliable growth type (45 % of its
-  points are real new built-up, 5 out of 16 in Thiès; extension 69 %): growth types are
-  indicative. The year of change is right within one year for 2 points out of 3; 2025 is
-  provisional and 2017 is inflated in Touba (false detections, not only a low 2016 base).
-  Touba is the least accurate city (sand and low buildings).
+- **New built-up area runs ahead of the roofs**: half (0.51 ± 0.08) of the mapped new
+  built-up area is built in 2025; a second reading of the points not built in 2025 shows that
+  another quarter is unbuilt subdivision or construction site, and only 15 % are true false
+  detections (vegetation, bare soil). Sentinel-2 sees a levelled or fenced plot as built-up.
+  The corrected total (27,200 ± 6,800 ha) is close to the map (23,300 ha), but the map misses
+  most unbuilt subdivisions: land being urbanised covers about 55,000 ha.
+- **By city**: in Touba, most errors are subdivisions (44 % of the mapped new built-up), and
+  the 2017 jump is mostly the opening of subdivisions; in Thiès, errors are true false
+  detections (29 %), and leapfrog is mostly wrong (5 real points out of 16). Leapfrog is the
+  least reliable growth type (45 % real, extension 69 %): growth types are indicative. The
+  year of change is right within one year for 2 points out of 3; 2025 is provisional (half
+  of its points are still subdivisions or bare soil).
 
 The tables keep the mapped values, consistent with the maps; the corrected areas are
 published next to them, and each indicator fact sheet gives the measured accuracy.
 
-**Next step** (J4, second reading decided on 07/10/2026): for the 228 points labelled not
-built in 2025, note what covers the pixel on the 2025 image (closed list of METHODOLOGIE
-§14.2: building on less than half, construction site, unbuilt subdivision, track, bare soil,
-vegetation, water, other) in `outputs/validation/cover_2025.csv`, with
-`outputs/validation/cover_2025.kml`, still blind. The report then adds a tolerant accuracy
-where land being urbanised counts as built; the strict accuracy stays official. Then J5,
-the website v1 (tools still to be chosen, ROADMAP §8).
+**Next step** (J5): the website v1, reading only `outputs/`; its tools are still to be
+chosen (ROADMAP §8).
 
 ## Study zones
 
@@ -226,12 +226,13 @@ in favour of the national one.
   indices and the temporal filter reduce but do not remove this.
 - 2016 relies on Sentinel-2A only (fewer scenes). Dry years (2017, 2019) produce false
   detections at the urban fringe; the temporal filter removes most of them, but the
-  2016→2017 jump is still inflated in Touba (+14 %; 4 of the 8 validation points dated 2017
-  there are not built).
+  2016→2017 jump is still strong in Touba (+14 %): the 4 validation points dated 2017 there
+  that are not built are all unbuilt subdivisions, seen by the map before the roofs.
 - The temporal filter has fewer following years to check near the end of the period. The
   last classified year (2026) is therefore not published: it only confirms 2025, and
-  indicators cover 2016–2025. Growth in 2025 is still overestimated: 14 of the 27 validation
-  points that the map dates to 2025 are not built.
+  indicators cover 2016–2025. Growth in 2025 is ahead of the buildings: 14 of the 27
+  validation points that the map dates to 2025 are not built, 10 of them subdivisions or
+  construction sites.
 - Sentinel-2A was launched in June 2015, so the series cannot start before the 2016 dry season.
 - Population is modelled (WorldPop), not counted: it is spread over built-up areas seen
   from space. City totals match the 2023 census, but commune figures are off by a factor
@@ -242,8 +243,8 @@ in favour of the national one.
   false detections: 45 % of the leapfrog points are real new built-up in the validation
   (5 out of 16 in Thiès), so growth types are indicative.
 - About half of the new built-up area has Open Buildings roofs within 30 m (75-84 % for the
-  2016 built-up area); the validation confirms that half of the mapped new built-up area is
-  wrong, although its total is about right.
+  2016 built-up area); the validation shows that half of the mapped new built-up area is not
+  built in 2025, but mostly because it is unbuilt subdivision or construction site.
 - Almost half of the validation points (237 of 480) were marked unsure by the interpreter,
   and 21 points in Dakar and Thiès were labelled on 2023 imagery (no 2025 image).
 - Commune boundaries come from OpenStreetMap and are not official (least reliable around Thiès).

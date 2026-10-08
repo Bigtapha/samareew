@@ -41,13 +41,15 @@ _MAP_RELIABILITY = ("Validée sur 480 points photo-interprétés : 85 % (± 4) d
                     "classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface "
                     "bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha "
                     "cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar.")
-_NEW_BUILT_RELIABILITY = ("Le nouveau bâti est moins sûr : la moitié seulement (51 ± 8 %) de "
-                          "celui de la carte est vrai, mais la carte en oublie autant ailleurs, "
-                          "et le total corrigé 2016-2025 (27 200 ± 6 800 ha) est proche de la "
-                          "carte (23 300 ha). L'année est juste à ±1 an pour 2 points sur 3.")
+_NEW_BUILT_RELIABILITY = ("Le nouveau bâti est en avance sur les toits : la moitié (51 ± 8 %) de "
+                          "celui de la carte est bâtie en 2025, un quart de plus est en "
+                          "lotissement non construit ou en chantier, et 15 % seulement sont de "
+                          "vraies fausses détections. Le total corrigé 2016-2025 (27 200 ± 6 800 "
+                          "ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour "
+                          "2 points sur 3.")
 _GROWTH_TYPE_RELIABILITY = ("Indicatif : seuls 45 % des points de saut sont vraiment du nouveau "
-                            "bâti (5 sur 16 à Thiès), contre 48 % pour la densification et 69 % "
-                            "pour l'extension.")
+                            "bâti (5 sur 16 à Thiès, où les autres sont surtout de la végétation), "
+                            "contre 48 % pour la densification et 69 % pour l'extension.")
 _POP_RELIABILITY = ("Population modélisée (projection répartie sur le bâti), pas un "
                     "recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur "
                     "les communes de Dakar), publiée seulement pour les villes entières.")
@@ -73,8 +75,9 @@ INDICATORS = {
         "sources": ["samareew"],
         "method": "METHODOLOGIE.md#8",
         "reliability": " ".join([_MAP_RELIABILITY, _NEW_BUILT_RELIABILITY,
-                                   "2025 est provisoire (52 % des points datés de 2025 ne sont "
-                                   "pas bâtis) et 2017 surestimée à Touba."]),
+                                   "2025 est provisoire (la moitié des points datés de 2025 sont "
+                                   "encore des lotissements ou du sol nu) ; à Touba, 2017 marque "
+                                   "surtout l'ouverture de lotissements."]),
     },
     "growth_index": {
         "title": "Croissance du bâti (2016 = 100)",

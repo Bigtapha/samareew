@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-07",
+  "date": "2026-10-08",
   "period": [
     2016,
     2025
@@ -170,7 +170,128 @@
         "margin95": 0.058,
         "n_points": 86
       },
-      "unsure_labels": 34
+      "unsure_labels": 34,
+      "tolerant": {
+        "urbanising_covers": [
+          "partly_built",
+          "construction",
+          "subdivision"
+        ],
+        "overall_accuracy": {
+          "estimate": 0.741,
+          "margin95": 0.097
+        },
+        "users_accuracy": {
+          "not_built": {
+            "estimate": 0.725,
+            "margin95": 0.14
+          },
+          "built_at_start": {
+            "estimate": 0.781,
+            "margin95": 0.146
+          },
+          "new_built": {
+            "estimate": 0.748,
+            "margin95": 0.118
+          }
+        },
+        "producers_accuracy": {
+          "not_built": {
+            "estimate": 0.921,
+            "margin95": 0.048
+          },
+          "built_at_start": {
+            "estimate": 0.97,
+            "margin95": 0.039
+          },
+          "new_built": {
+            "estimate": 0.298,
+            "margin95": 0.099
+          }
+        },
+        "area_ha": {
+          "not_built": {
+            "estimate": 44154.0,
+            "margin95": 8156.0
+          },
+          "built_at_start": {
+            "estimate": 17019.0,
+            "margin95": 3150.0
+          },
+          "new_built": {
+            "estimate": 26680.0,
+            "margin95": 8405.0
+          }
+        },
+        "date_accuracy_end": {
+          "estimate": 0.785,
+          "margin95": 0.093
+        },
+        "cover_of_map_class": {
+          "not_built": {
+            "vegetation": {
+              "estimate": 0.575,
+              "margin95": 0.155
+            },
+            "subdivision": {
+              "estimate": 0.2,
+              "margin95": 0.126
+            },
+            "bare_soil": {
+              "estimate": 0.1,
+              "margin95": 0.094
+            },
+            "built": {
+              "estimate": 0.075,
+              "margin95": 0.083
+            },
+            "dirt_track": {
+              "estimate": 0.05,
+              "margin95": 0.068
+            }
+          },
+          "built_at_start": {
+            "built": {
+              "estimate": 0.875,
+              "margin95": 0.116
+            },
+            "vegetation": {
+              "estimate": 0.062,
+              "margin95": 0.085
+            },
+            "subdivision": {
+              "estimate": 0.062,
+              "margin95": 0.085
+            }
+          },
+          "new_built": {
+            "built": {
+              "estimate": 0.595,
+              "margin95": 0.145
+            },
+            "subdivision": {
+              "estimate": 0.178,
+              "margin95": 0.108
+            },
+            "vegetation": {
+              "estimate": 0.118,
+              "margin95": 0.095
+            },
+            "bare_soil": {
+              "estimate": 0.062,
+              "margin95": 0.072
+            },
+            "dirt_track": {
+              "estimate": 0.024,
+              "margin95": 0.047
+            },
+            "construction": {
+              "estimate": 0.022,
+              "margin95": 0.044
+            }
+          }
+        }
+      }
     },
     "touba": {
       "n_points": 120,
@@ -330,7 +451,124 @@
         "margin95": 0.081,
         "n_points": 53
       },
-      "unsure_labels": 67
+      "unsure_labels": 67,
+      "tolerant": {
+        "urbanising_covers": [
+          "partly_built",
+          "construction",
+          "subdivision"
+        ],
+        "overall_accuracy": {
+          "estimate": 0.746,
+          "margin95": 0.096
+        },
+        "users_accuracy": {
+          "not_built": {
+            "estimate": 0.75,
+            "margin95": 0.136
+          },
+          "built_at_start": {
+            "estimate": 0.656,
+            "margin95": 0.167
+          },
+          "new_built": {
+            "estimate": 0.857,
+            "margin95": 0.101
+          }
+        },
+        "producers_accuracy": {
+          "not_built": {
+            "estimate": 0.993,
+            "margin95": 0.014
+          },
+          "built_at_start": {
+            "estimate": 0.801,
+            "margin95": 0.168
+          },
+          "new_built": {
+            "estimate": 0.366,
+            "margin95": 0.102
+          }
+        },
+        "area_ha": {
+          "not_built": {
+            "estimate": 20216.0,
+            "margin95": 3648.0
+          },
+          "built_at_start": {
+            "estimate": 6998.0,
+            "margin95": 2019.0
+          },
+          "new_built": {
+            "estimate": 14130.0,
+            "margin95": 3836.0
+          }
+        },
+        "date_accuracy_end": {
+          "estimate": 0.835,
+          "margin95": 0.088
+        },
+        "cover_of_map_class": {
+          "not_built": {
+            "bare_soil": {
+              "estimate": 0.625,
+              "margin95": 0.152
+            },
+            "subdivision": {
+              "estimate": 0.125,
+              "margin95": 0.104
+            },
+            "built": {
+              "estimate": 0.1,
+              "margin95": 0.094
+            },
+            "dirt_track": {
+              "estimate": 0.1,
+              "margin95": 0.094
+            },
+            "vegetation": {
+              "estimate": 0.025,
+              "margin95": 0.049
+            },
+            "construction": {
+              "estimate": 0.025,
+              "margin95": 0.049
+            }
+          },
+          "built_at_start": {
+            "built": {
+              "estimate": 0.844,
+              "margin95": 0.128
+            },
+            "subdivision": {
+              "estimate": 0.125,
+              "margin95": 0.116
+            },
+            "partly_built": {
+              "estimate": 0.031,
+              "margin95": 0.061
+            }
+          },
+          "new_built": {
+            "built": {
+              "estimate": 0.517,
+              "margin95": 0.139
+            },
+            "subdivision": {
+              "estimate": 0.436,
+              "margin95": 0.139
+            },
+            "bare_soil": {
+              "estimate": 0.023,
+              "margin95": 0.046
+            },
+            "construction": {
+              "estimate": 0.023,
+              "margin95": 0.046
+            }
+          }
+        }
+      }
     },
     "thies": {
       "n_points": 120,
@@ -490,7 +728,124 @@
         "margin95": 0.065,
         "n_points": 62
       },
-      "unsure_labels": 58
+      "unsure_labels": 58,
+      "tolerant": {
+        "urbanising_covers": [
+          "partly_built",
+          "construction",
+          "subdivision"
+        ],
+        "overall_accuracy": {
+          "estimate": 0.819,
+          "margin95": 0.094
+        },
+        "users_accuracy": {
+          "not_built": {
+            "estimate": 0.85,
+            "margin95": 0.112
+          },
+          "built_at_start": {
+            "estimate": 0.781,
+            "margin95": 0.146
+          },
+          "new_built": {
+            "estimate": 0.563,
+            "margin95": 0.142
+          }
+        },
+        "producers_accuracy": {
+          "not_built": {
+            "estimate": 0.963,
+            "margin95": 0.018
+          },
+          "built_at_start": {
+            "estimate": 0.513,
+            "margin95": 0.236
+          },
+          "new_built": {
+            "estimate": 0.367,
+            "margin95": 0.209
+          }
+        },
+        "area_ha": {
+          "not_built": {
+            "estimate": 27053.0,
+            "margin95": 3467.0
+          },
+          "built_at_start": {
+            "estimate": 5668.0,
+            "margin95": 2611.0
+          },
+          "new_built": {
+            "estimate": 4736.0,
+            "margin95": 2621.0
+          }
+        },
+        "date_accuracy_end": {
+          "estimate": 0.85,
+          "margin95": 0.093
+        },
+        "cover_of_map_class": {
+          "not_built": {
+            "vegetation": {
+              "estimate": 0.525,
+              "margin95": 0.157
+            },
+            "bare_soil": {
+              "estimate": 0.3,
+              "margin95": 0.144
+            },
+            "built": {
+              "estimate": 0.125,
+              "margin95": 0.104
+            },
+            "dirt_track": {
+              "estimate": 0.025,
+              "margin95": 0.049
+            },
+            "construction": {
+              "estimate": 0.025,
+              "margin95": 0.049
+            }
+          },
+          "built_at_start": {
+            "built": {
+              "estimate": 0.938,
+              "margin95": 0.085
+            },
+            "vegetation": {
+              "estimate": 0.031,
+              "margin95": 0.061
+            },
+            "subdivision": {
+              "estimate": 0.031,
+              "margin95": 0.061
+            }
+          },
+          "new_built": {
+            "built": {
+              "estimate": 0.667,
+              "margin95": 0.138
+            },
+            "vegetation": {
+              "estimate": 0.19,
+              "margin95": 0.124
+            },
+            "bare_soil": {
+              "estimate": 0.081,
+              "margin95": 0.091
+            },
+            "construction": {
+              "estimate": 0.045,
+              "margin95": 0.067
+            },
+            "dirt_track": {
+              "estimate": 0.017,
+              "margin95": 0.034
+            }
+          }
+        }
+      }
     },
     "mbour": {
       "n_points": 120,
@@ -650,7 +1005,136 @@
         "margin95": 0.119,
         "n_points": 42
       },
-      "unsure_labels": 78
+      "unsure_labels": 78,
+      "tolerant": {
+        "urbanising_covers": [
+          "partly_built",
+          "construction",
+          "subdivision"
+        ],
+        "overall_accuracy": {
+          "estimate": 0.71,
+          "margin95": 0.107
+        },
+        "users_accuracy": {
+          "not_built": {
+            "estimate": 0.725,
+            "margin95": 0.14
+          },
+          "built_at_start": {
+            "estimate": 0.562,
+            "margin95": 0.175
+          },
+          "new_built": {
+            "estimate": 0.8,
+            "margin95": 0.114
+          }
+        },
+        "producers_accuracy": {
+          "not_built": {
+            "estimate": 0.962,
+            "margin95": 0.03
+          },
+          "built_at_start": {
+            "estimate": 0.704,
+            "margin95": 0.235
+          },
+          "new_built": {
+            "estimate": 0.287,
+            "margin95": 0.094
+          }
+        },
+        "area_ha": {
+          "not_built": {
+            "estimate": 16397.0,
+            "margin95": 3091.0
+          },
+          "built_at_start": {
+            "estimate": 3461.0,
+            "margin95": 1344.0
+          },
+          "new_built": {
+            "estimate": 9713.0,
+            "margin95": 3070.0
+          }
+        },
+        "date_accuracy_end": {
+          "estimate": 0.777,
+          "margin95": 0.105
+        },
+        "cover_of_map_class": {
+          "not_built": {
+            "bare_soil": {
+              "estimate": 0.35,
+              "margin95": 0.15
+            },
+            "vegetation": {
+              "estimate": 0.325,
+              "margin95": 0.147
+            },
+            "built": {
+              "estimate": 0.15,
+              "margin95": 0.112
+            },
+            "subdivision": {
+              "estimate": 0.1,
+              "margin95": 0.094
+            },
+            "dirt_track": {
+              "estimate": 0.05,
+              "margin95": 0.068
+            },
+            "construction": {
+              "estimate": 0.025,
+              "margin95": 0.049
+            }
+          },
+          "built_at_start": {
+            "built": {
+              "estimate": 0.75,
+              "margin95": 0.152
+            },
+            "subdivision": {
+              "estimate": 0.125,
+              "margin95": 0.116
+            },
+            "vegetation": {
+              "estimate": 0.062,
+              "margin95": 0.085
+            },
+            "construction": {
+              "estimate": 0.031,
+              "margin95": 0.061
+            },
+            "bare_soil": {
+              "estimate": 0.031,
+              "margin95": 0.061
+            }
+          },
+          "new_built": {
+            "built": {
+              "estimate": 0.7,
+              "margin95": 0.122
+            },
+            "subdivision": {
+              "estimate": 0.17,
+              "margin95": 0.1
+            },
+            "construction": {
+              "estimate": 0.069,
+              "margin95": 0.076
+            },
+            "bare_soil": {
+              "estimate": 0.039,
+              "margin95": 0.055
+            },
+            "vegetation": {
+              "estimate": 0.023,
+              "margin95": 0.044
+            }
+          }
+        }
+      }
     }
   },
   "national": {
@@ -784,6 +1268,143 @@
       "margin95": 0.038,
       "n_points": 243
     },
-    "unsure_labels": 237
+    "unsure_labels": 237,
+    "tolerant": {
+      "urbanising_covers": [
+        "partly_built",
+        "construction",
+        "subdivision"
+      ],
+      "overall_accuracy": {
+        "estimate": 0.753,
+        "margin95": 0.054
+      },
+      "users_accuracy": {
+        "not_built": {
+          "estimate": 0.758,
+          "margin95": 0.072
+        },
+        "built_at_start": {
+          "estimate": 0.728,
+          "margin95": 0.093
+        },
+        "new_built": {
+          "estimate": 0.759,
+          "margin95": 0.065
+        }
+      },
+      "producers_accuracy": {
+        "not_built": {
+          "estimate": 0.951,
+          "margin95": 0.021
+        },
+        "built_at_start": {
+          "estimate": 0.828,
+          "margin95": 0.082
+        },
+        "new_built": {
+          "estimate": 0.319,
+          "margin95": 0.061
+        }
+      },
+      "area_ha": {
+        "not_built": {
+          "estimate": 107820.0,
+          "margin95": 10070.0
+        },
+        "built_at_start": {
+          "estimate": 33147.0,
+          "margin95": 4757.0
+        },
+        "new_built": {
+          "estimate": 55258.0,
+          "margin95": 10082.0
+        }
+      },
+      "date_accuracy_end": {
+        "estimate": 0.807,
+        "margin95": 0.051
+      },
+      "cover_of_map_class": {
+        "not_built": {
+          "vegetation": {
+            "estimate": 0.415,
+            "margin95": 0.078
+          },
+          "bare_soil": {
+            "estimate": 0.289,
+            "margin95": 0.064
+          },
+          "subdivision": {
+            "estimate": 0.124,
+            "margin95": 0.058
+          },
+          "built": {
+            "estimate": 0.103,
+            "margin95": 0.049
+          },
+          "dirt_track": {
+            "estimate": 0.054,
+            "margin95": 0.037
+          },
+          "construction": {
+            "estimate": 0.015,
+            "margin95": 0.017
+          }
+        },
+        "built_at_start": {
+          "built": {
+            "estimate": 0.86,
+            "margin95": 0.074
+          },
+          "subdivision": {
+            "estimate": 0.081,
+            "margin95": 0.056
+          },
+          "vegetation": {
+            "estimate": 0.045,
+            "margin95": 0.049
+          },
+          "partly_built": {
+            "estimate": 0.007,
+            "margin95": 0.014
+          },
+          "construction": {
+            "estimate": 0.004,
+            "margin95": 0.007
+          },
+          "bare_soil": {
+            "estimate": 0.004,
+            "margin95": 0.007
+          }
+        },
+        "new_built": {
+          "built": {
+            "estimate": 0.6,
+            "margin95": 0.08
+          },
+          "subdivision": {
+            "estimate": 0.22,
+            "margin95": 0.063
+          },
+          "vegetation": {
+            "estimate": 0.083,
+            "margin95": 0.047
+          },
+          "bare_soil": {
+            "estimate": 0.051,
+            "margin95": 0.038
+          },
+          "construction": {
+            "estimate": 0.033,
+            "margin95": 0.028
+          },
+          "dirt_track": {
+            "estimate": 0.013,
+            "margin95": 0.022
+          }
+        }
+      }
+    }
   }
 }
