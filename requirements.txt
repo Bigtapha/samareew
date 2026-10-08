@@ -8,6 +8,7 @@ rasterio
 geopandas
 matplotlib
 pillow
+pmtiles
 scikit-learn
 scipy
 pytest

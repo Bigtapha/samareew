@@ -1,0 +1,128 @@
+"""Site data (step 7): map tiles, boundaries and validation summary in the exchange format.
+
+Pure functions (NumPy, Pillow, shapely), so they can be unit-tested. Tiles follow the usual
+Web Mercator scheme (EPSG:3857, 256 px, x from the west, y from the north), as read by
+MapLibre GL from a PMTiles archive.
+"""
+import io
+import math
+
+import numpy as np
+from affine import Affine
+from PIL import Image
+
+TILE_PX = 256
+EARTH_RADIUS = 6378137.0
+ORIGIN = math.pi * EARTH_RADIUS            # half the width of the Web Mercator square
+TRANSPARENT = 0
+
+
+def tile_size_m(z: int) -> float:
+    """Width of one tile at zoom ``z``, in Web Mercator metres."""
+    return 2 * ORIGIN / 2 ** z
+
+
+def tile_range(bounds: tuple, z: int) -> tuple:
+    """Tiles (x0, y0, x1, y1), inclusive, covering ``bounds`` = (minx, miny, maxx, maxy) in
+    Web Mercator metres."""
+    size = tile_size_m(z)
+    minx, miny, maxx, maxy = bounds
+    n = 2 ** z - 1
+    x0 = min(max(int((minx + ORIGIN) // size), 0), n)
+    x1 = min(max(int((maxx + ORIGIN) // size), 0), n)
+    y0 = min(max(int((ORIGIN - maxy) // size), 0), n)
+    y1 = min(max(int((ORIGIN - miny) // size), 0), n)
+    return x0, y0, x1, y1
+
+
+def mosaic_transform(z: int, x0: int, y0: int) -> Affine:
+    """Affine transform of a mosaic of tiles whose top-left tile is (x0, y0) at zoom ``z``."""
+    res = tile_size_m(z) / TILE_PX
+    return Affine(res, 0, -ORIGIN + x0 * tile_size_m(z), 0, -res, ORIGIN - y0 * tile_size_m(z))
+
+
+def split_tiles(mosaic: np.ndarray, x0: int, y0: int):
+    """Yield (x, y, tile) for every 256 px tile of the mosaic that is not fully transparent."""
+    rows, cols = mosaic.shape
+    if rows % TILE_PX or cols % TILE_PX:
+        raise ValueError("the mosaic must be a whole number of tiles")
+    for i in range(rows // TILE_PX):
+        for j in range(cols // TILE_PX):
+            tile = mosaic[i * TILE_PX:(i + 1) * TILE_PX, j * TILE_PX:(j + 1) * TILE_PX]
+            if tile.any():
+                yield x0 + j, y0 + i, tile
+
+
+def overlay(base: np.ndarray, top: np.ndarray) -> np.ndarray:
+    """Tile of two cities: the pixels of ``top`` that are not transparent win."""
+    return np.where(top != TRANSPARENT, top, base)
+
+
+def period_classes(first_year: np.ndarray, breaks: tuple) -> np.ndarray:
+    """Class of each pixel from its urbanisation year: 1 = built in ``breaks[0]`` or before,
+    then k for a year in (breaks[k-2], breaks[k-1]]; 0 = not built, no data or built after
+    the last break."""
+    classes = np.zeros(first_year.shape, dtype=np.uint8)
+    built = first_year > 0
+    classes[built & (first_year <= breaks[0])] = 1
+    for k in range(1, len(breaks)):
+        classes[built & (first_year > breaks[k - 1]) & (first_year <= breaks[k])] = k + 1
+    return classes
+
+
+def encode_png(tile: np.ndarray, colors: dict) -> bytes:
+    """Paletted PNG of a class tile; class 0 is transparent. ``colors``: {class: "#rrggbb"}."""
+    if tile.max() >= 256:
+        raise ValueError("classes must fit in one byte")
+    palette = [0, 0, 0] * 256
+    for code, hex_color in colors.items():
+        palette[3 * code:3 * code + 3] = [int(hex_color[i:i + 2], 16) for i in (1, 3, 5)]
+    image = Image.fromarray(tile.astype(np.uint8), mode="P")
+    image.putpalette(palette)
+    out = io.BytesIO()
+    image.save(out, format="PNG", optimize=True, transparency=TRANSPARENT)
+    return out.getvalue()
+
+
+def ground_pixel_area_m2(z: int, lat: np.ndarray) -> np.ndarray:
+    """Ground area of one tile pixel at zoom ``z`` and latitude ``lat`` (degrees): Web Mercator
+    stretches distances by 1 / cos(lat)."""
+    res = tile_size_m(z) / TILE_PX
+    return (res * np.cos(np.radians(lat))) ** 2
+
+
+def mercator_to_lat(y: np.ndarray) -> np.ndarray:
+    """Latitude (degrees) of Web Mercator northings."""
+    return np.degrees(2 * np.arctan(np.exp(np.asarray(y) / EARTH_RADIUS)) - math.pi / 2)
+
+
+# --- Validation summary ------------------------------------------------------------
+
+def validation_summary(report: dict, start: int, end: int) -> dict:
+    """What the site shows of one accuracy report of step 5 (a city or the four cities):
+    accuracies and corrected areas with their 95 % margins, next to the mapped areas."""
+    mapped = report["mapped_area_ha"]
+    out = {
+        "n_points": report["n_points"],
+        "unsure_labels": report.get("unsure_labels"),
+        "overall_accuracy": report["overall_accuracy"],
+        "built_accuracy": {str(start): report["date_accuracy"]["start"],
+                           str(end): report["date_accuracy"]["end"]},
+        "new_built": {
+            "users_accuracy": report["users_accuracy"]["new_built"],
+            "producers_accuracy": report["producers_accuracy"]["new_built"],
+            "mapped_ha": mapped["new_built"],
+            "corrected_ha": report["area_ha"]["new_built"],
+        },
+        "built_area": {
+            str(start): {"mapped_ha": mapped["built_at_start"],
+                         "corrected_ha": report["built_area_ha"][str(start)]},
+            str(end): {"mapped_ha": mapped["built_at_start"] + mapped["new_built"],
+                       "corrected_ha": report["built_area_ha"][str(end)]},
+        },
+    }
+    tolerant = report.get("tolerant")
+    if tolerant:
+        out["new_built"]["users_accuracy_tolerant"] = tolerant["users_accuracy"]["new_built"]
+        out["new_built"]["cover_in_reality"] = tolerant["cover_of_map_class"]["new_built"]
+    return out

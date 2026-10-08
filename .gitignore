@@ -8,3 +8,5 @@ myvenv/
 .pytest_cache/
 # Rasters lourds hors de git (ROADMAP §4.4)
 *.tif
+# Map tiles: rebuilt by step 7 (python -m pipeline.s7_site_data)
+*.pmtiles

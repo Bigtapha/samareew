@@ -1,0 +1,390 @@
+{
+ "date": "2026-10-08",
+ "period": [
+  2016,
+  2025
+ ],
+ "method": "METHODOLOGIE.md#14",
+ "note": "Précisions pondérées par la surface, marges à 95 %. Les tableaux et les cartes gardent les valeurs de la carte ; les surfaces corrigées sont publiées à côté.",
+ "cities": {
+  "dakar": {
+   "n_points": 120,
+   "unsure_labels": 34,
+   "overall_accuracy": {
+    "estimate": 0.845,
+    "margin95": 0.066
+   },
+   "built_accuracy": {
+    "2016": {
+     "estimate": 0.942,
+     "margin95": 0.036
+    },
+    "2025": {
+     "estimate": 0.873,
+     "margin95": 0.062
+    }
+   },
+   "new_built": {
+    "users_accuracy": {
+     "estimate": 0.547,
+     "margin95": 0.145
+    },
+    "producers_accuracy": {
+     "estimate": 0.485,
+     "margin95": 0.217
+    },
+    "mapped_ha": 10641,
+    "corrected_ha": {
+     "estimate": 12007.0,
+     "margin95": 5346.0
+    },
+    "users_accuracy_tolerant": {
+     "estimate": 0.748,
+     "margin95": 0.118
+    },
+    "cover_in_reality": {
+     "built": {
+      "estimate": 0.595,
+      "margin95": 0.145
+     },
+     "subdivision": {
+      "estimate": 0.178,
+      "margin95": 0.108
+     },
+     "vegetation": {
+      "estimate": 0.118,
+      "margin95": 0.095
+     },
+     "bare_soil": {
+      "estimate": 0.062,
+      "margin95": 0.072
+     },
+     "dirt_track": {
+      "estimate": 0.024,
+      "margin95": 0.047
+     },
+     "construction": {
+      "estimate": 0.022,
+      "margin95": 0.044
+     }
+    }
+   },
+   "built_area": {
+    "2016": {
+     "mapped_ha": 21134,
+     "corrected_ha": {
+      "estimate": 17019,
+      "margin95": 3150
+     }
+    },
+    "2025": {
+     "mapped_ha": 31775,
+     "corrected_ha": {
+      "estimate": 29026,
+      "margin95": 5470
+     }
+    }
+   }
+  },
+  "touba": {
+   "n_points": 120,
+   "unsure_labels": 67,
+   "overall_accuracy": {
+    "estimate": 0.776,
+    "margin95": 0.073
+   },
+   "built_accuracy": {
+    "2016": {
+     "estimate": 0.895,
+     "margin95": 0.049
+    },
+    "2025": {
+     "estimate": 0.832,
+     "margin95": 0.069
+    }
+   },
+   "new_built": {
+    "users_accuracy": {
+     "estimate": 0.397,
+     "margin95": 0.138
+    },
+    "producers_accuracy": {
+     "estimate": 0.399,
+     "margin95": 0.186
+    },
+    "mapped_ha": 6036,
+    "corrected_ha": {
+     "estimate": 6007.0,
+     "margin95": 2639.0
+    },
+    "users_accuracy_tolerant": {
+     "estimate": 0.857,
+     "margin95": 0.101
+    },
+    "cover_in_reality": {
+     "built": {
+      "estimate": 0.517,
+      "margin95": 0.139
+     },
+     "subdivision": {
+      "estimate": 0.436,
+      "margin95": 0.139
+     },
+     "bare_soil": {
+      "estimate": 0.023,
+      "margin95": 0.046
+     },
+     "construction": {
+      "estimate": 0.023,
+      "margin95": 0.046
+     }
+    }
+   },
+   "built_area": {
+    "2016": {
+     "mapped_ha": 8542,
+     "corrected_ha": {
+      "estimate": 6998,
+      "margin95": 2019
+     }
+    },
+    "2025": {
+     "mapped_ha": 14578,
+     "corrected_ha": {
+      "estimate": 13005,
+      "margin95": 2871
+     }
+    }
+   }
+  },
+  "thies": {
+   "n_points": 120,
+   "unsure_labels": 58,
+   "overall_accuracy": {
+    "estimate": 0.836,
+    "margin95": 0.087
+   },
+   "built_accuracy": {
+    "2016": {
+     "estimate": 0.905,
+     "margin95": 0.07
+    },
+    "2025": {
+     "estimate": 0.864,
+     "margin95": 0.086
+    }
+   },
+   "new_built": {
+    "users_accuracy": {
+     "estimate": 0.518,
+     "margin95": 0.14
+    },
+    "producers_accuracy": {
+     "estimate": 0.431,
+     "margin95": 0.258
+    },
+    "mapped_ha": 3092,
+    "corrected_ha": {
+     "estimate": 3714.0,
+     "margin95": 2193.0
+    },
+    "users_accuracy_tolerant": {
+     "estimate": 0.563,
+     "margin95": 0.142
+    },
+    "cover_in_reality": {
+     "built": {
+      "estimate": 0.667,
+      "margin95": 0.138
+     },
+     "vegetation": {
+      "estimate": 0.19,
+      "margin95": 0.124
+     },
+     "bare_soil": {
+      "estimate": 0.081,
+      "margin95": 0.091
+     },
+     "construction": {
+      "estimate": 0.045,
+      "margin95": 0.067
+     },
+     "dirt_track": {
+      "estimate": 0.017,
+      "margin95": 0.034
+     }
+    }
+   },
+   "built_area": {
+    "2016": {
+     "mapped_ha": 3721,
+     "corrected_ha": {
+      "estimate": 5668,
+      "margin95": 2611
+     }
+    },
+    "2025": {
+     "mapped_ha": 6813,
+     "corrected_ha": {
+      "estimate": 9382,
+      "margin95": 3225
+     }
+    }
+   }
+  },
+  "mbour": {
+   "n_points": 120,
+   "unsure_labels": 78,
+   "overall_accuracy": {
+    "estimate": 0.774,
+    "margin95": 0.088
+   },
+   "built_accuracy": {
+    "2016": {
+     "estimate": 0.901,
+     "margin95": 0.045
+    },
+    "2025": {
+     "estimate": 0.818,
+     "margin95": 0.087
+    }
+   },
+   "new_built": {
+    "users_accuracy": {
+     "estimate": 0.561,
+     "margin95": 0.141
+    },
+    "producers_accuracy": {
+     "estimate": 0.356,
+     "margin95": 0.162
+    },
+    "mapped_ha": 3483,
+    "corrected_ha": {
+     "estimate": 5487.0,
+     "margin95": 2386.0
+    },
+    "users_accuracy_tolerant": {
+     "estimate": 0.8,
+     "margin95": 0.114
+    },
+    "cover_in_reality": {
+     "built": {
+      "estimate": 0.7,
+      "margin95": 0.122
+     },
+     "subdivision": {
+      "estimate": 0.17,
+      "margin95": 0.1
+     },
+     "construction": {
+      "estimate": 0.069,
+      "margin95": 0.076
+     },
+     "bare_soil": {
+      "estimate": 0.039,
+      "margin95": 0.055
+     },
+     "vegetation": {
+      "estimate": 0.023,
+      "margin95": 0.044
+     }
+    }
+   },
+   "built_area": {
+    "2016": {
+     "mapped_ha": 4330,
+     "corrected_ha": {
+      "estimate": 3461,
+      "margin95": 1344
+     }
+    },
+    "2025": {
+     "mapped_ha": 7813,
+     "corrected_ha": {
+      "estimate": 8948,
+      "margin95": 2562
+     }
+    }
+   }
+  }
+ },
+ "national": {
+  "n_points": 480,
+  "unsure_labels": 237,
+  "overall_accuracy": {
+   "estimate": 0.818,
+   "margin95": 0.039
+  },
+  "built_accuracy": {
+   "2016": {
+    "estimate": 0.919,
+    "margin95": 0.024
+   },
+   "2025": {
+    "estimate": 0.854,
+    "margin95": 0.038
+   }
+  },
+  "new_built": {
+   "users_accuracy": {
+    "estimate": 0.506,
+    "margin95": 0.081
+   },
+   "producers_accuracy": {
+    "estimate": 0.433,
+    "margin95": 0.111
+   },
+   "mapped_ha": 23252,
+   "corrected_ha": {
+    "estimate": 27214.0,
+    "margin95": 6786.0
+   },
+   "users_accuracy_tolerant": {
+    "estimate": 0.759,
+    "margin95": 0.065
+   },
+   "cover_in_reality": {
+    "built": {
+     "estimate": 0.6,
+     "margin95": 0.08
+    },
+    "subdivision": {
+     "estimate": 0.22,
+     "margin95": 0.063
+    },
+    "vegetation": {
+     "estimate": 0.083,
+     "margin95": 0.047
+    },
+    "bare_soil": {
+     "estimate": 0.051,
+     "margin95": 0.038
+    },
+    "construction": {
+     "estimate": 0.033,
+     "margin95": 0.028
+    },
+    "dirt_track": {
+     "estimate": 0.013,
+     "margin95": 0.022
+    }
+   }
+  },
+  "built_area": {
+   "2016": {
+    "mapped_ha": 37727,
+    "corrected_ha": {
+     "estimate": 33147,
+     "margin95": 4757
+    }
+   },
+   "2025": {
+    "mapped_ha": 60979,
+    "corrected_ha": {
+     "estimate": 60361,
+     "margin95": 7425
+    }
+   }
+  }
+ }
+}

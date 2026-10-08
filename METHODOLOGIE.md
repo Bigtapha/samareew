@@ -872,6 +872,65 @@ marge est publiée à côté (README, site) ; les types de croissance, surtout l
 
 ---
 
+## 15. Données du site (étape 7)
+
+Le site (J5) ne lit que `outputs/`. `pipeline/s7_site_data.py` y dépose, dans
+`outputs/site/`, tout ce qu'il lui faut en plus des tableaux d'indicateurs, sous une forme
+légère pour les téléphones et les connexions lentes. Le `manifest.json` liste les fichiers,
+les légendes, l'emprise et le centre de chaque ville, et les licences (format d'échange 0.2).
+
+### 15.1 Cartes : tuiles PMTiles
+
+Deux couches, pour les quatre villes à la fois (`SITE_LAYERS`) :
+
+| Couche | Classes | Couleurs |
+|---|---|---|
+| `urbanisation` | bâti en 2016 ; nouveau bâti 2017-2020 ; nouveau bâti 2021-2025 (année d'urbanisation, §8) | gris neutre, puis un même orangé du clair au foncé |
+| `growth_type_2016_2025` | densification ; extension ; saut (§11.2) | bleu, orange, vert d'eau |
+
+- **Tuiles raster** (PNG à palette, 256 px, Web Mercator), une archive **PMTiles** par couche :
+  un seul fichier statique, lu par morceaux par MapLibre, sans serveur de tuiles.
+- **Zooms 8 à 14** : au zoom 14, un pixel de tuile mesure environ 9,2 m au sol à la latitude
+  du Sénégal, proche du pixel de 10 m ; au-delà, le site agrandit le zoom 14. Aux zooms
+  inférieurs, chaque pixel prend la **classe la plus fréquente** des pixels qu'il couvre : le
+  bâti épars s'efface (à Dakar, 14 % du bâti en moins au zoom 10, 6 % au zoom 12). Les cartes
+  servent à voir où ; **les chiffres viennent des tableaux, jamais des tuiles**.
+- **Années regroupées en deux périodes**, les mêmes que les types de croissance : neuf
+  années côte à côte ne se distinguent pas à l'œil sur une carte. Le détail annuel est dans
+  les graphiques.
+- **Couleurs** vérifiées pour les daltoniens (validateur du guide de visualisation,
+  09/10/2026) : le gris de 2016 est volontairement neutre (fond, pas une catégorie) ;
+  l'orangé clair et le vert d'eau sont peu contrastés sur fond clair, d'où une légende et un
+  tableau toujours à côté de la carte. Le bleu est évité pour le bâti, car le fond de carte
+  l'emploie pour l'eau.
+
+**Contrôles au dernier calcul** (09/10/2026) : relues au zoom 14, les tuiles donnent la même
+surface que les rasters de 10 m à **0,1 à 0,7 %** près pour chaque ville et chaque classe (un
+peu plus, car le pixel de tuile est plus petit que le pixel source) ; 0,06 % des pixels bâtis
+tombent juste hors des zones, au bord, par la reprojection. Taille : 2,9 Mo (`urbanisation`)
+et 2,2 Mo (`growth_type_2016_2025`) ; une tuile pèse au plus 14,5 Ko (médiane 3,6 Ko au zoom
+14), soit moins de 100 Ko pour un écran de téléphone. Cartes de contrôle :
+`data/j5_tiles_<couche>.png`. Les archives ne sont pas dans git : l'étape 7 les reconstruit.
+
+### 15.2 Limites
+
+Zones, communes et secteurs de Touba en GeoJSON (EPSG:4326), avec les noms d'unités de
+`outputs/tables/units.csv` (`city`, `unit_type`, `unit`, `label`), plus les centres.
+Simplification à **15 m** (`SITE_SIMPLIFY_M`) en UTM, ville par ville ; pour les communes et
+les secteurs, une **simplification de couverture** garde les frontières communes
+identiques (ni trou ni chevauchement) ; coordonnées arrondies à 5 décimales (environ 1 m).
+Résultat : surfaces modifiées de moins de 0,1 %, chevauchement nul, communes 138 Ko au lieu
+de 660 Ko. `communes.geojson` reste sous **ODbL** (© OpenStreetMap contributors).
+
+### 15.3 Validation
+
+`validation.json` reprend, pour chaque ville et pour les quatre villes, ce que le site
+montre de §14.4 : précision globale, précision bâti / non bâti en 2016 et 2025, précisions
+utilisateur et producteur du nouveau bâti (stricte et tolérante), contenu réel du nouveau
+bâti cartographié, et surfaces cartographiées et corrigées avec leur marge.
+
+---
+
 ## Références
 
 - Breiman, L. (2001). Random Forests. _Machine Learning_, 45, 5–32.

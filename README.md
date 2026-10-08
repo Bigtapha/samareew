@@ -152,12 +152,14 @@ pipeline/            one step = one module, run from the project root
   s4_indicators.py   indicators of every city -> long table + fact sheets in outputs/tables/
   s5_validation.py   validation sample (--draw), accuracy from the labels, second reading (--cover) -> outputs/validation/
   s6_crosscheck.py   comparison with Open Buildings Temporal and GHSL -> outputs/crosscheck/
+  s7_site_data.py    map tiles (PMTiles), boundaries, validation summary, manifest -> outputs/site/
 src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators,
-                     crosscheck, validation
+                     crosscheck, validation, site_data
 tests/               unit tests (pure functions, no Earth Engine needed)
 zones/               frozen study zones (GeoJSON, versioned)
 data/                ignored by git: downloads (data/raw/), training samples, stacks (data/cities/<city>/)
 outputs/             model/ (evaluation), cities/<city>/ (results), tables/ (indicators for the site),
+                     site/ (maps, boundaries and validation for the site), validation/,
                      crosscheck/ (comparison with reference products),
                      legacy_dakar/ (first case study)
 docs/                old Dakar web map (GitHub Pages), to be replaced by the site in J5
@@ -181,6 +183,7 @@ python -m pipeline.s5_validation --draw  # validation sample, once -> outputs/va
 python -m pipeline.s5_validation --cover # second reading sheet (points not built in 2025), once
 python -m pipeline.s5_validation         # accuracy from the labels entered so far
 python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
+python -m pipeline.s7_site_data       # site data: map tiles, boundaries, validation -> outputs/site/
 pytest
 ```
 
@@ -204,6 +207,13 @@ Practical notes:
   labelling, `--cover` prepares a second reading of the points labelled not built in 2025
   (`cover_2025.csv`, `cover_2025.kml`); once it is complete, the report adds a `tolerant`
   section.
+- Step 7 writes everything the site reads besides `outputs/tables/`, listed in
+  `outputs/site/manifest.json` (exchange format 0.2): one PMTiles archive per map layer
+  (paletted PNG tiles, zooms 8-14, about 5 MB for both layers; **ignored by git**, rebuild them
+  with this step), the boundaries as simplified GeoJSON with the unit names of
+  `outputs/tables/units.csv` (`communes.geojson` stays ODbL), and `validation.json`. It checks
+  its own output: tile areas against the 10 m rasters, and boundary areas before and after
+  simplification. Control maps: `data/j5_tiles_<layer>.png`.
 - `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
   tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
   uses a geedim function marked as deprecated: keep the pinned versions until it is updated.

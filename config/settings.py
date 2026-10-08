@@ -86,7 +86,7 @@ MIN_COMMUNE_PART_KM2 = 0.5  # commune pieces smaller than this inside a zone are
 SECTOR_RING_M = 2000
 
 # --- Indicators (step 4, ROADMAP §4.3) -----------------------------------
-FORMAT_VERSION = "0.1"           # version of the exchange format read by the site (ROADMAP §4.2)
+FORMAT_VERSION = "0.2"           # version of the exchange format read by the site (ROADMAP §4.2); 0.2 adds the maps (step 7)
 RING_WIDTH_M = SECTOR_RING_M     # distance rings around the centre, in every city
 # Growth types (Atlas of Urban Expansion): the urban footprint at the start of a period is
 # the urban and suburban built-up area + a fringe of open land + the open spaces it encloses.
@@ -171,6 +171,43 @@ VALIDATION_COVER_CLASSES = {
 # Covers counted as land being urbanised in the tolerant accuracy (the strict one is official)
 VALIDATION_URBANISING = ("partly_built", "construction", "subdivision")
 
+# --- Site data (step 7, ROADMAP §4.1) -----------------------------------
+# Map layers as raster tiles (PNG with a palette, Web Mercator), one PMTiles file per layer
+# for the four cities. Zoom 14 is about the 10 m pixel at Senegal's latitude; the site
+# enlarges it beyond. Lower zooms keep the most common class of the pixels they cover.
+SITE_MIN_ZOOM = 8
+SITE_MAX_ZOOM = 14
+# Classes of each layer: (code in the tiles, label, colour). Code 0 is transparent.
+# Colours checked for colour-blind readers (dataviz validator, 09/10/2026): one orange hue
+# light -> dark for the two periods of new built-up area, a neutral grey for 2016;
+# growth types take the first three categorical slots (blue, orange, aqua).
+SITE_LAYERS = {
+    "urbanisation": {
+        "title": "Bâti par période d'apparition",
+        "source": "urbanisation_year",
+        "breaks": (2016, 2020, 2025),    # built by 2016, then new built-up area per period
+        "classes": [
+            (1, "Bâti en 2016", "#8f8d87"),
+            (2, "Nouveau bâti 2017-2020", "#f19a5f"),
+            (3, "Nouveau bâti 2021-2025", "#b8410e"),
+        ],
+    },
+    "growth_type_2016_2025": {
+        "title": "Type de croissance 2016-2025",
+        "source": "growth_type",
+        "period": (2016, 2025),
+        "classes": [
+            (1, "Densification", "#2a78d6"),
+            (2, "Extension", "#eb6834"),
+            (3, "Saut", "#1baf7a"),
+        ],
+    },
+}
+# Boundaries: simplified in metres (shared edges between communes stay shared), then
+# rounded to SITE_COORD_DECIMALS (5 decimals = about 1 m).
+SITE_SIMPLIFY_M = 15
+SITE_COORD_DECIMALS = 5
+
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
 TRAINING_SAMPLES_CSV = DATA_DIR / "training_samples.csv"   # written by step 1, read by step 2
@@ -205,6 +242,13 @@ VALIDATION_KML = VALIDATION_DIR / "points.kml"            # points and their 10 
 VALIDATION_REPORT_JSON = VALIDATION_DIR / "accuracy.json"
 VALIDATION_COVER_CSV = VALIDATION_DIR / "cover_2025.csv"  # second reading: cover of the points not built at the end
 VALIDATION_COVER_KML = VALIDATION_DIR / "cover_2025.kml"  # the same points, for Google Earth Pro
+
+# Site data (step 7), in outputs/site/: everything the site reads besides outputs/tables/
+SITE_DATA_DIR = OUTPUT_DIR / "site"
+SITE_MANIFEST_JSON = SITE_DATA_DIR / "manifest.json"       # list of files, layers and legends
+SITE_VALIDATION_JSON = SITE_DATA_DIR / "validation.json"   # accuracy and corrected areas, by city
+SITE_TILES_DIR = SITE_DATA_DIR / "tiles"                   # <layer>.pmtiles (ignored by git, rebuilt by step 7)
+SITE_BOUNDARIES_DIR = SITE_DATA_DIR / "boundaries"         # zones, communes, sectors, centres (GeoJSON)
 
 
 def city_data_dir(city: str) -> Path:

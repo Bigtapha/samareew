@@ -40,6 +40,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Unité grand public | **La commune** ; découpage plus fin uniquement si nécessaire (**Touba** : secteurs anneaux × directions ou grille hexagonale) |
 | Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
+| Outils du site | Site **statique** généré par **Astro** (pages HTML légères, JavaScript chargé seulement pour les graphiques et les cartes), graphiques **Observable Plot** (SVG), cartes **MapLibre GL** avec des tuiles **PMTiles** (un fichier par couche, sans serveur) ; hébergement GitHub Pages ; pensé d'abord pour le téléphone et les connexions lentes |
 | Période | Saisons sèches **2016 à 2026** (1er novembre – 31 mai) ; indicateurs publiés **jusqu'à l'avant-dernière année** (2025), la dernière sert de confirmation |
 | Type de croissance | Règle de l'**Atlas of Urban Expansion** : emprise de départ = bâti urbain (≥ 25 % de bâti dans un cercle de 1 km²) + frange de 100 m + trous enclavés < 200 ha ; nouveau bâti dedans = **densification**, nouvel îlot qui la touche = **extension**, sinon **saut** ; par période (2016→2020, 2020→2025, 2016→2025) |
 | Population | **WorldPop Global 2** (R2025A, annuel, 100 m, contraint au bâti, CC BY 4.0) ; RGPH-5 2023 en contrôle sur les communes entièrement dans les zones |
@@ -78,8 +79,8 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 - **Une table « longue »** : `indicateur | ville | commune/secteur | année | valeur`
 - **Une fiche par indicateur** : titre grand public, unité, définition en une phrase, source,
   licence, lien méthode, niveau de fiabilité, palette.
-- **Des cartes par ville** (couches de périodes, tuiles).
-- **Un numéro de version** du format dans les métadonnées.
+- **Des cartes par ville** (couches de périodes, tuiles) : depuis la version 0.2, dans `outputs/site/` (étape 7) : une archive PMTiles par couche pour les quatre villes, les limites en GeoJSON simplifié, le résumé de la validation, et un `manifest.json` qui liste les fichiers, les légendes et les licences.
+- **Un numéro de version** du format dans les métadonnées (`FORMAT_VERSION`, 0.2 depuis le 09/10/2026).
 
 Ajouter une ville = ajouter des lignes. Ajouter un indicateur = ajouter une fiche.
 Le site ne change pas.
@@ -184,7 +185,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 > J3 et J4 peuvent se chevaucher : étiqueter pendant que les indicateurs se construisent.
 
 ### J5 — Site v1
-- [ ] Choisir les outils (générateur statique, bibliothèque de graphiques, MapLibre + PMTiles)
+- [x] Choisir les outils : Astro, Observable Plot, MapLibre GL + PMTiles (§2)
+- [x] Étape 7, données du site (§4.1) : couches cartographiques (année d'urbanisation, types de croissance) en PMTiles et limites (zones, communes, secteurs de Touba) dans `outputs/`, car le site ne lit que `outputs/` ; surfaces corrigées de la validation dans le format d'échange
 - [ ] Gabarit de graphique OWID (onglets, sélection de villes, URL avec état, téléchargement)
 - [ ] Page thème « Expansion urbaine » avec 4 ou 5 points clés
 - [ ] Les graphiques des indicateurs v1
@@ -253,7 +255,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| Outils du site | J5 |
+| _(aucune pour l'instant)_ | |
 
 ---
 
@@ -289,3 +291,4 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 07/10/2026 | Publication après la validation : les tableaux gardent les valeurs de la carte ; les fiches donnent la précision mesurée ; les surfaces corrigées par ville, avec leur marge, sont publiées à côté ; types de croissance indicatifs, année 2025 provisoire | Surface bâtie 2025 juste en moyenne (60 400 ± 7 400 ha corrigés, 61 000 cartographiés) mais nouveau bâti juste à 51 % seulement et saut à 45 % ; les surfaces corrigées sont plus justes en moyenne mais trop incertaines par ville (± 40 % sur le nouveau bâti) pour remplacer la carte |
 | 07/10/2026 | Seconde lecture des 228 points non bâtis en 2025 : occupation du sol dans une liste fermée de 8 codes fixée avant la lecture ; précision « tolérante » où chantier, lotissement non construit et pixel bâti à moins de moitié comptent comme bâti ; la précision stricte reste officielle | Les erreurs du nouveau bâti ne viennent pas de la qualité des images anciennes (précision utilisateur 0,53 sur les seuls points sûrs, contre 0,51) : 67 des 88 erreurs sont des points vus non bâtis sur les images de 2025, probablement des terrains en cours d'urbanisation que Sentinel-2 voit comme du bâti ; pondérer par la confiance aurait biaisé la précision vers le haut sans traiter ce cas |
 | 08/10/2026 | Lotissements (urbanisation en cours) ajoutés aux thèmes à développer après la v1 ; rien ne change dans la carte v1 | La seconde lecture montre qu'un quart du nouveau bâti cartographié est en lotissement non construit ou en chantier, et que la carte ne voit qu'une partie des lotissements (précision producteur tolérante 0,32) |
+| 09/10/2026 | Outils du site : Astro (statique), Observable Plot, MapLibre GL + PMTiles, GitHub Pages | Critères donnés : pratique, maintenable, bon rendu en débit faible et sur téléphone. Astro sert des pages HTML sans JavaScript par défaut et ne charge le code que pour les graphiques et les cartes ; Plot est léger et produit du SVG téléchargeable ; PMTiles évite tout serveur de tuiles. Écartés : Observable Framework (moins de liberté pour un site éditorial à gabarit OWID), Quarto / MkDocs (interactivité trop limitée) |

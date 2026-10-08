@@ -1,0 +1,160 @@
+{
+ "format_version": "0.2",
+ "generated": "2026-10-09",
+ "cities": {
+  "dakar": {
+   "name": "Dakar",
+   "bounds": [
+    -17.53115,
+    14.52751,
+    -17.00364,
+    14.90712
+   ],
+   "centre": [
+    -17.43206,
+    14.66953
+   ]
+  },
+  "touba": {
+   "name": "Touba",
+   "bounds": [
+    -16.00244,
+    14.74807,
+    -15.75432,
+    14.9563
+   ],
+   "centre": [
+    -15.87554,
+    14.86319
+   ]
+  },
+  "thies": {
+   "name": "Thiès",
+   "bounds": [
+    -17.00118,
+    14.67435,
+    -16.738,
+    14.85796
+   ],
+   "centre": [
+    -16.92562,
+    14.79154
+   ]
+  },
+  "mbour": {
+   "name": "Mbour",
+   "bounds": [
+    -17.09396,
+    14.29768,
+    -16.87261,
+    14.56308
+   ],
+   "centre": [
+    -16.9694,
+    14.4078
+   ]
+  }
+ },
+ "tables": {
+  "indicators": "../tables/indicators.json",
+  "values": "../tables/indicators.csv",
+  "units": "../tables/units.csv"
+ },
+ "layers": {
+  "urbanisation": {
+   "title": "Bâti par période d'apparition",
+   "file": "tiles/urbanisation.pmtiles",
+   "type": "raster",
+   "tile_format": "png",
+   "tile_size": 256,
+   "min_zoom": 8,
+   "max_zoom": 14,
+   "bounds": [
+    -17.53559,
+    14.2958,
+    -15.75356,
+    14.95729
+   ],
+   "legend": [
+    {
+     "code": 1,
+     "label": "Bâti en 2016",
+     "color": "#8f8d87"
+    },
+    {
+     "code": 2,
+     "label": "Nouveau bâti 2017-2020",
+     "color": "#f19a5f"
+    },
+    {
+     "code": 3,
+     "label": "Nouveau bâti 2021-2025",
+     "color": "#b8410e"
+    }
+   ],
+   "licence": "CC BY 4.0",
+   "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)"
+  },
+  "growth_type_2016_2025": {
+   "title": "Type de croissance 2016-2025",
+   "file": "tiles/growth_type_2016_2025.pmtiles",
+   "type": "raster",
+   "tile_format": "png",
+   "tile_size": 256,
+   "min_zoom": 8,
+   "max_zoom": 14,
+   "bounds": [
+    -17.53559,
+    14.2958,
+    -15.75356,
+    14.95729
+   ],
+   "legend": [
+    {
+     "code": 1,
+     "label": "Densification",
+     "color": "#2a78d6"
+    },
+    {
+     "code": 2,
+     "label": "Extension",
+     "color": "#eb6834"
+    },
+    {
+     "code": 3,
+     "label": "Saut",
+     "color": "#1baf7a"
+    }
+   ],
+   "licence": "CC BY 4.0",
+   "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)"
+  }
+ },
+ "boundaries": {
+  "zones": {
+   "file": "boundaries/zones.geojson",
+   "licence": "CC BY 4.0",
+   "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)",
+   "features": 4
+  },
+  "communes": {
+   "file": "boundaries/communes.geojson",
+   "licence": "ODbL 1.0",
+   "attribution": "© OpenStreetMap contributors (ODbL)",
+   "features": 81
+  },
+  "sectors": {
+   "file": "boundaries/sectors.geojson",
+   "licence": "CC BY 4.0",
+   "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)",
+   "features": 47
+  },
+  "centres": {
+   "file": "boundaries/centres.geojson",
+   "licence": "CC BY 4.0",
+   "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)",
+   "features": 4
+  }
+ },
+ "validation": "validation.json"
+}
