@@ -113,3 +113,40 @@ def test_encode_webp_round_trip():
     tile[:128, :, 3] = 0
     holed = np.array(Image.open(io.BytesIO(sd.encode_webp(tile, 90))).convert("RGBA"))
     assert holed[0, 0, 3] == 0 and holed[200, 0, 3] == 255
+
+
+def test_crop_to_classes():
+    classes = np.zeros((20, 20), dtype=np.uint8)
+    classes[5, 6] = classes[7, 9] = 1
+    rows, cols = sd.crop_to_classes(classes, margin=1, factor=4)
+    assert (rows.start, cols.start) == (4, 5)
+    assert (rows.stop - rows.start) % 4 == 0 and (cols.stop - cols.start) % 4 == 0
+    assert rows.stop >= 9 and cols.stop >= 11
+    with pytest.raises(ValueError):
+        sd.crop_to_classes(np.zeros((4, 4), dtype=np.uint8), 0, 2)
+
+
+def test_encode_footprint_png_keeps_colours():
+    colors = {1: "#808080", 2: "#ff0000"}
+    rgba = np.zeros((1, 3, 4), dtype=np.uint8)
+    rgba[0, 0] = [128, 128, 128, 255]
+    rgba[0, 1] = [255, 0, 0, 64]
+    back = np.array(Image.open(io.BytesIO(sd.encode_footprint_png(rgba, colors, 8))).convert("RGBA"))
+    assert back[0, 0].tolist() == [128, 128, 128, 255]
+    assert back[0, 1, :3].tolist() == [255, 0, 0] and back[0, 1, 3] == round(255 * 2 / 8)
+    assert back[0, 2, 3] == 0
+
+
+def test_footprint_rgba():
+    colors = {1: "#808080", 2: "#ff0000"}
+    classes = np.zeros((2, 4), dtype=np.uint8)
+    classes[:, 0] = 1                      # block 1: half class 1
+    classes[0, 2:] = 2                     # block 2: 2 x class 2, 1 x class 1
+    classes[1, 2] = 1
+    rgba = sd.footprint_rgba(classes, 2, colors)
+    assert rgba.shape == (1, 2, 4)
+    assert rgba[0, 0].tolist() == [128, 128, 128, 128]          # grey, half opaque
+    assert rgba[0, 1, :3].tolist() == [255, 0, 0]                # majority class 2
+    assert rgba[0, 1, 3] == round(255 * 3 / 4)
+    empty = sd.footprint_rgba(np.zeros((2, 2), dtype=np.uint8), 2, colors)
+    assert empty[0, 0].tolist() == [0, 0, 0, 0]

@@ -216,6 +216,12 @@ SITE_IMAGE_GAMMA = 1.1                       # > 1 lightens the dark tones
 SITE_IMAGE_QUALITY = 70                      # WebP quality (0-100)
 SITE_IMAGE_TIF = "true_colour_{year}.tif"    # data/cities/<city>/: reflectance x 10000 (uint16)
 SITE_IMAGE_NAME = "sentinel2_{year}"         # outputs/site/tiles/<name>.pmtiles
+# City footprints side by side at the same scale (home page, decided 09/10/2026): the classes
+# of the "urbanisation" layer, SITE_FOOTPRINT_M metres per pixel (enough for a phone screen at
+# 2x), cropped to the built-up area plus a margin. Opacity = share of built-up pixels.
+SITE_FOOTPRINT_M = 80
+SITE_FOOTPRINT_MARGIN_M = 1000
+SITE_FOOTPRINT_LEVELS = 8                    # opacity levels of the paletted PNG
 # Boundaries: simplified in metres (shared edges between communes stay shared), then
 # rounded to SITE_COORD_DECIMALS (5 decimals = about 1 m).
 SITE_SIMPLIFY_M = 15

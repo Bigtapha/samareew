@@ -10,7 +10,8 @@ connections:
    same unit names as outputs/tables/units.csv;
 3. the validation results the site shows (accuracy and corrected areas, by city);
 4. a manifest listing files, layers, legends, cities and licences;
-5. the satellite image shown under the layers on request: the true-colour Sentinel-2
+5. the city footprints at the same scale (home page): one small paletted PNG per city;
+6. the satellite image shown under the layers on request: the true-colour Sentinel-2
    composite of SITE_IMAGE_YEAR (same season and cloud mask as the classification) over the
    bounding box of each zone, downloaded once from Earth Engine, as WebP tiles.
 
@@ -18,6 +19,7 @@ Inputs : outputs/cities/<city>/urbanisation_year.tif, growth_type_<start>_<end>.
          zones/*.geojson (step 0), outputs/validation/accuracy.json (step 5)
          Earth Engine (once per city): data/cities/<city>/true_colour_<year>.tif
 Outputs: outputs/site/tiles/<layer>.pmtiles      (ignored by git: rebuilt by this step)
+         outputs/site/footprints/<city>.png
          outputs/site/boundaries/*.geojson
          outputs/site/validation.json, outputs/site/manifest.json
          data/j5_tiles_<layer>.png               control map of the tiles read back
@@ -321,6 +323,38 @@ def image_control_map(tiles: dict, z: int) -> None:
     Image.fromarray(canvas[..., :3]).save(cfg.DATA_DIR / f"j5_tiles_{IMAGE_NAME}.png")
 
 
+# --- 1c. Footprints at the same scale ---------------------------------------------------
+
+def build_footprints() -> dict:
+    """One picture per city of the "urbanisation" classes, SITE_FOOTPRINT_M metres per pixel,
+    cropped to the built-up area: outputs/site/footprints/<city>.png."""
+    layer = cfg.SITE_LAYERS["urbanisation"]
+    colors = {code: color for code, _, color in layer["classes"]}
+    out_dir = cfg.SITE_DATA_DIR / "footprints"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    files = {}
+    for city in cfg.CITIES:
+        classes, transform, _ = layer_classes(city, layer)
+        pixel_m = abs(transform.a)
+        factor = int(round(cfg.SITE_FOOTPRINT_M / pixel_m))
+        rows, cols = sd.crop_to_classes(classes, int(cfg.SITE_FOOTPRINT_MARGIN_M / pixel_m), factor)
+        pad = max(0, -rows.start, -cols.start, rows.stop - classes.shape[0], cols.stop - classes.shape[1])
+        padded = np.pad(classes, pad)
+        crop = padded[rows.start + pad:rows.stop + pad, cols.start + pad:cols.stop + pad]
+        rgba = sd.footprint_rgba(crop, factor, colors)
+        path = out_dir / f"{city}.png"
+        path.write_bytes(sd.encode_footprint_png(rgba, colors, cfg.SITE_FOOTPRINT_LEVELS))
+        # Check: the picture keeps the built-up area (opacity = share of built-up pixels)
+        area_ha = float(rgba[..., 3].astype(float).sum() / 255 * cfg.SITE_FOOTPRINT_M ** 2 / 10_000)
+        source_ha = float((classes > 0).sum() * pixel_m ** 2 / 10_000)
+        files[city] = {"file": f"footprints/{city}.png", "width_px": rgba.shape[1], "height_px": rgba.shape[0],
+                       "width_km": round(rgba.shape[1] * cfg.SITE_FOOTPRINT_M / 1000, 2),
+                       "height_km": round(rgba.shape[0] * cfg.SITE_FOOTPRINT_M / 1000, 2),
+                       "kb": round(path.stat().st_size / 1024, 1),
+                       "area_gap_pct": round(100 * (area_ha / source_ha - 1), 2)}
+    return files
+
+
 # --- 2. Boundaries ---------------------------------------------------------------------
 
 def simplify(gdf: gpd.GeoDataFrame, coverage: bool) -> gpd.GeoDataFrame:
@@ -412,7 +446,7 @@ def build_validation() -> dict:
 
 # --- 4. Manifest -----------------------------------------------------------------------
 
-def build_manifest(layers: dict, image: dict, boundaries: dict) -> None:
+def build_manifest(layers: dict, image: dict, footprints: dict, boundaries: dict) -> None:
     zones = gpd.read_file(cfg.ZONES_GEOJSON)
     centres = gpd.read_file(cfg.ZONES_DIR / "centres.geojson")
     cities = {}
@@ -444,6 +478,10 @@ def build_manifest(layers: dict, image: dict, boundaries: dict) -> None:
             "min_zoom": cfg.SITE_MIN_ZOOM, "max_zoom": cfg.SITE_MAX_ZOOM, "bounds": image["bounds"],
             "cities": image["cities"],
             "licence": "Copernicus (libre, attribution)", "attribution": IMAGE_ATTRIBUTION}},
+        "footprints": {"layer": "urbanisation", "metres_per_pixel": cfg.SITE_FOOTPRINT_M,
+                       "cities": {c: {k: f[k] for k in ("file", "width_px", "height_px", "width_km", "height_km")}
+                                  for c, f in footprints.items()},
+                       "licence": "CC BY 4.0", "attribution": SAMAREEW_ATTRIBUTION},
         "boundaries": boundaries,
         "validation": "validation.json",
     }
@@ -459,6 +497,9 @@ def main(refresh: bool) -> None:
         print(f"{name}: {sum(stats['tiles'].values())} tiles, {stats['bytes'] / 1e6:.1f} MB "
               f"(per zoom: {stats['tiles']})")
         print(check_layer(name, layer, zones).to_string(index=False))
+    footprints = build_footprints()
+    print("footprints:", {c: f"{f['width_px']}x{f['height_px']} px, {f['kb']} kB, area {f['area_gap_pct']:+} %"
+                          for c, f in footprints.items()})
     image = build_image(refresh)
     print(f"{IMAGE_NAME}: {sum(image['tiles'].values())} tiles, {image['bytes'] / 1e6:.1f} MB, "
           f"{image['mean_tile_kb']} kB per tile (per zoom: {image['tiles']})")
@@ -466,7 +507,7 @@ def main(refresh: bool) -> None:
     print(check_boundaries().to_string(index=False))
     validation = build_validation()
     print(f"validation: {len(validation['cities'])} cities + national")
-    build_manifest(layers, image, boundaries)
+    build_manifest(layers, image, footprints, boundaries)
     print(f"-> {cfg.SITE_DATA_DIR}")
 
 

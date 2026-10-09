@@ -936,16 +936,34 @@ téléchargé tant qu'on ne l'affiche pas, et les couches passent alors à 60 % 
   téléchargées sont en cache dans `data/cities/<ville>/true_colour_2025.tif`
   (`--refresh` pour les retélécharger).
 
-**Au dernier calcul** (09/10/2026) : 613 tuiles, **2,6 Mo** pour Touba, Thiès et Mbour ; au
-zoom 14, une tuile pèse 4,6 Ko en médiane (11 Ko au plus, en ville dense), soit 100 à 220 Ko
-pour un écran de téléphone tout zoomé, environ 30 Ko pour la vue d'ensemble d'une ville.
-Contrôle à l'œil des tuiles relues (`data/j5_image_tile_check.png`) : routes, Grande Mosquée
-et parcellaire lisibles à Touba. **Dakar manque encore** : le quota mensuel gratuit d'Earth
-Engine du projet était épuisé (mode restreint jusqu'au 1er novembre) ; son image est
-exportée vers Google Drive (`python -m pipeline.s7_site_data --drive dakar`) et la page de
-Dakar l'indique en attendant.
+**Au dernier calcul** (09/10/2026) : 1 223 tuiles, **4,8 Mo** pour les quatre villes ; au
+zoom 14, une tuile pèse environ 4,6 Ko en médiane (11 Ko au plus, en ville dense), soit 100 à
+220 Ko pour un écran de téléphone tout zoomé, environ 30 Ko pour la vue d'ensemble d'une
+ville. Contrôle à l'œil des tuiles relues (`data/j5_image_tile_check.png`,
+`data/j5_tiles_sentinel2_2025.png`) : routes, Grande Mosquée et parcellaire lisibles à
+Touba ; couleurs semblables d'une ville à l'autre. Le quota mensuel gratuit d'Earth Engine
+étant épuisé (mode restreint jusqu'au 1er novembre), l'image de **Dakar** a été exportée
+vers Google Drive (`python -m pipeline.s7_site_data --drive dakar`), même image et même
+emprise, puis déposée dans `data/cities/dakar/`.
 
-### 15.3 Limites
+### 15.3 Les villes à la même échelle
+
+L'accueil montre les quatre villes côte à côte, à la même échelle (`SITE_FOOTPRINT_*`,
+décision du 09/10/2026), avec les classes et les couleurs de la couche `urbanisation` (bâti
+en 2016, nouveau bâti 2017-2020, 2021-2025). Une image par ville
+(`outputs/site/footprints/<ville>.png`) :
+
+- **80 m par pixel** (blocs de 8 × 8 pixels de 10 m, en UTM 28N), recadrée sur le bâti plus
+  1 km de marge ; sur le site, chaque image a une largeur proportionnelle aux kilomètres
+  qu'elle couvre, avec une barre d'échelle de 10 km ;
+- chaque pixel prend la **classe la plus fréquente** de son bloc et une **opacité égale à la
+  part de pixels bâtis** : le bâti épars reste visible, plus pâle, au lieu de disparaître (mode)
+  ou de tout remplir ; la surface bâtie est conservée (écart de 0,00 à 0,05 % avec les rasters
+  de 10 m) ;
+- **PNG à palette** (3 couleurs × 8 niveaux d'opacité) : 45 Ko pour Dakar, 14 à 16 Ko pour
+  les autres, 91 Ko en tout (225 Ko en WebP), images chargées en différé.
+
+### 15.4 Limites
 
 Zones, communes et secteurs de Touba en GeoJSON (EPSG:4326), avec les noms d'unités de
 `outputs/tables/units.csv` (`city`, `unit_type`, `unit`, `label`), plus les centres.
@@ -955,7 +973,7 @@ identiques (ni trou ni chevauchement) ; coordonnées arrondies à 5 décimales (
 Résultat : surfaces modifiées de moins de 0,1 %, chevauchement nul, communes 138 Ko au lieu
 de 660 Ko. `communes.geojson` reste sous **ODbL** (© OpenStreetMap contributors).
 
-### 15.4 Validation
+### 15.5 Validation
 
 `validation.json` reprend, pour chaque ville et pour les quatre villes, ce que le site
 montre de §14.4 : précision globale, précision bâti / non bâti en 2016 et 2025, précisions

@@ -142,12 +142,13 @@
    "min_zoom": 8,
    "max_zoom": 14,
    "bounds": [
-    -17.0945,
+    -17.53304,
     14.29618,
     -15.75394,
     14.95684
    ],
    "cities": [
+    "dakar",
     "touba",
     "thies",
     "mbour"
@@ -155,6 +156,42 @@
    "licence": "Copernicus (libre, attribution)",
    "attribution": "Contient des données Copernicus Sentinel modifiées (2025), SamaReew"
   }
+ },
+ "footprints": {
+  "layer": "urbanisation",
+  "metres_per_pixel": 80,
+  "cities": {
+   "dakar": {
+    "file": "footprints/dakar.png",
+    "width_px": 734,
+    "height_px": 551,
+    "width_km": 58.72,
+    "height_km": 44.08
+   },
+   "touba": {
+    "file": "footprints/touba.png",
+    "width_px": 357,
+    "height_px": 310,
+    "width_km": 28.56,
+    "height_km": 24.8
+   },
+   "thies": {
+    "file": "footprints/thies.png",
+    "width_px": 378,
+    "height_px": 280,
+    "width_km": 30.24,
+    "height_km": 22.4
+   },
+   "mbour": {
+    "file": "footprints/mbour.png",
+    "width_px": 321,
+    "height_px": 394,
+    "width_km": 25.68,
+    "height_km": 31.52
+   }
+  },
+  "licence": "CC BY 4.0",
+  "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)"
  },
  "boundaries": {
   "zones": {

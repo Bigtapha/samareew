@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { catalogue, cities } from "../lib/outputs";
+import { catalogue, cities, manifest } from "../lib/outputs";
 import { value } from "../lib/facts";
 import { formatValue } from "../lib/format";
 import { CITY_COLORS } from "../config";
@@ -13,6 +13,12 @@ const stats = cities.map((c) => {
   return { ...c, start: a, end: b, growth: Math.round(100 * (b / a - 1)) };
 });
 const total = (k: "start" | "end") => stats.reduce((s, c) => s + c[k], 0);
+
+// Footprints at the same scale: each picture's width is proportional to the ground it covers.
+const footprints = manifest.footprints;
+const legend = footprints ? manifest.layers[footprints.layer].legend : [];
+const maxKm = footprints ? Math.max(...Object.values(footprints.cities).map((f: any) => f.width_km)) : 1;
+const SCALE_KM = 10;
 const spanWords: Record<number, string> = { 9: "neuf", 10: "dix", 11: "onze", 12: "douze" };
 const span = `${spanWords[last - first] ?? last - first} ans`;
 ---
@@ -26,6 +32,29 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
     </p>
     <p><a class="button" href={`${base}/expansion-urbaine`}>Lire les points clés</a></p>
   </section>
+
+  {footprints && (
+    <section class="footprints-block" aria-labelledby="echelle">
+      <h2 id="echelle">Les quatre villes à la même échelle</h2>
+      <p class="muted small">Surface bâtie en {first}, puis nouveau bâti jusqu'en {last}, d'après les images satellite.</p>
+      <ul class="legend-inline small">
+        {legend.map((l: any) => <li><span class="swatch" style={`background:${l.color}`}></span>{l.label}</li>)}
+      </ul>
+      <div class="footprints" style={`--max-km:${maxKm}`}>
+        {stats.map((c) => {
+          const f = footprints.cities[c.slug];
+          return (
+            <a class="footprint" href={`${base}/villes/${c.slug}`} style={`--km:${f.width_km}`}>
+              <img src={`${base}/data/${f.file}`} width={f.width_px} height={f.height_px} loading="lazy" decoding="async"
+                alt={`Tache bâtie de ${c.name} : ${formatValue(c.start, "ha")} ha en ${first}, ${formatValue(c.end, "ha")} ha en ${last}`} />
+              <span><strong>{c.name}</strong> <span class="muted small">+{c.growth}&#8239;%</span></span>
+            </a>
+          );
+        })}
+      </div>
+      <div class="scale small muted" style={`--km:${SCALE_KM}; --max-km:${maxKm}`}><span class="bar"></span>{SCALE_KM} km</div>
+    </section>
+  )}
 
   <h2>Les villes</h2>
   <ul class="cities">
@@ -54,5 +83,16 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
   .cities { list-style: none; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
   .cities a { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.9rem 1rem; height: 100%; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--city); border-radius: var(--radius); color: var(--text); text-decoration: none; }
   .cities a:hover { border-color: var(--muted); border-top-color: var(--city); }
+  /* Same scale: px per km = the smaller of "Dakar fills the width" and a cap for large screens */
+  .footprints-block { container-type: inline-size; }
+  .footprints, .scale { --px-km: min(calc(100cqw / var(--max-km)), 10.5px); }
+  .footprints { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1rem 0.75rem; }
+  .footprint { width: calc(var(--km) * var(--px-km)); display: flex; flex-direction: column; gap: 0.2rem; color: var(--text); text-decoration: none; }
+  .footprint img { width: 100%; height: auto; display: block; }
+  .footprint:hover strong { text-decoration: underline; }
+  .scale { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+  .scale .bar { display: inline-block; width: calc(var(--km) * var(--px-km)); height: 6px; border: 1px solid var(--muted); border-top: 0; }
+  .legend-inline { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; list-style: none; padding: 0; margin: 0 0 0.75rem; }
+  .legend-inline li { display: inline-flex; align-items: center; gap: 0.35rem; }
   .big { font-size: 1.8rem; font-weight: 700; line-height: 1.1; color: var(--city); }
 </style>

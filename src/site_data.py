@@ -114,6 +114,62 @@ def encode_webp(tile: np.ndarray, quality: int) -> bytes:
     return out.getvalue()
 
 
+def crop_to_classes(classes: np.ndarray, margin: int, factor: int) -> tuple:
+    """Row and column slices around the non-zero pixels, plus ``margin`` pixels, with sizes
+    rounded up to a multiple of ``factor`` (the crop may run past the raster: pad it)."""
+    rows, cols = np.nonzero(classes)
+    if not len(rows):
+        raise ValueError("no class pixel to crop to")
+    r0, c0 = rows.min() - margin, cols.min() - margin
+    r1, c1 = rows.max() + 1 + margin, cols.max() + 1 + margin
+    r1 = r0 + -(-(r1 - r0) // factor) * factor
+    c1 = c0 + -(-(c1 - c0) // factor) * factor
+    return slice(r0, r1), slice(c0, c1)
+
+
+def footprint_rgba(classes: np.ndarray, factor: int, colors: dict) -> np.ndarray:
+    """Small RGBA picture of a class raster, ``factor`` times coarser: each output pixel takes
+    the colour of its most common class and an opacity equal to its share of class pixels,
+    so that sparse built-up areas look lighter rather than disappearing or filling up.
+
+    ``classes`` (rows and cols multiples of ``factor``) holds codes 0 (empty) to n;
+    ``colors`` = {code: "#rrggbb"}.
+    """
+    rows, cols = classes.shape
+    if rows % factor or cols % factor:
+        raise ValueError("the raster must be a whole number of blocks")
+    blocks = classes.reshape(rows // factor, factor, cols // factor, factor).swapaxes(1, 2)
+    codes = sorted(colors)
+    counts = np.stack([(blocks == c).sum(axis=(2, 3)) for c in codes])      # (n, rows', cols')
+    total = counts.sum(axis=0)
+    rgba = np.zeros(total.shape + (4,), dtype=np.uint8)
+    palette = np.array([[int(colors[c][i:i + 2], 16) for i in (1, 3, 5)] for c in codes], dtype=np.uint8)
+    rgba[..., :3] = palette[counts.argmax(axis=0)]
+    rgba[..., 3] = np.round(255 * total / factor ** 2).astype(np.uint8)
+    rgba[total == 0, :3] = 0
+    return rgba
+
+
+def encode_footprint_png(rgba: np.ndarray, colors: dict, levels: int) -> bytes:
+    """Paletted PNG of a footprint: the exact class colours, each at ``levels`` opacities
+    (index 0 transparent). Much smaller than RGBA for a picture with few colours."""
+    codes = sorted(colors)
+    rgb = np.array([[int(colors[c][i:i + 2], 16) for i in (1, 3, 5)] for c in codes], dtype=np.uint8)
+    match = (rgba[..., None, :3] == rgb).all(axis=-1)                 # (rows, cols, n)
+    level = np.round(rgba[..., 3].astype(float) / 255 * levels).astype(int)   # 0 .. levels
+    index = np.where((level > 0) & match.any(axis=-1), 1 + match.argmax(axis=-1) * levels + level - 1, 0)
+    palette, alpha = [0, 0, 0], [0]
+    for color in rgb:
+        for k in range(1, levels + 1):
+            palette += color.tolist()
+            alpha.append(round(255 * k / levels))
+    image = Image.fromarray(index.astype(np.uint8), mode="P")
+    image.putpalette(palette + [0, 0, 0] * (256 - len(palette) // 3))
+    out = io.BytesIO()
+    image.save(out, format="PNG", optimize=True, transparency=bytes(alpha))
+    return out.getvalue()
+
+
 def ground_pixel_area_m2(z: int, lat: np.ndarray) -> np.ndarray:
     """Ground area of one tile pixel at zoom ``z`` and latitude ``lat`` (degrees): Web Mercator
     stretches distances by 1 / cos(lat)."""

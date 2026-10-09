@@ -21,6 +21,7 @@ const files = [
   ["site/" + manifest.validation, manifest.validation],
   ...Object.values(manifest.layers).map((l) => ["site/" + l.file, l.file]),
   ...Object.values(manifest.images ?? {}).map((l) => ["site/" + l.file, l.file]),
+  ...Object.values(manifest.footprints?.cities ?? {}).map((f) => ["site/" + f.file, f.file]),
   ...Object.values(manifest.boundaries).map((b) => ["site/" + b.file, b.file]),
   ["tables/indicators.json", "tables/indicators.json"],
   ["tables/indicators.csv", "tables/indicators.csv"],
