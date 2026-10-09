@@ -269,6 +269,16 @@ SITE_VALIDATION_JSON = SITE_DATA_DIR / "validation.json"   # accuracy and correc
 SITE_TILES_DIR = SITE_DATA_DIR / "tiles"                   # <layer>.pmtiles (ignored by git, rebuilt by step 7)
 SITE_BOUNDARIES_DIR = SITE_DATA_DIR / "boundaries"         # zones, communes, sectors, centres (GeoJSON)
 
+# Release (step 8, J6): two assets attached to a GitHub release tagged v<RELEASE_VERSION>.
+# Asset names do not change from one release to the next, so that
+# <REPO_URL>/releases/latest/download/<asset> is a stable link (data page, deployment).
+REPO_URL = "https://github.com/Bigtapha/samareew"
+RELEASE_VERSION = "1.0.0"                     # bump at each new release of the data
+RELEASE_DIR = DATA_DIR / "release"            # where step 8 writes the assets
+RELEASE_DATA_ZIP = "samareew-data.zip"        # downloadable data (CC BY 4.0, communes ODbL)
+RELEASE_SITE_ASSETS = "site-assets.tar.gz"    # map archives ignored by git, for the deployment
+SITE_BASEMAP_DIR = ROOT / "site" / "public" / "basemap"   # built by `npm run basemap` in site/
+
 
 def city_data_dir(city: str) -> Path:
     return DATA_DIR / "cities" / city

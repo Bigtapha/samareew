@@ -1,0 +1,63 @@
+# Build the site and deploy it to GitHub Pages (https://bigtapha.github.io/samareew/).
+# The map archives (.pmtiles) are ignored by git: they come from site-assets.tar.gz in the
+# latest release (written by `python -m pipeline.s8_release`), extracted at the repository root.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "outputs/**", ".github/workflows/deploy.yml"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Map archives from the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern site-assets.tar.gz --pattern SHA256SUMS
+          sha256sum --check --ignore-missing SHA256SUMS
+          tar -xzf site-assets.tar.gz
+          rm site-assets.tar.gz SHA256SUMS
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Build
+        working-directory: site
+        run: |
+          npm ci
+          npm run check
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

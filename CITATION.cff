@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use SamaReew data or code, please cite it as below."
+title: "SamaReew: urban expansion in Senegalese cities, 2016–2025"
+abstract: >-
+  Open-data atlas comparing Senegalese cities (Dakar, Touba, Thiès, Mbour). Built-up
+  areas are mapped every year from Sentinel-2 imagery with Google Earth Engine and one
+  national Random Forest model, cleaned with a temporal consistency filter and checked by
+  an independent accuracy assessment of 480 photo-interpreted points.
+type: software
+authors:
+  - family-names: Cisse
+    given-names: Moustapha
+version: 1.0.0
+date-released: 2026-10-09
+repository-code: "https://github.com/Bigtapha/samareew"
+url: "https://bigtapha.github.io/samareew/"
+license:
+  - MIT
+  - CC-BY-4.0
+keywords:
+  - urban expansion
+  - Senegal
+  - Sentinel-2
+  - Google Earth Engine
+  - remote sensing
+  - open data

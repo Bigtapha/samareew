@@ -213,9 +213,12 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 
 ### J6 — Publication
 - [ ] Rendre public le dépôt GitHub (vérifier avant qu'aucun secret ni fichier lourd n'y figure)
-- [ ] Déploiement (GitHub Pages) ; les archives PMTiles ne sont pas dans git : les reconstruire avec l'étape 7 et `npm run basemap` au déploiement, ou les publier en release
-- [ ] Données téléchargeables publiées (releases)
-- [ ] README mis à jour, avec la manière de citer le projet
+- [x] Audit avant publication (09/10/2026) : aucun secret, chemin personnel ni gros fichier dans tout l'historique (plus gros fichier 2 Mo, dépôt 8,8 Mo) ; ancienne carte web de Dakar (`docs/`) retirée ; `sample_key.csv` publié (validation terminée)
+- [x] Étape 8, `python -m pipeline.s8_release` : `samareew-data.zip` (tableaux, GeoTIFF par ville, limites, validation et étiquettes, contrôle croisé, README, licence, citation ; 6 Mo) et `site-assets.tar.gz` (PMTiles de l'étape 7 et fond de carte ; 22,5 Mo), avec `SHA256SUMS` ; noms fixes pour que `releases/latest/download/…` reste un lien valable
+- [x] Workflow `.github/workflows/deploy.yml` : récupère `site-assets.tar.gz` dans la dernière release, vérifie la somme, `npm ci`, `check`, `build`, déploie sur Pages ; simulé dans un clone propre (25 pages construites)
+- [ ] Déploiement (GitHub Pages) : réglage Pages « source : GitHub Actions », après la première release
+- [ ] Données téléchargeables publiées : release `v1.0.0` (commande affichée par l'étape 8) ; lien « Toutes les données (ZIP) » déjà sur la page Données & méthode
+- [x] README mis à jour, avec la manière de citer le projet ; `CITATION.cff` (bouton « Cite this repository » de GitHub)
 - [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)
 
 **Critère de fin** : le site est en ligne et partageable.
@@ -313,3 +316,4 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 09/10/2026 | Image satellite sous les couches des cartes : notre composite Sentinel-2 2025 (10 m, couleurs naturelles), désactivée par défaut ; curseur avant / après 2016-2025 gardé pour après la v1 | On voit ce que le modèle a vu, et les lotissements qui expliquent l'avance du nouveau bâti sur les toits (§14.4 de METHODOLOGIE) ; même saison et mêmes images que la carte, licence Copernicus libre, servie avec le site. Rien n'est chargé tant qu'on ne l'affiche pas. Écartés : imageries très fines (Esri, Google, Bing, Mapbox : clé ou conditions restrictives), EOX Sentinel-2 Cloudless (licence non commerciale, année différente), OpenAerialMap (couverture éparse) |
 | 09/10/2026 | Accueil : les quatre villes à la même échelle (silhouettes du bâti) plutôt qu'une carte du Sénégal à cercles, pour l'instant | Plus parlant pour comparer les villes (Dakar face aux trois autres, et où chacune a poussé) ; images légères (PNG à palette, 80 m par pixel, 91 Ko pour les quatre) ; la carte à cercles en SVG reste possible en complément. Écartée sur l'accueil : une carte MapLibre (environ 500 Ko, 13 s en 3G) |
 | 09/10/2026 | Encoche de la zone de Dakar entre le lac Rose et Kayar : laissée telle quelle pour la v1, à revoir après | Elle découle de la règle commune des zones (§2), pas d'une erreur de carte ; la corriger demande de changer la règle pour les quatre villes, de reclasser (quota Earth Engine épuisé jusqu'au 1er novembre) et de recalculer la validation |
+| 09/10/2026 | Déploiement : archives PMTiles (couches et fond de carte) jointes à chaque release dans `site-assets.tar.gz`, site construit et déployé par GitHub Actions | L'étape 7 ne peut pas tourner dans GitHub Actions (GeoTIFF de `data/`) ; une release rend le déploiement reproductible sans alourdir l'historique git (25 Mo à chaque mise à jour) ; écartés : construire en local et pousser `dist/` (déploiement lié à une machine), versionner les PMTiles |

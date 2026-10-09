@@ -11,6 +11,10 @@ export const CITY_COLORS: Record<string, string> = {
 /** Methodology links point to the repository until the site has its own method pages. */
 export const REPO_URL = "https://github.com/Bigtapha/samareew";
 export const METHOD_URL = `${REPO_URL}/blob/main/METHODOLOGIE.md`;
+/** Assets of the latest release (step 8): the names never change, so these links stay valid. */
+export const DATA_ZIP_URL = `${REPO_URL}/releases/latest/download/samareew-data.zip`;
+export const RELEASES_URL = `${REPO_URL}/releases`;
+export const AUTHOR = "Moustapha Cisse";
 
 /** Unit types shown in the chart template, in the order of the "Niveau" menu. */
 export const TEMPLATE_UNIT_TYPES = ["city", "commune", "sector", "direction", "ring"] as const;

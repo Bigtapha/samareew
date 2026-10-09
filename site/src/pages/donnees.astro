@@ -3,7 +3,7 @@
 import Base from "../layouts/Base.astro";
 import { catalogue, cities, manifest, validation } from "../lib/outputs";
 import { formatValue } from "../lib/format";
-import { METHOD_URL, REPO_URL } from "../config";
+import { AUTHOR, DATA_ZIP_URL, METHOD_URL, RELEASES_URL, REPO_URL } from "../config";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
@@ -78,12 +78,19 @@ const limits = [
   </p>
 
   <h2 id="telecharger">Télécharger</h2>
+  <p>
+    <a href={DATA_ZIP_URL}><strong>Toutes les données (ZIP, 6 Mo)</strong></a> : tableaux, cartes de chaque ville en
+    GeoTIFF (année d'urbanisation et types de croissance, pixels de 10 m), limites, échantillon de validation avec ses
+    étiquettes, contrôle croisé, avec la note de méthode. <a href={RELEASES_URL}>Versions précédentes</a>.
+  </p>
+  <p class="small muted">Ou fichier par fichier :</p>
   <ul class="downloads">
     {downloads.map((d) => <li><a href={base + d.href} download>{d.label}</a> <span class="muted small">— {d.note}</span></li>)}
     <li><a href={`${base}/graphiques`}>Un fichier CSV par graphique</a> <span class="muted small">— onglet « Télécharger » de chaque graphique</span></li>
   </ul>
   <p class="small muted">
-    Les cartes (archives PMTiles des couches{image ? " et de l'image satellite" : ""}) se reconstruisent avec le code :{" "}
+    Les archives PMTiles des cartes du site (couches{image ? ", image satellite" : ""} et fond de carte) sont jointes à
+    chaque <a href={RELEASES_URL}>version</a> (site-assets.tar.gz) ; tout se reconstruit avec le code du{" "}
     <a href={REPO_URL}>dépôt du projet</a>.
   </p>
 
@@ -144,7 +151,7 @@ const limits = [
 
   <h2 id="citer">Citer</h2>
   <p class="cite">
-    SamaReew ({new Date(catalogue.generated).getFullYear()}). <em>Expansion urbaine de Dakar, Touba, Thiès et Mbour, {first}–{last}</em>.
+    {AUTHOR} ({new Date(catalogue.generated).getFullYear()}). SamaReew : <em>Expansion urbaine de Dakar, Touba, Thiès et Mbour, {first}–{last}</em>.
     Données CC BY 4.0, d'après Copernicus Sentinel-2. {REPO_URL}
   </p>
 </Base>

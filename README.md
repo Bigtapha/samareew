@@ -21,7 +21,7 @@ read it first.
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
 | J4 — National validation (480 photo-interpreted points) | Done |
 | J5 — Website v1 | Done: all pages of ROADMAP §4.5 in `site/` (home with the cities at the same scale, theme page, one chart page per indicator, 4 city fact sheets, data & method, about), tested on mobile and slow connections |
-| **J6 — Publication** | **Next**: public repository, GitHub Pages deployment, downloadable data, first story |
+| **J6 — Publication** | **In progress**: release of the data (step 8) and GitHub Pages deployment ready; public repository, first release and first story to come |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
 
@@ -94,6 +94,18 @@ about 500 kB the first time (MapLibre), so city maps load only when scrolled to.
 proportional circles is optional. **Next step (J6)**: make the repository public, deploy on
 GitHub Pages (rebuilding the `.pmtiles` with step 7 and `npm run basemap`), publish the data
 and a first story (ROADMAP J6).
+
+## Data and citation
+
+- **Website**: https://bigtapha.github.io/samareew/
+- **All the data** in one archive (6 MB): [`samareew-data.zip`](https://github.com/Bigtapha/samareew/releases/latest/download/samareew-data.zip)
+  from the [latest release](https://github.com/Bigtapha/samareew/releases/latest): indicator
+  tables, GeoTIFF rasters by city (year of urbanisation, growth types, 10 m), boundaries,
+  validation sample with its labels, cross-check, with a README and the method notes.
+- **How to cite** (see also [`CITATION.cff`](CITATION.cff), or "Cite this repository" on GitHub):
+
+  > Cisse, M. (2026). *SamaReew: urban expansion in Senegalese cities, 2016–2025* (version 1.0.0)
+  > [Data and code]. https://github.com/Bigtapha/samareew. Data CC BY 4.0, code MIT.
 
 ## Study zones
 
@@ -172,8 +184,9 @@ pipeline/            one step = one module, run from the project root
   s5_validation.py   validation sample (--draw), accuracy from the labels, second reading (--cover) -> outputs/validation/
   s6_crosscheck.py   comparison with Open Buildings Temporal and GHSL -> outputs/crosscheck/
   s7_site_data.py    map tiles (PMTiles), boundaries, validation summary, manifest -> outputs/site/
+  s8_release.py      release assets: data archive + map archives for the deployment -> data/release/
 src/                 reusable functions: gee_utils (Earth Engine), postprocess, zones, indicators,
-                     crosscheck, validation, site_data
+                     crosscheck, validation, site_data, release
 tests/               unit tests (pure functions, no Earth Engine needed)
 zones/               frozen study zones (GeoJSON, versioned)
 data/                ignored by git: downloads (data/raw/), training samples, stacks (data/cities/<city>/)
@@ -188,7 +201,8 @@ site/                public website (Astro), reads only outputs/
   src/lib/           build-time reading of outputs/ (outputs, facts), chart drawing (charts), formatting
   src/pages/         expansion-urbaine, graphiques/<indicator> (+ CSV), villes/<city>, donnees, a-propos
   src/scripts/       browser code: chart template, maps
-docs/                old Dakar web map (GitHub Pages), to be replaced by the site in J5
+.github/workflows/   deploy.yml: builds site/ and deploys it to GitHub Pages
+CITATION.cff         how to cite the project
 ```
 
 ## How to run
@@ -211,6 +225,7 @@ python -m pipeline.s5_validation         # accuracy from the labels entered so f
 python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
 python -m pipeline.s7_site_data       # site data: map tiles, satellite image, boundaries, validation -> outputs/site/
 python -m pipeline.s7_site_data --drive dakar  # export one city's image to Google Drive (Earth Engine quota)
+python -m pipeline.s8_release         # release assets -> data/release/ (after step 7 and npm run basemap)
 pytest
 
 # website (Node 24: https://github.com/nvm-sh/nvm, then `nvm install` in site/)
@@ -256,6 +271,17 @@ Practical notes:
   the latest Protomaps daily build over the cities' bounds (zooms 0-14), with its glyphs and
   sprites, so that no map request leaves the site; rerun `npm run basemap` to refresh it or
   after adding a city.
+- **Release and deployment.** Step 8 writes the two assets of a GitHub release into
+  `data/release/`: `samareew-data.zip` (the downloadable data, with a README, the licence and
+  `CITATION.cff`) and `site-assets.tar.gz` (the `.pmtiles` archives of step 7 and the basemap,
+  which git ignores), plus `SHA256SUMS`. Asset names never change, so
+  `.../releases/latest/download/<asset>` stays a valid link. To publish a new version: bump
+  `RELEASE_VERSION` in `config/settings.py` and `version` / `date-released` in `CITATION.cff`,
+  commit and push, run step 8, then `gh release create v<version>` with the three files (the
+  step prints the command). The workflow `.github/workflows/deploy.yml` then builds the site
+  with the map archives of the latest release and deploys it to GitHub Pages; it also runs on
+  every push to `main` that changes `site/` or `outputs/` (repository setting: Pages, source
+  "GitHub Actions").
 - `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
   tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
   uses a geedim function marked as deprecated: keep the pinned versions until it is updated.

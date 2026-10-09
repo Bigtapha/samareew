@@ -36,7 +36,9 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
   (decided 09/10/2026): Astro, Observable Plot, MapLibre GL + PMTiles; mobile first, slow
   connections. Entry points: `outputs/site/manifest.json` and `outputs/tables/indicators.json`.
   The `.pmtiles` archives are ignored by git: rebuild them with step 7 (data layers) and
-  `npm run basemap` in `site/` (basemap, needs the `pmtiles` CLI, in `~/.local/bin`). Node 24 via
+  `npm run basemap` in `site/` (basemap, needs the `pmtiles` CLI, in `~/.local/bin`); step 8
+  packs them into `site-assets.tar.gz`, which the deployment workflow downloads from the
+  latest GitHub release (`.github/workflows/deploy.yml`). Node 24 via
   nvm (`nvm use` in `site/`, `.nvmrc`); the system Node 20 is too old for Astro 7.
 - Large files (GeoTIFF, tiles) never go into git (`*.tif` and `data/` are ignored).
 - Licences: code MIT, produced data CC BY 4.0, `zones/communes.geojson` ODbL (OSM-derived).
@@ -57,6 +59,7 @@ python -m pipeline.s4_indicators   # all cities -> outputs/tables/ (+ data/world
 python -m pipeline.s5_validation   # --draw once (sample), accuracy from labels.csv; --cover once (second reading)
 python -m pipeline.s6_crosscheck   # Open Buildings, GHSL, census -> outputs/crosscheck/ (after s4)
 python -m pipeline.s7_site_data    # map tiles, boundaries, validation -> outputs/site/ (after s4, s5)
+python -m pipeline.s8_release       # release assets -> data/release/ (after s7 and npm run basemap)
 pytest
 
 cd site && nvm use        # Node 24
