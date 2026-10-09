@@ -1,0 +1,160 @@
+---
+// Data & method: downloads, sources and licences, validation, limits, how to cite.
+import Base from "../layouts/Base.astro";
+import { catalogue, cities, manifest, validation } from "../lib/outputs";
+import { formatValue } from "../lib/format";
+import { METHOD_URL, REPO_URL } from "../config";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
+const pct = (x: { estimate: number; margin95: number }) =>
+  `${Math.round(100 * x.estimate)} ± ${Math.round(100 * x.margin95)}`;
+const ha = (x: { estimate: number; margin95: number }) =>
+  `${formatValue(x.estimate, "ha")} ± ${formatValue(x.margin95, "ha")}`;
+const image = Object.values(manifest.images ?? {})[0] as any;
+
+const downloads = [
+  { href: "/data/tables/indicators.csv", label: "Tous les indicateurs (CSV)", note: "table longue : indicateur, ville, unité, année, valeur" },
+  { href: "/data/tables/indicators.json", label: "Fiches des indicateurs (JSON)", note: "titre, unité, définition, sources, fiabilité" },
+  { href: "/data/tables/units.csv", label: "Unités (CSV)", note: "villes, communes, secteurs, directions, anneaux, avec leur surface" },
+  { href: `/data/${manifest.boundaries.zones.file}`, label: "Zones d'étude (GeoJSON)", note: manifest.boundaries.zones.licence },
+  { href: `/data/${manifest.boundaries.communes.file}`, label: "Communes (GeoJSON)", note: `${manifest.boundaries.communes.licence}, d'après OpenStreetMap` },
+  { href: `/data/${manifest.boundaries.sectors.file}`, label: "Secteurs de Touba (GeoJSON)", note: manifest.boundaries.sectors.licence },
+  { href: `/data/${manifest.validation}`, label: "Résultats de la validation (JSON)", note: "précisions et surfaces corrigées, par ville" },
+];
+
+const sources = [
+  ["Images satellite", "Copernicus Sentinel-2 (ESA), 2016–2026, via Google Earth Engine", "Libre, attribution « Contient des données Copernicus Sentinel modifiées »"],
+  ["Cartes, tableaux et indicateurs produits", "SamaReew", "CC BY 4.0"],
+  ["Population annuelle (villes)", catalogue.sources.worldpop.name, catalogue.sources.worldpop.licence],
+  ["Population recensée (communes)", catalogue.sources.ansd.name, catalogue.sources.ansd.licence],
+  ["Enveloppe des villes", "GHSL, degré d'urbanisation 2025 (Commission européenne, JRC)", "CC BY 4.0"],
+  ["Limites des communes", "© contributeurs OpenStreetMap, corrigées automatiquement", "ODbL 1.0"],
+  ["Étiquettes d'entraînement", "ESA WorldCover 2021, Google Dynamic World", "CC BY 4.0"],
+  ["Fond de carte", "Protomaps, d'après © contributeurs OpenStreetMap", "ODbL 1.0 (polices OFL, icônes MIT)"],
+  ["Code", "SamaReew", "MIT"],
+];
+
+const limits = [
+  "À 10 m, Sentinel-2 voit des groupes de bâtiments, pas les maisons : les constructions isolées ou très petites peuvent manquer.",
+  "Le sable clair, les plages et les tannes peuvent être confondus avec du bâti ; les indices spectraux et le filtre temporel en retirent l'essentiel, pas tout.",
+  `Le nouveau bâti est en avance sur les toits : un terrain nivelé ou clôturé ressemble à du bâti. Environ un quart du nouveau bâti cartographié est en lotissement ou en chantier en ${last}.`,
+  `L'année ${last} est provisoire : le filtre temporel a moins d'années pour la confirmer. ${catalogue.years.at(-1)! + 1} sert seulement à confirmer ${last}.`,
+  "Les années sèches (2017, 2019) donnent de fausses détections en périphérie ; le filtre en retire la plupart, mais le saut de 2016 à 2017 reste fort à Touba (surtout des lotissements).",
+  "Les types de croissance (densification, extension, saut) sont indicatifs : ils bougent de 20 points selon les réglages, et le saut est le moins fiable.",
+  "La population WorldPop est modélisée, pas comptée : juste pour les villes entières, fausse d'un facteur 0,35 à 2,9 par commune. Elle n'est donc publiée que par ville ; par commune, on donne le recensement 2023.",
+  "Les limites des communes viennent d'OpenStreetMap et ne sont pas officielles (les moins sûres autour de Thiès).",
+  "Près de la moitié des points de validation (237 sur 480) ont été jugés incertains par l'interprète, et 21 points de Dakar et Thiès ont été lus sur des images de 2023.",
+];
+---
+<Base title="Données & méthode" description="Téléchargements, sources, licences, validation et limites de SamaReew.">
+  <h1>Données & méthode</h1>
+  <p class="muted lead">
+    Tout ce qui est publié ici est ouvert et téléchargeable. La note de méthode complète, avec les valeurs de tous
+    les réglages, est dans <a href={METHOD_URL}>METHODOLOGIE.md</a>.
+  </p>
+
+  <nav class="toc small" aria-label="Sur cette page">
+    <a href="#methode">Méthode</a><a href="#telecharger">Télécharger</a><a href="#sources">Sources et licences</a>
+    <a href="#validation">Validation</a><a href="#limites">Limites</a><a href="#citer">Citer</a>
+  </nav>
+
+  <h2 id="methode">La méthode en bref</h2>
+  <ol class="steps">
+    <li><strong>Images.</strong> Pour chaque ville et chaque année, la médiane des images Sentinel-2 de la saison sèche
+      (1er novembre – 31 mai), nuages retirés : une image de 10 m sans nuages par an.</li>
+    <li><strong>Modèle.</strong> Une seule forêt aléatoire (Random Forest) pour tout le pays, entraînée là où deux cartes
+      mondiales indépendantes s'accordent sur bâti / non bâti : la même règle pour les quatre villes.</li>
+    <li><strong>Cohérence dans le temps.</strong> Un pixel ne devient bâti une année que s'il le reste ensuite ; c'est
+      ainsi qu'on obtient l'année d'urbanisation de chaque pixel.</li>
+    <li><strong>Indicateurs.</strong> Surface bâtie, croissance, nouveau bâti, types de croissance, population et
+      surface par habitant, par ville, commune, secteur, direction et distance au centre.</li>
+    <li><strong>Validation.</strong> 480 points tirés au hasard, vérifiés à l'œil sur des images à très haute résolution
+      sans connaître la carte, pour mesurer la précision et corriger les surfaces.</li>
+  </ol>
+  <p class="small muted">
+    Zone d'étude de chaque ville : l'agglomération urbaine GHSL 2025, plus 2 km. Centre : place de l'Indépendance
+    (Dakar), Grande Mosquée (Touba), place de France (Thiès), quai de pêche (Mbour).
+  </p>
+
+  <h2 id="telecharger">Télécharger</h2>
+  <ul class="downloads">
+    {downloads.map((d) => <li><a href={base + d.href} download>{d.label}</a> <span class="muted small">— {d.note}</span></li>)}
+    <li><a href={`${base}/graphiques`}>Un fichier CSV par graphique</a> <span class="muted small">— onglet « Télécharger » de chaque graphique</span></li>
+  </ul>
+  <p class="small muted">
+    Les cartes (archives PMTiles des couches{image ? " et de l'image satellite" : ""}) se reconstruisent avec le code :{" "}
+    <a href={REPO_URL}>dépôt du projet</a>.
+  </p>
+
+  <h2 id="sources">Sources et licences</h2>
+  <div class="table-scroll">
+    <table class="wrap">
+      <thead><tr><th scope="col">Quoi</th><th scope="col">Source</th><th scope="col">Licence</th></tr></thead>
+      <tbody>{sources.map(([what, source, licence]) => <tr><th scope="row">{what}</th><td>{source}</td><td>{licence}</td></tr>)}</tbody>
+    </table>
+  </div>
+  <p class="small muted">
+    CC BY 4.0 : réutilisation libre, y compris commerciale, en citant la source. ODbL : les données dérivées des
+    communes doivent rester sous ODbL.
+  </p>
+
+  <h2 id="validation">Validation</h2>
+  <p>
+    120 points par ville, tirés au hasard en cinq groupes (non bâti, bâti en {first}, puis le nouveau bâti découpé
+    par type de croissance), ont été examinés à l'aveugle aux deux dates {first} et {last} dans Google Earth Pro. Les
+    précisions sont pondérées par la surface de chaque groupe ; les marges sont à 95 %.
+  </p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Bâti / non bâti {last} (%)</th>
+          <th scope="col">3 classes (%)</th>
+          <th scope="col">Nouveau bâti réel (%)</th>
+          <th scope="col">Bâti {last} : carte (ha)</th>
+          <th scope="col">Corrigé (ha)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {[...cities.map((c) => [c.name, validation.cities[c.slug]]), ["Quatre villes", validation.national]].map(([label, r]: any) => (
+          <tr>
+            <th scope="row">{label}</th>
+            <td>{pct(r.built_accuracy[String(last)])}</td>
+            <td>{pct(r.overall_accuracy)}</td>
+            <td>{pct(r.new_built.users_accuracy)}</td>
+            <td>{formatValue(r.built_area[String(last)].mapped_ha, "ha")}</td>
+            <td>{ha(r.built_area[String(last)].corrected_ha)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted">
+    « 3 classes » : non bâti, bâti en {first}, nouveau bâti. « Nouveau bâti réel » : part du nouveau bâti cartographié
+    qui est vraiment devenu bâti entre {first} et {last} ; le reste est surtout en lotissement ou en chantier, ou
+    était déjà bâti en {first}. Les tableaux et les cartes
+    gardent les valeurs de la carte ; les surfaces corrigées sont plus justes en moyenne mais trop incertaines par
+    ville pour les remplacer.
+  </p>
+
+  <h2 id="limites">Limites</h2>
+  <ul class="limits">{limits.map((l) => <li>{l}</li>)}</ul>
+
+  <h2 id="citer">Citer</h2>
+  <p class="cite">
+    SamaReew ({new Date(catalogue.generated).getFullYear()}). <em>Expansion urbaine de Dakar, Touba, Thiès et Mbour, {first}–{last}</em>.
+    Données CC BY 4.0, d'après Copernicus Sentinel-2. {REPO_URL}
+  </p>
+</Base>
+
+<style>
+  .lead, .steps, .limits, section > p, p { max-width: 46rem; }
+  .toc { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0.5rem 0 1rem; }
+  .steps li, .limits li, .downloads li { margin-bottom: 0.45rem; }
+  .downloads { padding-left: 1.1rem; }
+  table.wrap td, table.wrap th { white-space: normal; text-align: left; min-width: 8rem; }
+  .cite { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.95rem; }
+  h2 { scroll-margin-top: 1rem; }
+</style>

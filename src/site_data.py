@@ -42,8 +42,9 @@ def mosaic_transform(z: int, x0: int, y0: int) -> Affine:
 
 
 def split_tiles(mosaic: np.ndarray, x0: int, y0: int):
-    """Yield (x, y, tile) for every 256 px tile of the mosaic that is not fully transparent."""
-    rows, cols = mosaic.shape
+    """Yield (x, y, tile) for every 256 px tile of the mosaic that is not fully transparent.
+    The mosaic holds classes (rows, cols) or colours (rows, cols, bands), 0 where empty."""
+    rows, cols = mosaic.shape[:2]
     if rows % TILE_PX or cols % TILE_PX:
         raise ValueError("the mosaic must be a whole number of tiles")
     for i in range(rows // TILE_PX):
@@ -54,7 +55,10 @@ def split_tiles(mosaic: np.ndarray, x0: int, y0: int):
 
 
 def overlay(base: np.ndarray, top: np.ndarray) -> np.ndarray:
-    """Tile of two cities: the pixels of ``top`` that are not transparent win."""
+    """Tile of two cities: the pixels of ``top`` that are not transparent win (class tiles,
+    or RGBA tiles where the last band is the alpha)."""
+    if top.ndim == 3:
+        return np.where(top[..., -1:] > 0, top, base)
     return np.where(top != TRANSPARENT, top, base)
 
 
@@ -81,6 +85,32 @@ def encode_png(tile: np.ndarray, colors: dict) -> bytes:
     image.putpalette(palette)
     out = io.BytesIO()
     image.save(out, format="PNG", optimize=True, transparency=TRANSPARENT)
+    return out.getvalue()
+
+
+def stretch_rgba(reflectance: np.ndarray, stretch: tuple, gamma: float) -> np.ndarray:
+    """8-bit RGBA image (rows, cols, 4) from reflectance bands (3, rows, cols), 0-1.
+
+    ``stretch`` = (low, high) reflectance mapped to 0 and 255, the same for the three bands
+    so that colours stay natural; ``gamma`` > 1 lightens dark tones. NaN pixels (no data)
+    are transparent, every other pixel is opaque.
+    """
+    low, high = stretch
+    valid = np.all(np.isfinite(reflectance), axis=0)
+    scaled = np.clip((np.nan_to_num(reflectance) - low) / (high - low), 0, 1) ** (1 / gamma)
+    rgba = np.zeros(reflectance.shape[1:] + (4,), dtype=np.uint8)
+    rgba[..., :3] = np.round(np.moveaxis(scaled, 0, -1) * 255).astype(np.uint8)
+    rgba[..., 3] = np.where(valid, 255, 0)
+    rgba[~valid, :3] = 0
+    return rgba
+
+
+def encode_webp(tile: np.ndarray, quality: int) -> bytes:
+    """WebP of an RGBA tile; fully opaque tiles are stored without the alpha band."""
+    opaque = bool((tile[..., 3] == 255).all())
+    image = Image.fromarray(tile[..., :3] if opaque else tile, mode="RGB" if opaque else "RGBA")
+    out = io.BytesIO()
+    image.save(out, format="WEBP", quality=quality, method=6)
     return out.getvalue()
 
 

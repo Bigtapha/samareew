@@ -1,0 +1,169 @@
+---
+import Base from "../../layouts/Base.astro";
+import { catalogue, cities, indicators, manifest, rowsOf, type IndicatorSheet } from "../../lib/outputs";
+import { CITY_COLORS, METHOD_URL, TEMPLATE_UNIT_TYPES } from "../../config";
+
+export function getStaticPaths() {
+  return indicators.map((sheet) => ({ params: { indicator: sheet.slug }, props: { sheet } }));
+}
+
+const { sheet } = Astro.props as { sheet: IndicatorSheet };
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const rows = rowsOf(sheet.slug, TEMPLATE_UNIT_TYPES);
+const levels = TEMPLATE_UNIT_TYPES.filter((t) => rows.some((r) => r.type === t));
+const hasMap = levels.some((l) => l !== "city");
+const [methodFile, methodAnchor] = sheet.method.split("#");
+// GitHub names its anchors after the full heading: "#8" would not scroll, so the link text gives the section.
+const methodUrl = METHOD_URL;
+const sources = sheet.sources.map((s) => catalogue.sources[s]);
+const usesOsm = rows.some((r) => r.type === "commune");
+
+const data = {
+  slug: sheet.slug,
+  title: sheet.title,
+  unit: sheet.unit,
+  period: sheet.period,
+  rows,
+  cities: cities.map((c) => ({ slug: c.slug, name: c.name, color: CITY_COLORS[c.slug], bounds: c.bounds })),
+  levels,
+  boundaries: { commune: manifest.boundaries.communes.file, sector: manifest.boundaries.sectors.file },
+  attribution: {
+    commune: `SamaReew (CC BY 4.0) · Limites : ${manifest.boundaries.communes.attribution}`,
+    sector: "SamaReew (CC BY 4.0)",
+  },
+};
+const json = JSON.stringify(data).replace(/</g, "\\u003c");
+const cityLevel = levels.includes("city");
+const tabs = [
+  ["graphique", "Graphique"],
+  ...(hasMap ? [["carte", "Carte"]] : []),
+  ["tableau", "Tableau"],
+  ["sources", "Sources"],
+  ["telecharger", "Télécharger"],
+];
+---
+<Base title={sheet.title} description={sheet.definition}>
+  <p class="small"><a href={`${base}/graphiques`}>Tous les graphiques</a></p>
+  <article class="chart" data-chart>
+    <header class="chart-head">
+      <h1>{sheet.title}</h1>
+      <p class="muted">{sheet.definition}</p>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Vues">
+      {tabs.map(([id, label]) => (
+        <button type="button" role="tab" id={`tab-${id}`} aria-controls={`panel-${id}`} data-tab={id}>{label}</button>
+      ))}
+    </div>
+
+    <div class="controls">
+      <label data-control="level" hidden><span>Niveau</span> <select></select></label>
+      <fieldset data-control="cities" hidden={!cityLevel}>
+        <legend class="visually-hidden">Villes affichées</legend>
+        {cities.map((c) => (
+          <label class="city-toggle" style={`--city:${CITY_COLORS[c.slug]}`}>
+            <input type="checkbox" value={c.slug} checked /> {c.name}
+          </label>
+        ))}
+      </fieldset>
+      <label data-control="city" hidden><span>Ville</span> <select></select></label>
+      <label data-control="time" hidden><span>Année</span> <select></select></label>
+    </div>
+    <p class="caption muted small" data-caption></p>
+
+    <section role="tabpanel" id="panel-graphique" aria-labelledby="tab-graphique" data-panel="graphique">
+      <div class="figure" data-figure></div>
+    </section>
+
+    {hasMap && (
+      <section role="tabpanel" id="panel-carte" aria-labelledby="tab-carte" data-panel="carte" hidden>
+        <div class="map" data-map><p class="map-loading small muted" data-map-loading>Chargement de la carte (environ 0,5 Mo la première fois)…</p></div>
+        <div data-legend></div>
+      </section>
+    )}
+
+    <section role="tabpanel" id="panel-tableau" aria-labelledby="tab-tableau" data-panel="tableau" hidden>
+      <div data-figure></div>
+    </section>
+
+    <section role="tabpanel" id="panel-sources" aria-labelledby="tab-sources" data-panel="sources" hidden>
+      <dl class="sheet">
+        <dt>Définition</dt>
+        <dd>{sheet.definition}</dd>
+        <dt>Fiabilité</dt>
+        <dd>{sheet.reliability}</dd>
+        <dt>Sources</dt>
+        <dd>
+          <ul>
+            {sources.map((s: any) => <li>{s.name} — licence {s.licence}</li>)}
+            {usesOsm && <li>Limites des communes : {manifest.boundaries.communes.attribution}</li>}
+          </ul>
+        </dd>
+        <dt>Méthode</dt>
+        <dd><a href={methodUrl}>Note de méthode ({methodFile}{methodAnchor ? `, section ${methodAnchor}` : ""})</a></dd>
+      </dl>
+    </section>
+
+    <section role="tabpanel" id="panel-telecharger" aria-labelledby="tab-telecharger" data-panel="telecharger" hidden>
+      <ul class="downloads">
+        <li>
+          Le graphique affiché : <button type="button" class="link-button" data-export="png">image PNG</button>
+          ou <button type="button" class="link-button" data-export="svg">SVG</button>
+          <span class="muted small"> — avec le titre et la source</span>
+        </li>
+        <li>
+          <a href={`${base}/graphiques/${sheet.slug}.csv`} download>Données de ce graphique (CSV)</a>
+          <span class="muted small"> — toutes les villes, communes et secteurs, toutes les années</span>
+        </li>
+        <li>
+          <a href={`${base}/data/tables/indicators.csv`} download>Tous les indicateurs (CSV)</a>
+          <span class="muted small"> — avec <a href={`${base}/data/tables/indicators.json`}>les fiches</a> et <a href={`${base}/data/tables/units.csv`}>la liste des unités</a></span>
+        </li>
+      </ul>
+      <p class="small muted">
+        Licence CC BY 4.0 : réutilisation libre, y compris commerciale, en citant « SamaReew, d'après
+        Copernicus Sentinel-2 ». {usesOsm && "Les noms et limites des communes viennent d'OpenStreetMap (ODbL)."}
+      </p>
+    </section>
+
+    <footer class="chart-foot small muted" data-source>
+      Source : {sources.map((s: any) => s.name).join(" ; ")} · Format des données {catalogue.format_version}, {catalogue.generated}
+    </footer>
+    <script type="application/json" set:html={json} />
+  </article>
+</Base>
+
+<script>
+  import "../../scripts/chart";
+</script>
+
+<style>
+  .chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem var(--gutter); }
+  .chart-head p { margin-bottom: 0.75rem; }
+  .tabs { display: flex; gap: 0.25rem; overflow-x: auto; border-bottom: 1px solid var(--line); margin: 0 calc(-1 * var(--gutter)) 0.75rem; padding: 0 var(--gutter); scrollbar-width: none; }
+  .tabs button { flex: none; background: none; border: 0; border-bottom: 3px solid transparent; padding: 0.55rem 0.6rem; color: var(--muted); cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem; }
+  .controls label > span { color: var(--muted); margin-right: 0.25rem; }
+  fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  [hidden] { display: none !important; }
+  .city-toggle { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.2rem 0.6rem 0.2rem 0.4rem; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+  .city-toggle input { accent-color: var(--city); margin: 0; }
+  .city-toggle:has(input:checked) { border-color: var(--city); }
+  .caption { margin: 0 0 0.5rem; }
+  .figure:empty { min-height: 260px; }
+  .figure :global(svg) { display: block; overflow: visible; }
+  .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 1rem; text-align: center; }
+  .map { position: relative; height: min(70vh, 480px); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+  .sheet dt { font-weight: 600; margin-top: 0.75rem; }
+  .sheet dd { margin: 0.15rem 0 0; }
+  .sheet ul, .downloads { padding-left: 1.1rem; margin: 0; }
+  .downloads li { margin-bottom: 0.5rem; }
+  .link-button { background: none; border: 0; padding: 0; color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+  .chart-foot { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 0.6rem; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  :global(.legend) { display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; list-style: none; padding: 0; margin: 0.6rem 0 0; font-size: 0.85rem; }
+  :global(.legend li) { display: inline-flex; align-items: center; gap: 0.35rem; }
+  :global(.swatch) { width: 0.9rem; height: 0.9rem; border-radius: 2px; border: 1px solid rgba(0,0,0,0.15); }
+  :global(.swatch-none) { background: transparent; border-style: dashed; border-color: var(--muted); }
+</style>

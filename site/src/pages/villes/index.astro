@@ -1,0 +1,23 @@
+---
+import Base from "../../layouts/Base.astro";
+import { catalogue, cities } from "../../lib/outputs";
+import { value } from "../../lib/facts";
+import { formatValue } from "../../lib/format";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
+---
+<Base title="Villes">
+  <h1>Villes</h1>
+  <p class="muted">Une fiche par ville, sur le même modèle : chiffres clés, carte, graphiques, communes.</p>
+  <ul class="cards">
+    {cities.map((c) => {
+      const a = value("built_area_ha", c.slug, first)!;
+      const b = value("built_area_ha", c.slug, last)!;
+      return (
+        <li><a href={`${base}/villes/${c.slug}`}><strong>{c.name}</strong>
+          <span class="muted small">{formatValue(b, "ha")} ha bâtis en {last}, +{Math.round(100 * (b / a - 1))}&#8239;% depuis {first}</span></a></li>
+      );
+    })}
+  </ul>
+</Base>

@@ -1,0 +1,310 @@
+---
+import Base from "../../layouts/Base.astro";
+import StaticChart from "../../components/StaticChart.astro";
+import { catalogue, cities, manifest, rowsOf, validation, type City } from "../../lib/outputs";
+import { rows as allRows, sumByUnit, value } from "../../lib/facts";
+import { formatValue } from "../../lib/format";
+
+export function getStaticPaths() {
+  return cities.map((city) => ({ params: { city: city.slug }, props: { city } }));
+}
+
+const { city } = Astro.props as { city: City };
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const cityRows = (indicator: string) => rowsOf(indicator, ["city"]).filter((r) => r.city === city.slug);
+const built = new Map(cityRows("built_area_ha").map((r) => [r.year, r.value]));
+const built2016 = built.get(2016)!;
+const built2025 = built.get(2025)!;
+const newBuilt = cityRows("new_built_ha");
+const sumNew = (from: number, to: number) =>
+  newBuilt.filter((r) => r.year >= from && r.year <= to).reduce((s, r) => s + r.value, 0);
+const growth = (type: string) =>
+  cityRows(`growth_${type}_ha`).find((r) => r.start === 2016 && r.year === 2025)?.value ?? 0;
+
+// Area of each legend class, next to the map (the colours alone are not enough, METHODOLOGIE §15.1).
+const areas: Record<string, number[]> = {
+  urbanisation: [built2016, sumNew(2017, 2020), sumNew(2021, 2025)],
+  growth_type_2016_2025: ["densification", "extension", "leapfrog"].map(growth),
+};
+
+const layers = Object.entries(manifest.layers).map(([id, l]: [string, any]) => ({
+  id,
+  title: l.title,
+  file: l.file,
+  attribution: l.attribution,
+  legend: l.legend as { code: number; label: string; color: string }[],
+  minZoom: l.min_zoom,
+  maxZoom: l.max_zoom,
+}));
+
+const [imageId, imageAll] = (Object.entries(manifest.images ?? {})[0] ?? [null, null]) as [string | null, any];
+// The image may be missing for a city (step 7 leaves out a city whose download failed).
+const image = imageAll?.cities?.includes(city.slug) ? imageAll : null;
+
+const v = validation.cities[city.slug];
+const pct = (x: { estimate: number; margin95: number }) =>
+  `${Math.round(x.estimate * 100)}\u202f% (± ${Math.round(x.margin95 * 100)})`;
+
+// --- What the mapped new built-up area is on the ground, city by city (validation, second reading)
+const cover = v.new_built.cover_in_reality ?? {};
+const share = (...keys: string[]) => keys.reduce((t, k) => t + (cover[k]?.estimate ?? 0), 0);
+const trulyNew = v.new_built.users_accuracy.estimate;
+const urbanising = share("subdivision", "construction");
+const falseDetections = share("vegetation", "bare_soil", "dirt_track");
+const rest = ([
+  ["en lotissement ou en chantier", urbanising],
+  [`déjà bâti en 2016`, share("built") - trulyNew],
+  ["de vraies fausses détections (végétation, sol nu, pistes)", falseDetections],
+] as [string, number][]).filter(([, x]) => Math.round(100 * x) >= 1).sort((a, b) => b[1] - a[1])
+  .map(([what, x]) => `${Math.round(100 * x)}\u202f% ${what}`).join(", ");
+// "Ahead of the roofs" only where subdivisions outweigh true false detections
+const newBuiltLead = urbanising > falseDetections + 0.05
+  ? "Le nouveau bâti est en avance sur les toits"
+  : "Le nouveau bâti est le point faible de la carte";
+const newBuiltText = `${newBuiltLead} : ${Math.round(100 * trulyNew)}\u202f% (± ${Math.round(100 * v.new_built.users_accuracy.margin95)}) est du bâti vraiment nouveau en 2025 ; le reste : ${rest}.`;
+
+// --- Key figures
+const years: number[] = catalogue.years;
+const [first, last] = [years[0], years[years.length - 1]];
+const growthPct = Math.round((built2025 / built2016 - 1) * 100);
+const corrected = v.built_area[String(last)].corrected_ha;
+const corrected0 = v.built_area[String(first)].corrected_ha;
+// Validation: a start year overestimated beyond its margin means real growth is probably higher
+const startOverestimated = built2016 - corrected0.estimate > corrected0.margin95;
+const pop0 = value("population", city.slug, first);
+const pop1 = value("population", city.slug, last);
+const m2a = value("built_m2_per_capita", city.slug, first);
+const m2b = value("built_m2_per_capita", city.slug, last);
+const sdg = value("sdg_11_3_1", city.slug, last, first);
+const n = (v: number, unit = "ha") => formatValue(v, unit);
+const people = (v: number) => `${formatValue(v / 1e6, "ratio")}\u202fmillion${v >= 2e6 ? "s" : ""}`;
+const figures = [
+  { label: `Surface bâtie ${last}`, value: `${n(built2025)} ha`,
+    note: `corrigée par la validation : ${n(corrected.estimate)} ± ${n(corrected.margin95)} ha` },
+  { label: `Croissance ${first}–${last}`, value: `+${growthPct}\u202f%`,
+    note: startOverestimated
+      ? `de ${n(built2016)} ha ; le bâti ${first} est surestimé, la croissance réelle est probablement plus forte`
+      : `de ${n(built2016)} ha en ${first}` },
+  { label: "Nouveau bâti par an", value: `${n(sumNew(first + 1, last) / (last - first))} ha`, note: `moyenne ${first + 1}–${last}` },
+  ...(pop0 && pop1 ? [{ label: `Population ${last}`, value: people(pop1), note: `${people(pop0)} en ${first} (WorldPop, modélisée)` }] : []),
+  ...(m2a && m2b ? [{ label: "Surface bâtie par habitant", value: `${n(m2b, "m²")} m²`, note: `${n(m2a, "m²")} m² en ${first}` }] : []),
+  ...(sdg ? [{ label: "Bâti / population (ODD 11.3.1)", value: formatValue(sdg, "ratio"), note: sdg > 1 ? "le bâti s'étend plus vite que la population" : "la population croît plus vite que le bâti" }] : []),
+];
+
+// --- Charts (static SVG)
+const own = (indicator: string) => allRows(indicator).filter((r) => r.type === "city" && r.city === city.slug);
+const yearly = own("new_built_ha").map((r) => ({ ...r, label: String(r.year), order: r.year }));
+const byDirection = sumByUnit("new_built_ha", city.slug, "direction", first + 1, last);
+const byRing = sumByUnit("new_built_ha", city.slug, "ring", first + 1, last).filter((r) => r.value > 0);
+const peak = [...byDirection].sort((a, b) => b.value - a.value)[0];
+const towards = (label: string) => (/^[aeiouy]/i.test(label) ? `l'${label.toLowerCase()}` : `le ${label.toLowerCase()}`);
+
+// --- Units: communes, and sectors for Touba
+const unitTypes = (["sector", "commune"] as const).filter((t) => allRows("built_area_ha").some((r) => r.city === city.slug && r.type === t));
+function unitTable(type: string) {
+  const units = allRows("built_area_ha").filter((r) => r.city === city.slug && r.type === type && r.year === last);
+  return units.map((u) => {
+    const at = (indicator: string, year: number) => value(indicator, city.slug, year, null, type, u.unit);
+    const b0 = at("built_area_ha", first);
+    return {
+      label: u.label,
+      order: u.order,
+      built0: b0,
+      built1: u.value,
+      growth: b0 && b0 >= 1 ? 100 * (u.value / b0 - 1) : undefined,
+      share: at("built_share_pct", last),
+      census: at("census_population", 2023),
+      m2: at("census_built_m2_per_capita", 2023),
+    };
+  }).sort((a, b) => (type === "sector" ? a.order - b.order : b.built1 - a.built1));
+}
+const typeTitle: Record<string, string> = { commune: "Par commune", sector: "Par secteur" };
+
+const data = {
+  city: city.slug,
+  bounds: city.bounds,
+  layers: layers.map(({ legend, title, ...l }) => l),
+  image: image ? { id: imageId, file: image.file, attribution: image.attribution } : null,
+  zones: manifest.boundaries.zones.file,
+};
+const json = JSON.stringify(data).replace(/</g, "\\u003c");
+---
+<Base title={city.name}>
+  <nav class="small city-nav" aria-label="Villes">
+    {cities.map((c) => (
+      <a href={`${base}/villes/${c.slug}`} aria-current={c.slug === city.slug ? "page" : undefined}>{c.name}</a>
+    ))}
+  </nav>
+  <h1>{city.name}</h1>
+  <p class="muted lead">
+    De {first} à {last}, la surface bâtie de {city.name} est passée de {n(built2016)} à {n(built2025)} ha
+    (+{growthPct}&#8239;%). Zone d'étude : l'agglomération telle que la voit GHSL en 2025, plus 2 km, la même règle
+    pour les quatre villes.
+  </p>
+  {city.slug === "touba" && (
+    <p class="note">
+      « Touba » désigne ici l'<strong>agglomération Touba-Mbacké</strong>, un seul ensemble bâti. Les chiffres de
+      Mbacké viennent de sa commune ; la ville est aussi découpée en secteurs (directions × anneaux de 2 km), car la
+      commune de Touba Mosquée couvre à elle seule la plus grande partie de la zone.
+    </p>
+  )}
+
+  <dl class="figures">
+    {figures.map((f) => (
+      <div><dt>{f.label}</dt><dd><strong>{f.value}</strong><span class="small muted">{f.note}</span></dd></div>
+    ))}
+  </dl>
+
+  <h2>Carte</h2>
+
+  <section class="city-map" data-city-map>
+    <fieldset class="layer-switch">
+      <legend class="visually-hidden">Couche affichée</legend>
+      {layers.map((l, i) => (
+        <label><input type="radio" name="layer" value={l.id} checked={i === 0} /> {l.title}</label>
+      ))}
+    </fieldset>
+    {image && (
+      <div class="image-switch">
+        <label title={image.description}><input type="checkbox" name="image" /> {image.title}</label>
+        <label data-opacity hidden>Opacité des couches <input type="range" min="0" max="100" step="5" /></label>
+      </div>
+    )}
+    {imageAll && !image && <p class="small muted">{imageAll.title} : pas encore disponible pour {city.name}.</p>}
+    <div class="map" data-map><p class="map-loading small muted" data-map-loading>Chargement de la carte (environ 0,5 Mo la première fois)…</p></div>
+    {layers.map((l, i) => (
+      <div data-layer-legend={l.id} hidden={i !== 0}>
+        <div class="table-scroll legend-table">
+        <table>
+          <caption class="visually-hidden">{l.title}</caption>
+          <thead><tr><th scope="col">Légende</th><th scope="col">Surface (ha)</th><th scope="col">Part</th></tr></thead>
+          <tbody>
+            {l.legend.map((item, k) => (
+              <tr>
+                <th scope="row"><span class="swatch" style={`background:${item.color}`}></span> {item.label}</th>
+                <td>{formatValue(areas[l.id][k], "ha")}</td>
+                <td>{formatValue((100 * areas[l.id][k]) / areas[l.id].reduce((a, b) => a + b, 0), "%")} %</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+        {l.id === "urbanisation" && (
+          <p class="small muted">
+            Validation sur {v.n_points} points : {pct(v.overall_accuracy)} de la surface bien classée (non bâti, bâti en
+            2016, nouveau bâti). {newBuiltText} L'année 2025 est provisoire.
+          </p>
+        )}
+        {l.id !== "urbanisation" && (
+          <p class="small muted">
+            Types de croissance indicatifs : le « saut » est le type le moins fiable (45 % de nouveau bâti réel dans la
+            validation nationale).
+          </p>
+        )}
+      </div>
+    ))}
+    <p class="small muted">
+      Tirets : limite de la zone d'étude (agglomération GHSL 2025 + 2 km).
+      {image && <>{" "}{image.title} : {image.description.charAt(0).toLowerCase() + image.description.slice(1)} ; chargée seulement si vous l'affichez.</>}
+    </p>
+    <script type="application/json" set:html={json} />
+  </section>
+
+  <h2>Graphiques</h2>
+  <div class="charts">
+    <StaticChart kind="line" rows={own("built_area_ha")} unit="ha" cityOrder={[city.slug]}
+      title="Surface bâtie" caption="en hectares, à la fin de chaque année"
+      href={`/graphiques/built_area_ha`} />
+    <StaticChart kind="bar" rows={yearly} unit="ha" ordered
+      title="Nouveau bâti chaque année" caption={`en hectares ; ${last} est provisoire`}
+      href={`/graphiques/new_built_ha?niveau=villes&villes=${city.slug}&onglet=tableau`} />
+    <StaticChart kind="bar" rows={byDirection} unit="ha"
+      title={`Vers où ${city.name} pousse-t-elle ?`}
+      caption={`Nouveau bâti ${first + 1}–${last} par direction depuis le centre, en hectares ; le plus vers ${towards(peak.label)}`}
+      href={`/graphiques/new_built_ha?niveau=directions&ville=${city.slug}`} />
+    <StaticChart kind="bar" rows={byRing} unit="ha"
+      title="À quelle distance du centre ?"
+      caption={`Nouveau bâti ${first + 1}–${last} par anneau de 2 km autour du centre, en hectares`}
+      href={`/graphiques/new_built_ha?niveau=anneaux&ville=${city.slug}`} />
+  </div>
+
+  {unitTypes.map((type) => {
+    const table = unitTable(type);
+    const withCensus = table.some((u) => u.census !== undefined);
+    return (
+      <details class="units" open={type === unitTypes[0]}>
+        <summary><h2>{typeTitle[type]} <span class="muted small">({table.length})</span></h2></summary>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">{type === "sector" ? "Secteur" : "Commune"}</th>
+                <th scope="col">Bâti {first} (ha)</th><th scope="col">Bâti {last} (ha)</th>
+                <th scope="col">Croissance</th><th scope="col">Part bâtie {last}</th>
+                {withCensus && <><th scope="col">Population 2023</th><th scope="col">m² bâtis / hab.</th></>}
+              </tr>
+            </thead>
+            <tbody>
+              {table.map((u) => (
+                <tr>
+                  <th scope="row">{u.label}</th>
+                  <td>{u.built0 === undefined ? "–" : n(u.built0)}</td>
+                  <td>{n(u.built1)}</td>
+                  <td>{u.growth === undefined ? "–" : `+${Math.round(u.growth)}\u202f%`}</td>
+                  <td>{u.share === undefined ? "–" : `${formatValue(u.share, "%")}\u202f%`}</td>
+                  {withCensus && <><td>{u.census === undefined ? "–" : n(u.census, "habitants")}</td><td>{u.m2 === undefined ? "–" : n(u.m2, "m²")}</td></>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">
+          {type === "commune"
+            ? <>Partie de chaque commune comprise dans la zone d'étude. Limites des communes d'après OpenStreetMap,
+              pas les limites officielles (© contributeurs OpenStreetMap, ODbL).{withCensus && " Population : recensement 2023 (RGPH-5, ANSD), seulement pour les communes entièrement dans la zone."}</>
+            : "Secteurs : disque central de 2 km, puis anneaux de 2 km découpés en 8 directions depuis la Grande Mosquée."}
+        </p>
+      </details>
+    );
+  })}
+
+  <h2>Fiabilité</h2>
+  <p>
+    {v.n_points} points tirés au hasard dans la zone ont été vérifiés à l'œil sur des images à très haute résolution.{" "}
+    {pct(v.built_accuracy[String(last)])} de la surface est bien classée bâti ou non bâti en {last}. {newBuiltText}
+    Les types de croissance sont indicatifs, et {last} est provisoire.
+  </p>
+  <p class="small"><a href={`${base}/donnees#validation`}>Méthode, validation et limites</a> · <a href={`${base}/expansion-urbaine`}>Comparer les quatre villes</a></p>
+</Base>
+
+<script>
+  import "../../scripts/city-map";
+</script>
+
+<style>
+  .city-nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-bottom: 0.75rem; }
+  .city-nav a[aria-current="page"] { color: var(--text); font-weight: 600; text-decoration: none; }
+  .layer-switch { border: 0; padding: 0; margin: 0 0 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
+  .layer-switch label, .image-switch label { display: inline-flex; gap: 0.35rem; align-items: center; cursor: pointer; }
+  .image-switch { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; align-items: center; margin: 0 0 0.6rem; }
+  .image-switch input[type="range"] { width: 8rem; accent-color: var(--accent); }
+  .map { height: min(70vh, 560px); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); margin-bottom: 0.75rem; }
+  .legend-table { max-width: 32rem; margin-bottom: 0.6rem; }
+  .legend-table th[scope="row"] { font-weight: 400; white-space: normal; position: static; }
+  .legend-table .swatch { vertical-align: -0.1rem; margin-right: 0.35rem; }
+  .lead { max-width: 46rem; }
+  .map { position: relative; }
+  .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 1rem; text-align: center; }
+  .note { max-width: 46rem; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--muted); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
+  .figures { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); margin: 1.25rem 0 0; }
+  .figures > div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.7rem 0.9rem; }
+  .figures dt { font-size: 0.85rem; color: var(--muted); }
+  .figures dd { margin: 0.15rem 0 0; display: flex; flex-direction: column; }
+  .figures strong { font-size: 1.4rem; line-height: 1.2; }
+  .charts { display: grid; gap: 0.5rem 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+  .units summary { cursor: pointer; list-style-position: inside; }
+  .units summary h2 { display: inline; }
+  .units { margin: 1.5rem 0; }
+  .units .table-scroll { margin-top: 0.75rem; }
+</style>

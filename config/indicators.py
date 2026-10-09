@@ -42,9 +42,9 @@ _MAP_RELIABILITY = ("Validée sur 480 points photo-interprétés : 85 % (± 4) d
                     "bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha "
                     "cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar.")
 _NEW_BUILT_RELIABILITY = ("Le nouveau bâti est en avance sur les toits : la moitié (51 ± 8 %) de "
-                          "celui de la carte est bâtie en 2025, un quart de plus est en "
-                          "lotissement non construit ou en chantier, et 15 % seulement sont de "
-                          "vraies fausses détections. Le total corrigé 2016-2025 (27 200 ± 6 800 "
+                          "celui de la carte est du bâti vraiment nouveau en 2025 et 9 % était déjà "
+                          "bâti en 2016, un quart est en lotissement non construit ou en chantier, "
+                          "et 15 % seulement sont de vraies fausses détections. Le total corrigé 2016-2025 (27 200 ± 6 800 "
                           "ha) est proche de la carte (23 300 ha). L'année est juste à ±1 an pour "
                           "2 points sur 3.")
 _GROWTH_TYPE_RELIABILITY = ("Indicatif : seuls 45 % des points de saut sont vraiment du nouveau "

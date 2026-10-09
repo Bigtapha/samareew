@@ -130,6 +130,32 @@
    "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)"
   }
  },
+ "images": {
+  "sentinel2_2025": {
+   "title": "Image satellite 2025 (Sentinel-2)",
+   "description": "Composite en couleurs naturelles de la saison sèche 2025 (1er novembre - 31 mai), pixels de 10 m, celui qu'a classé le modèle",
+   "year": 2025,
+   "file": "tiles/sentinel2_2025.pmtiles",
+   "type": "raster",
+   "tile_format": "webp",
+   "tile_size": 256,
+   "min_zoom": 8,
+   "max_zoom": 14,
+   "bounds": [
+    -17.0945,
+    14.29618,
+    -15.75394,
+    14.95684
+   ],
+   "cities": [
+    "touba",
+    "thies",
+    "mbour"
+   ],
+   "licence": "Copernicus (libre, attribution)",
+   "attribution": "Contient des données Copernicus Sentinel modifiées (2025), SamaReew"
+  }
+ },
  "boundaries": {
   "zones": {
    "file": "boundaries/zones.geojson",

@@ -79,3 +79,37 @@ def test_validation_summary():
                           "cover_of_map_class": {"new_built": {"built": v(0.6)}}}
     s = sd.validation_summary(report, 2016, 2025)
     assert s["new_built"]["users_accuracy_tolerant"]["estimate"] == 0.75
+
+
+def test_split_tiles_and_overlay_on_rgba():
+    mosaic = np.zeros((256, 512, 4), dtype=np.uint8)
+    mosaic[0, 260] = [10, 20, 30, 255]
+    assert [(x, y) for x, y, _ in sd.split_tiles(mosaic, 0, 0)] == [(1, 0)]
+    a = np.zeros((1, 2, 4), dtype=np.uint8)
+    a[0, 0] = [1, 1, 1, 255]
+    b = np.zeros((1, 2, 4), dtype=np.uint8)
+    b[0, 1] = [2, 2, 2, 255]
+    assert sd.overlay(a, b)[..., 0].tolist() == [[1, 2]]
+
+
+def test_stretch_rgba():
+    refl = np.array([[[0.02, 0.32, 0.5, np.nan]]] * 3)     # 3 bands, 1 row, 4 pixels
+    rgba = sd.stretch_rgba(refl, (0.02, 0.32), 1.0)
+    assert rgba.shape == (1, 4, 4)
+    assert rgba[0, :, 0].tolist() == [0, 255, 255, 0]       # low, high, clipped, no data
+    assert rgba[0, :, 3].tolist() == [255, 255, 255, 0]
+    mid = np.full((3, 1, 1), 0.17)                          # half-way
+    assert sd.stretch_rgba(mid, (0.02, 0.32), 1.0)[0, 0, 0] == 128
+    assert sd.stretch_rgba(mid, (0.02, 0.32), 2.0)[0, 0, 0] == round(255 * 0.5 ** 0.5)
+
+
+def test_encode_webp_round_trip():
+    tile = np.zeros((256, 256, 4), dtype=np.uint8)
+    tile[..., :3] = 120
+    tile[..., 3] = 255
+    opaque = Image.open(io.BytesIO(sd.encode_webp(tile, 90)))
+    assert opaque.format == "WEBP" and opaque.mode == "RGB"
+    assert abs(int(np.array(opaque)[100, 100, 0]) - 120) <= 3
+    tile[:128, :, 3] = 0
+    holed = np.array(Image.open(io.BytesIO(sd.encode_webp(tile, 90))).convert("RGBA"))
+    assert holed[0, 0, 3] == 0 and holed[200, 0, 3] == 255

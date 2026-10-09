@@ -9,18 +9,26 @@ connections:
 2. the boundaries (zones, communes, Touba sectors, centres) as simplified GeoJSON, with the
    same unit names as outputs/tables/units.csv;
 3. the validation results the site shows (accuracy and corrected areas, by city);
-4. a manifest listing files, layers, legends, cities and licences.
+4. a manifest listing files, layers, legends, cities and licences;
+5. the satellite image shown under the layers on request: the true-colour Sentinel-2
+   composite of SITE_IMAGE_YEAR (same season and cloud mask as the classification) over the
+   bounding box of each zone, downloaded once from Earth Engine, as WebP tiles.
 
 Inputs : outputs/cities/<city>/urbanisation_year.tif, growth_type_<start>_<end>.tif (steps 3-4)
          zones/*.geojson (step 0), outputs/validation/accuracy.json (step 5)
+         Earth Engine (once per city): data/cities/<city>/true_colour_<year>.tif
 Outputs: outputs/site/tiles/<layer>.pmtiles      (ignored by git: rebuilt by this step)
          outputs/site/boundaries/*.geojson
          outputs/site/validation.json, outputs/site/manifest.json
          data/j5_tiles_<layer>.png               control map of the tiles read back
 
 Usage
-    python -m pipeline.s7_site_data
+    python -m pipeline.s7_site_data              # uses the cached image downloads when present
+    python -m pipeline.s7_site_data --refresh    # download the satellite image again
+    python -m pipeline.s7_site_data --drive dakar   # export one city's image to Google Drive
+                                                    # (when Earth Engine refuses direct downloads)
 """
+import argparse
 import io
 import json
 from datetime import date
@@ -48,6 +56,7 @@ UTM = "EPSG:32628"
 START, END = cfg.VALIDATION_PERIOD
 OSM_ATTRIBUTION = "© OpenStreetMap contributors (ODbL)"
 SAMAREEW_ATTRIBUTION = "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)"
+IMAGE_ATTRIBUTION = f"Contient des données Copernicus Sentinel modifiées ({cfg.SITE_IMAGE_YEAR}), SamaReew"
 
 
 # --- 1. Map tiles ----------------------------------------------------------------------
@@ -168,6 +177,150 @@ def check_layer(name: str, layer: dict, zones: gpd.GeoDataFrame) -> pd.DataFrame
     return out
 
 
+# --- 1b. Satellite image -----------------------------------------------------------------
+
+IMAGE_NAME = cfg.SITE_IMAGE_NAME.format(year=cfg.SITE_IMAGE_YEAR)
+
+
+def zone_box_utm(city: str) -> tuple:
+    zones = gpd.read_file(cfg.ZONES_GEOJSON).to_crs(UTM)
+    return tuple(zones[zones["city"] == city].total_bounds)
+
+
+def image_path(city: str):
+    return cfg.city_data_dir(city) / cfg.SITE_IMAGE_TIF.format(year=cfg.SITE_IMAGE_YEAR)
+
+
+def true_colour_image(city: str) -> tuple:
+    """Earth Engine image of the true-colour composite (reflectance x 10000, 0 = no data)
+    over the zone's bounding box, and that box."""
+    import ee
+    from src import gee_utils as gu
+    gu.init(cfg.GEE_PROJECT)
+    box = ee.Geometry.Rectangle(list(zone_box_utm(city)), UTM, False)
+    image = (gu.seasonal_composite(box, cfg.SITE_IMAGE_YEAR, cfg.SEASON_START, cfg.SEASON_END,
+                                   cfg.CLOUD_SCORE_THRESHOLD)
+             .select(cfg.SITE_IMAGE_BANDS).multiply(10000).round().unmask(0).toUint16())
+    return image, box
+
+
+def download_image(city: str, refresh: bool) -> None:
+    """Direct download of the composite into data/cities/<city>/ (cached)."""
+    path = image_path(city)
+    if path.exists() and not refresh:
+        return
+    import geemap
+    image, box = true_colour_image(city)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Written under another name first: a failed download must not pass for a cached one.
+    # Few parallel requests: the noncommercial tier limits concurrency (HTTP 429).
+    partial = path.with_suffix(".partial.tif")
+    try:
+        geemap.download_ee_image(image, str(partial), region=box, crs=cfg.ANALYSIS_CRS, scale=cfg.SCALE,
+                                 dtype="uint16", max_tile_size=cfg.DOWNLOAD_MAX_TILE_MB,
+                                 num_threads=cfg.DOWNLOAD_THREADS)
+    except Exception:
+        partial.unlink(missing_ok=True)
+        raise
+    partial.replace(path)
+
+
+def export_image_to_drive(city: str) -> None:
+    """Earth Engine export task to Google Drive, when direct downloads are refused (quota)."""
+    import ee
+    image, box = true_colour_image(city)
+    name = f"{image_path(city).stem}_{city}"
+    ee.batch.Export.image.toDrive(image=image, description=name, fileNamePrefix=name, region=box,
+                                  scale=cfg.SCALE, crs=cfg.ANALYSIS_CRS, maxPixels=1e10).start()
+    print(f"export started: when the task is done (https://code.earthengine.google.com/tasks), "
+          f"download {name}.tif from Google Drive to {image_path(city)}")
+
+
+def image_rgba(city: str) -> tuple:
+    """8-bit RGBA image of one city (bands first), with its transform and CRS."""
+    path = cfg.city_data_dir(city) / cfg.SITE_IMAGE_TIF.format(year=cfg.SITE_IMAGE_YEAR)
+    with rasterio.open(path) as src:
+        raw = src.read().astype(np.float32)
+        transform, crs = src.transform, src.crs
+    raw[:, (raw == 0).all(axis=0)] = np.nan
+    rgba = sd.stretch_rgba(raw / 10000, cfg.SITE_IMAGE_STRETCH, cfg.SITE_IMAGE_GAMMA)
+    return np.moveaxis(rgba, -1, 0), transform, crs
+
+
+def image_mosaic(rgba, transform, crs, z: int) -> tuple:
+    """The city's image on the tile grid of zoom ``z``: (mosaic rows x cols x 4, x0, y0)."""
+    bounds = transform_bounds(crs, MERCATOR, *rasterio.transform.array_bounds(*rgba.shape[1:], transform))
+    x0, y0, x1, y1 = sd.tile_range(bounds, z)
+    mosaic = np.zeros((4, (y1 - y0 + 1) * sd.TILE_PX, (x1 - x0 + 1) * sd.TILE_PX), dtype=np.uint8)
+    reproject(rgba, mosaic, src_transform=transform, src_crs=crs,
+              dst_transform=sd.mosaic_transform(z, x0, y0), dst_crs=MERCATOR,
+              resampling=Resampling.bilinear if z == cfg.SITE_MAX_ZOOM else Resampling.average)
+    mosaic[3] = np.where(mosaic[3] >= 128, 255, 0)    # no half-transparent edges
+    mosaic[:3, mosaic[3] == 0] = 0
+    return np.moveaxis(mosaic, 0, -1), x0, y0
+
+
+def build_image(refresh: bool) -> dict:
+    """Write outputs/site/tiles/sentinel2_<year>.pmtiles; return its statistics. A city whose
+    image cannot be downloaded is left out with a warning (the site shows the others)."""
+    rasters, missing = {}, []
+    for city in cfg.CITIES:
+        try:
+            download_image(city, refresh)
+        except Exception as error:                      # quota, network: keep the other cities
+            print(f"WARNING {city}: satellite image not downloaded ({type(error).__name__}); "
+                  f"try again later or: python -m pipeline.s7_site_data --drive {city}")
+            missing.append(city)
+            continue
+        rasters[city] = image_rgba(city)
+    encoded, stats = {}, {"tiles": {}, "bytes": 0}
+    for z in range(cfg.SITE_MIN_ZOOM, cfg.SITE_MAX_ZOOM + 1):
+        tiles = {}
+        for city, (rgba, transform, crs) in rasters.items():
+            mosaic, x0, y0 = image_mosaic(rgba, transform, crs, z)
+            for x, y, tile in sd.split_tiles(mosaic, x0, y0):
+                tiles[(x, y)] = sd.overlay(tiles[(x, y)], tile) if (x, y) in tiles else tile.copy()
+        for (x, y), tile in tiles.items():
+            encoded[zxy_to_tileid(z, x, y)] = sd.encode_webp(tile, cfg.SITE_IMAGE_QUALITY)
+        stats["tiles"][z] = len(tiles)
+        if z == cfg.SITE_MAX_ZOOM - 2:
+            image_control_map(tiles, z)
+
+    bounds = [transform_bounds(crs, "EPSG:4326", *rasterio.transform.array_bounds(*r.shape[1:], t))
+              for r, t, crs in rasters.values()]
+    west, south = min(b[0] for b in bounds), min(b[1] for b in bounds)
+    east, north = max(b[2] for b in bounds), max(b[3] for b in bounds)
+    path = cfg.SITE_TILES_DIR / f"{IMAGE_NAME}.pmtiles"
+    cfg.SITE_TILES_DIR.mkdir(parents=True, exist_ok=True)
+    with write(path) as writer:
+        for tile_id in sorted(encoded):
+            writer.write_tile(tile_id, encoded[tile_id])
+        e7 = lambda v: int(round(v * 1e7))
+        writer.finalize(
+            {"tile_type": TileType.WEBP, "tile_compression": Compression.NONE,
+             "min_lon_e7": e7(west), "min_lat_e7": e7(south), "max_lon_e7": e7(east), "max_lat_e7": e7(north),
+             "center_zoom": cfg.SITE_MIN_ZOOM, "center_lon_e7": e7((west + east) / 2),
+             "center_lat_e7": e7((south + north) / 2)},
+            {"name": IMAGE_NAME, "attribution": IMAGE_ATTRIBUTION})
+    stats["bytes"] = path.stat().st_size
+    stats["bounds"] = [round(v, 5) for v in (west, south, east, north)]
+    sizes = [len(b) for b in encoded.values()]
+    stats["mean_tile_kb"] = round(sum(sizes) / len(sizes) / 1024, 1)
+    stats["cities"], stats["missing"] = list(rasters), missing
+    return stats
+
+
+def image_control_map(tiles: dict, z: int) -> None:
+    """All tiles of one zoom side by side: data/j5_tiles_sentinel2_<year>.png."""
+    xs, ys = [x for x, _ in tiles], [y for _, y in tiles]
+    x0, y0 = min(xs), min(ys)
+    canvas = np.full(((max(ys) - y0 + 1) * sd.TILE_PX, (max(xs) - x0 + 1) * sd.TILE_PX, 4), 255, dtype=np.uint8)
+    for (x, y), tile in tiles.items():
+        block = canvas[(y - y0) * sd.TILE_PX:(y - y0 + 1) * sd.TILE_PX, (x - x0) * sd.TILE_PX:(x - x0 + 1) * sd.TILE_PX]
+        block[tile[..., 3] > 0] = tile[tile[..., 3] > 0]
+    Image.fromarray(canvas[..., :3]).save(cfg.DATA_DIR / f"j5_tiles_{IMAGE_NAME}.png")
+
+
 # --- 2. Boundaries ---------------------------------------------------------------------
 
 def simplify(gdf: gpd.GeoDataFrame, coverage: bool) -> gpd.GeoDataFrame:
@@ -259,7 +412,7 @@ def build_validation() -> dict:
 
 # --- 4. Manifest -----------------------------------------------------------------------
 
-def build_manifest(layers: dict, boundaries: dict) -> None:
+def build_manifest(layers: dict, image: dict, boundaries: dict) -> None:
     zones = gpd.read_file(cfg.ZONES_GEOJSON)
     centres = gpd.read_file(cfg.ZONES_DIR / "centres.geojson")
     cities = {}
@@ -282,13 +435,22 @@ def build_manifest(layers: dict, boundaries: dict) -> None:
                           "legend": [{"code": c, "label": l, "color": col} for c, l, col in layer["classes"]],
                           "licence": "CC BY 4.0", "attribution": SAMAREEW_ATTRIBUTION}
                    for name, layer in cfg.SITE_LAYERS.items()},
+        "images": {IMAGE_NAME: {
+            "title": f"Image satellite {cfg.SITE_IMAGE_YEAR} (Sentinel-2)",
+            "description": (f"Composite en couleurs naturelles de la saison sèche {cfg.SITE_IMAGE_YEAR} "
+                            "(1er novembre - 31 mai), pixels de 10 m, celui qu'a classé le modèle"),
+            "year": cfg.SITE_IMAGE_YEAR, "file": f"tiles/{IMAGE_NAME}.pmtiles", "type": "raster",
+            "tile_format": "webp", "tile_size": sd.TILE_PX,
+            "min_zoom": cfg.SITE_MIN_ZOOM, "max_zoom": cfg.SITE_MAX_ZOOM, "bounds": image["bounds"],
+            "cities": image["cities"],
+            "licence": "Copernicus (libre, attribution)", "attribution": IMAGE_ATTRIBUTION}},
         "boundaries": boundaries,
         "validation": "validation.json",
     }
     cfg.SITE_MANIFEST_JSON.write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
 
 
-def main() -> None:
+def main(refresh: bool) -> None:
     zones = gpd.read_file(cfg.ZONES_GEOJSON)
     layers = {}
     for name, layer in cfg.SITE_LAYERS.items():
@@ -297,13 +459,23 @@ def main() -> None:
         print(f"{name}: {sum(stats['tiles'].values())} tiles, {stats['bytes'] / 1e6:.1f} MB "
               f"(per zoom: {stats['tiles']})")
         print(check_layer(name, layer, zones).to_string(index=False))
+    image = build_image(refresh)
+    print(f"{IMAGE_NAME}: {sum(image['tiles'].values())} tiles, {image['bytes'] / 1e6:.1f} MB, "
+          f"{image['mean_tile_kb']} kB per tile (per zoom: {image['tiles']})")
     boundaries = build_boundaries()
     print(check_boundaries().to_string(index=False))
     validation = build_validation()
     print(f"validation: {len(validation['cities'])} cities + national")
-    build_manifest(layers, boundaries)
+    build_manifest(layers, image, boundaries)
     print(f"-> {cfg.SITE_DATA_DIR}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--refresh", action="store_true", help="download the satellite image again")
+    parser.add_argument("--drive", metavar="CITY", help="only start the export of this city's image to Google Drive")
+    args = parser.parse_args()
+    if args.drive:
+        export_image_to_drive(args.drive)
+    else:
+        main(args.refresh)

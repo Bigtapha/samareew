@@ -1,0 +1,204 @@
+---
+// Theme page (OWID style): key points with figures computed from outputs/, then charts.
+import Base from "../layouts/Base.astro";
+import StaticChart from "../components/StaticChart.astro";
+import { catalogue, cities, validation } from "../lib/outputs";
+import { rows, sumByUnit, value } from "../lib/facts";
+import { formatValue } from "../lib/format";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const years: number[] = catalogue.years;
+const [first, last] = [years[0], years[years.length - 1]];
+const ha = (v: number) => formatValue(Math.round(v / 100) * 100, "ha");
+const pct = (v: number) => `${Math.round(v)}\u202f%`;
+const name = new Map(cities.map((c) => [c.slug, c.name]));
+const listNames = (slugs: string[]) =>
+  slugs.length < 2 ? slugs.map((s) => name.get(s)).join("") : `${slugs.slice(0, -1).map((s) => name.get(s)).join(", ")} et ${name.get(slugs.at(-1)!)}`;
+
+// 1. Growth of the four cities together
+const built = cities.map((c) => ({
+  city: c.slug,
+  start: value("built_area_ha", c.slug, first)!,
+  end: value("built_area_ha", c.slug, last)!,
+}));
+const total0 = built.reduce((s, b) => s + b.start, 0);
+const total1 = built.reduce((s, b) => s + b.end, 0);
+
+// 2. Fastest in proportion, largest in area
+const byRate = [...built].sort((a, b) => b.end / b.start - a.end / a.start);
+const byArea = [...built].sort((a, b) => (b.end - b.start) - (a.end - a.start));
+const rate = (b: { start: number; end: number }) => 100 * (b.end / b.start - 1);
+const fastest = byRate.filter((b) => rate(b) >= rate(byRate[0]) - 5);   // within 5 points: a tie
+const largest = byArea[0];
+const biggest = [...built].sort((a, b) => b.end - a.end)[0];
+
+// 3. Land consumption against population (SDG 11.3.1 over the whole period)
+const sdg = cities.map((c) => ({ city: c.slug, v: value("sdg_11_3_1", c.slug, last, first)! }));
+const allAbove = sdg.every((s) => s.v > 1);
+const sdgSorted = [...sdg].sort((a, b) => a.v - b.v);
+const m2 = cities.map((c) => ({
+  city: c.slug, start: value("built_m2_per_capita", c.slug, first)!, end: value("built_m2_per_capita", c.slug, last)!,
+}));
+
+// 4. Distance of growth from the centre (rings of 2 km), for Dakar
+const rings = sumByUnit("new_built_ha", "dakar", "ring", first + 1, last);
+const farKm = 20;
+const ringStart = (unit: string) => Number(unit.split("-")[0]);
+const far = rings.filter((r) => ringStart(r.unit) >= farKm).reduce((s, r) => s + r.value, 0);
+const farShare = 100 * far / rings.reduce((s, r) => s + r.value, 0);
+
+// 5. New built-up area ahead of the roofs (validation, four cities)
+const nat = validation.national;
+const cover = nat.new_built.cover_in_reality;
+const urbanising = (cover.subdivision?.estimate ?? 0) + (cover.construction?.estimate ?? 0);
+// Built in 2025 but already built in the start year: a date error, not a false detection
+const alreadyBuilt = (cover.built?.estimate ?? 0) - nat.new_built.users_accuracy.estimate;
+const spanWords: Record<number, string> = { 9: "neuf", 10: "dix", 11: "onze", 12: "douze" };
+const span = `${spanWords[last - first] ?? last - first} ans`;
+const falseDetections = (cover.vegetation?.estimate ?? 0) + (cover.bare_soil?.estimate ?? 0) + (cover.dirt_track?.estimate ?? 0);
+
+const keyPoints = [
+  {
+    title: `Les quatre villes ont gagné ${ha(total1 - total0)} ha de bâti en ${span}`,
+    text: `De ${ha(total0)} ha en ${first} à ${ha(total1)} ha en ${last} (+${pct(100 * (total1 / total0 - 1))}), soit en moyenne ${ha((total1 - total0) / (last - first))} ha par an.`,
+    href: "/graphiques/built_area_ha",
+  },
+  {
+    title: `${listNames(fastest.map((b) => b.city))} grandi${fastest.length > 1 ? "ssent" : "t"} le plus vite, ${name.get(largest.city)} gagne le plus de surface`,
+    text: `${byRate.map((b) => `${name.get(b.city)} +${pct(rate(b))}`).join(", ")} entre ${first} et ${last}. ${name.get(largest.city)} ajoute à elle seule ${ha(largest.end - largest.start)} ha, ${pct(100 * (largest.end - largest.start) / (total1 - total0))} du nouveau bâti des quatre villes.`,
+    href: "/graphiques/growth_index",
+  },
+  {
+    title: allAbove ? "Partout, le bâti s'étend plus vite que la population" : "Le bâti s'étend plus vite que la population dans certaines villes",
+    text: `Le rapport entre la croissance du bâti et celle de la population (ODD 11.3.1) va de ${formatValue(sdgSorted[0].v, "ratio")} (${name.get(sdgSorted[0].city)}) à ${formatValue(sdgSorted.at(-1)!.v, "ratio")} (${name.get(sdgSorted.at(-1)!.city)}). La surface bâtie par habitant augmente : ${m2.map((m) => `${name.get(m.city)} ${formatValue(m.start, "m²/hab.")} → ${formatValue(m.end, "m²/hab.")} m²`).join(", ")}.`,
+    href: "/graphiques/sdg_11_3_1",
+  },
+  {
+    title: `Dakar grandit loin de son centre`,
+    text: `${pct(farShare)} du nouveau bâti de Dakar depuis ${first} est à plus de ${farKm} km de la place de l'Indépendance : Rufisque, Diamniadio, Sébikotane, la route de Thiès.`,
+    href: "/graphiques/new_built_ha?niveau=anneaux&ville=dakar",
+  },
+  {
+    title: "La carte voit les lotissements avant les maisons",
+    text: `Vérifié sur des images à très haute résolution, le nouveau bâti cartographié se compose de ${pct(100 * nat.new_built.users_accuracy.estimate)} de bâti vraiment nouveau, ${pct(100 * alreadyBuilt)} de bâti déjà là en ${first}, environ ${pct(100 * urbanising)} de lotissements ou de chantiers déjà nivelés ou clôturés, et ${pct(100 * falseDetections)} seulement de vraies fausses détections. La surface totale reste juste : ${ha(nat.new_built.corrected_ha.estimate)} ± ${ha(nat.new_built.corrected_ha.margin95)} ha corrigés pour ${ha(nat.new_built.mapped_ha)} ha cartographiés.`,
+    href: "/donnees#validation",
+  },
+];
+
+const allWithin = cities.every((c) => {
+  const b = validation.cities[c.slug].built_area[String(last)];
+  return Math.abs(b.corrected_ha.estimate - b.mapped_ha) <= b.corrected_ha.margin95;
+});
+
+const cityRows = (indicator: string) => rows(indicator).filter((r) => r.type === "city");
+const periodRows = (indicator: string) => cityRows(indicator).filter((r) => r.start === first && r.year === last);
+const growthTypes = cities.map((c) => ({
+  city: c.slug,
+  shares: ["densification", "extension", "leapfrog"].map((t) => value(`growth_${t}_share_pct`, c.slug, last, first)!),
+}));
+const typeLabels = ["Densification", "Extension", "Saut"];
+---
+<Base title="Expansion urbaine" description="Comment grandissent Dakar, Touba, Thiès et Mbour : points clés et graphiques, 2016–2025.">
+  <header class="lead">
+    <p class="kicker small">Thème</p>
+    <h1>Expansion urbaine</h1>
+    <p class="muted">
+      De {first} à {last}, les surfaces bâties de Dakar, Touba, Thiès et Mbour ont été cartographiées chaque
+      année à partir des images satellite Sentinel-2, avec la même méthode pour les quatre villes. Voici ce
+      qu'elles montrent, et jusqu'où on peut s'y fier.
+    </p>
+  </header>
+
+  <section aria-labelledby="points">
+    <h2 id="points">Points clés</h2>
+    <ol class="key-points">
+      {keyPoints.map((k) => (
+        <li>
+          <h3>{k.title}</h3>
+          <p>{k.text}</p>
+          <a class="small" href={base + k.href}>Voir les données</a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section aria-labelledby="graphiques">
+    <h2 id="graphiques">Graphiques</h2>
+    <div class="charts">
+      <StaticChart kind="line" rows={cityRows("growth_index")} unit="indice"
+        title={`${listNames(fastest.map((b) => b.city))} grandi${fastest.length > 1 ? "ssent" : "t"} le plus vite`} caption={`Croissance du bâti, ${first} = 100`}
+        href="/graphiques/growth_index" />
+      <StaticChart kind="line" rows={cityRows("built_area_ha")} unit="ha"
+        title={`${name.get(biggest.city)} reste de loin la plus grande`} caption="Surface bâtie, en hectares"
+        href="/graphiques/built_area_ha" />
+      <StaticChart kind="line" rows={cityRows("built_m2_per_capita")} unit="m²/hab."
+        title={m2.every((m) => m.end > m.start) ? "Chaque habitant occupe plus de surface bâtie" : "Surface bâtie par habitant"} caption="Surface bâtie par habitant, en m² (population WorldPop)"
+        href="/graphiques/built_m2_per_capita" />
+      <StaticChart kind="bar" rows={periodRows("sdg_11_3_1")} unit="ratio"
+        title={allAbove ? "Le bâti croît plus vite que la population" : "Croissance du bâti et de la population"} caption={`ODD 11.3.1, ${first}–${last} : au-dessus de 1, le bâti s'étend plus vite que la population`}
+        href="/graphiques/sdg_11_3_1" />
+    </div>
+  </section>
+
+  <section aria-labelledby="types">
+    <h2 id="types">Se remplir ou s'étaler ?</h2>
+    <p>
+      Le nouveau bâti est classé selon la règle de l'Atlas of Urban Expansion : <strong>densification</strong> dans
+      la ville existante, <strong>extension</strong> en continuité, <strong>saut</strong> à l'écart.
+      Ces parts sont <strong>indicatives</strong> : elles bougent jusqu'à 20 points selon les réglages, et le saut est le type le moins
+      fiable (45&#8239;% de nouveau bâti réel dans la validation, 5 points sur 16 à Thiès). Seul le classement est stable :
+      Touba s'étend le plus en continuité. On ne classe pas les villes entre elles sur la densification, où les
+      écarts sont plus petits que l'incertitude.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption class="visually-hidden">Part du nouveau bâti {first}–{last} par type de croissance</caption>
+        <thead><tr><th scope="col">Ville</th>{typeLabels.map((l) => <th scope="col">{l}</th>)}</tr></thead>
+        <tbody>
+          {growthTypes.map((g) => (
+            <tr><th scope="row">{name.get(g.city)}</th>{g.shares.map((s) => <td>{formatValue(s, "%")}&#8239;%</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p class="small"><a href={`${base}/graphiques/growth_extension_share_pct`}>Explorer les types de croissance</a></p>
+  </section>
+
+  <section aria-labelledby="fiabilite">
+    <h2 id="fiabilite">Jusqu'où s'y fier ?</h2>
+    <p>
+      480 points tirés au hasard ont été vérifiés à l'œil sur des images à très haute résolution, sans connaître la
+      réponse de la carte. En {last}, {pct(100 * nat.built_accuracy[last].estimate)} (± {Math.round(100 * nat.built_accuracy[last].margin95)})
+      de la surface est bien classée bâti ou non bâti. {allWithin
+        ? "Les surfaces corrigées par la validation, avec leur marge à 95 %, encadrent la surface de la carte dans chaque ville :"
+        : "Les surfaces corrigées par la validation, avec leur marge à 95 % :"}
+    </p>
+    <div class="table-scroll">
+      <table>
+        <caption class="visually-hidden">Surface bâtie {last} : carte et surface corrigée</caption>
+        <thead><tr><th scope="col">Ville</th><th scope="col">Carte (ha)</th><th scope="col">Corrigée (ha)</th></tr></thead>
+        <tbody>
+          {cities.map((c) => {
+            const b = validation.cities[c.slug].built_area[String(last)];
+            return <tr><th scope="row">{c.name}</th><td>{formatValue(b.mapped_ha, "ha")}</td><td>{formatValue(b.corrected_ha.estimate, "ha")} ± {formatValue(b.corrected_ha.margin95, "ha")}</td></tr>;
+          })}
+        </tbody>
+      </table>
+    </div>
+    <p class="small"><a href={`${base}/donnees#validation`}>Méthode, validation et limites</a></p>
+  </section>
+</Base>
+
+<style>
+  .kicker { text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent-text); margin: 0 0 0.25rem; font-weight: 600; }
+  .lead p { max-width: 42rem; }
+  .key-points { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; counter-reset: k; }
+  .key-points li { counter-increment: k; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 0.8rem 1rem; }
+  .key-points h3 { font-size: 1.05rem; margin: 0 0 0.35rem; }
+  .key-points h3::before { content: counter(k) ". "; color: var(--accent-text); }
+  .key-points p { margin: 0 0 0.35rem; max-width: 46rem; }
+  .charts { display: grid; gap: 0.5rem 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
+  section > p { max-width: 46rem; }
+  .table-scroll { max-width: 34rem; margin-bottom: 0.5rem; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>

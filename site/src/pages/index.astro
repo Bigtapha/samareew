@@ -1,0 +1,58 @@
+---
+import Base from "../layouts/Base.astro";
+import { catalogue, cities } from "../lib/outputs";
+import { value } from "../lib/facts";
+import { formatValue } from "../lib/format";
+import { CITY_COLORS } from "../config";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const [first, last] = [catalogue.years[0], catalogue.years.at(-1)!];
+const stats = cities.map((c) => {
+  const a = value("built_area_ha", c.slug, first)!;
+  const b = value("built_area_ha", c.slug, last)!;
+  return { ...c, start: a, end: b, growth: Math.round(100 * (b / a - 1)) };
+});
+const total = (k: "start" | "end") => stats.reduce((s, c) => s + c[k], 0);
+const spanWords: Record<number, string> = { 9: "neuf", 10: "dix", 11: "onze", 12: "douze" };
+const span = `${spanWords[last - first] ?? last - first} ans`;
+---
+<Base title="SamaReew">
+  <section class="hero">
+    <h1>Comment grandissent les villes du Sénégal ?</h1>
+    <p class="muted">
+      SamaReew compare l'expansion de Dakar, Touba, Thiès et Mbour de {first} à {last}, d'après les images satellite
+      Sentinel-2 et des données ouvertes. En {span}, les quatre villes ont gagné{" "}
+      <strong>{formatValue(Math.round((total("end") - total("start")) / 100) * 100, "ha")} hectares</strong> de bâti.
+    </p>
+    <p><a class="button" href={`${base}/expansion-urbaine`}>Lire les points clés</a></p>
+  </section>
+
+  <h2>Les villes</h2>
+  <ul class="cities">
+    {stats.map((c) => (
+      <li style={`--city:${CITY_COLORS[c.slug]}`}>
+        <a href={`${base}/villes/${c.slug}`}>
+          <strong>{c.name}</strong>
+          <span class="big">+{c.growth}&#8239;%</span>
+          <span class="muted small">de bâti entre {first} et {last}, {formatValue(c.end, "ha")} ha en {last}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <h2>Explorer</h2>
+  <ul class="cards">
+    <li><a href={`${base}/graphiques`}><strong>Graphiques</strong><span class="muted small">Un graphique par indicateur, avec carte, tableau et données.</span></a></li>
+    <li><a href={`${base}/donnees`}><strong>Données & méthode</strong><span class="muted small">Téléchargements, sources, validation et limites.</span></a></li>
+  </ul>
+</Base>
+
+<style>
+  .hero { max-width: 44rem; padding: 0.5rem 0 0.5rem; }
+  .hero h1 { font-size: clamp(1.7rem, 1.3rem + 2vw, 2.6rem); }
+  .button { display: inline-block; background: var(--accent); color: var(--surface); padding: 0.55rem 1rem; border-radius: var(--radius); text-decoration: none; font-weight: 600; }
+  .cities { list-style: none; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+  .cities a { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.9rem 1rem; height: 100%; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--city); border-radius: var(--radius); color: var(--text); text-decoration: none; }
+  .cities a:hover { border-color: var(--muted); border-top-color: var(--city); }
+  .big { font-size: 1.8rem; font-weight: 700; line-height: 1.1; color: var(--city); }
+</style>

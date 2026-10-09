@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "Atlas ouvert de l'expansion urbaine des villes du Sénégal, 2016–2025." } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const path = Astro.url.pathname.replace(/\/$/, "");
+const nav = [
+  ["/expansion-urbaine", "Expansion urbaine"],
+  ["/graphiques", "Graphiques"],
+  ["/villes", "Villes"],
+  ["/donnees", "Données & méthode"],
+  ["/a-propos", "À propos"],
+];
+const pageTitle = title === "SamaReew" ? title : `${title} · SamaReew`;
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={`${base}/`}>Sama<span>Reew</span></a>
+        <nav class="site-nav" aria-label="Navigation principale">
+          {nav.map(([href, label]) => (
+            <a href={base + href} aria-current={path.startsWith(base + href) ? "page" : undefined}>{label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          Données SamaReew sous licence CC BY 4.0, d'après Copernicus Sentinel-2 (2016–2026). Limites des
+          communes © contributeurs OpenStreetMap (ODbL). Code sous licence MIT.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

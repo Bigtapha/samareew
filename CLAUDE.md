@@ -35,7 +35,9 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
 - `site/` (J5) will read only `outputs/`, never import from `pipeline/` or `src/`. Tools
   (decided 09/10/2026): Astro, Observable Plot, MapLibre GL + PMTiles; mobile first, slow
   connections. Entry points: `outputs/site/manifest.json` and `outputs/tables/indicators.json`.
-  The `.pmtiles` archives are ignored by git: rebuild them with step 7. Node 20 is installed.
+  The `.pmtiles` archives are ignored by git: rebuild them with step 7 (data layers) and
+  `npm run basemap` in `site/` (basemap, needs the `pmtiles` CLI, in `~/.local/bin`). Node 24 via
+  nvm (`nvm use` in `site/`, `.nvmrc`); the system Node 20 is too old for Astro 7.
 - Large files (GeoTIFF, tiles) never go into git (`*.tif` and `data/` are ignored).
 - Licences: code MIT, produced data CC BY 4.0, `zones/communes.geojson` ODbL (OSM-derived).
   Check the licence of any new source before using it (GADM was rejected for that reason).
@@ -56,6 +58,11 @@ python -m pipeline.s5_validation   # --draw once (sample), accuracy from labels.
 python -m pipeline.s6_crosscheck   # Open Buildings, GHSL, census -> outputs/crosscheck/ (after s4)
 python -m pipeline.s7_site_data    # map tiles, boundaries, validation -> outputs/site/ (after s4, s5)
 pytest
+
+cd site && nvm use        # Node 24
+npm run basemap           # basemap -> site/public/basemap/ (once, or to refresh OSM)
+npm run dev               # copies outputs/ into site/public/data/, then http://localhost:4321/samareew/
+npm run build && npm run check
 ```
 
 Step numbers follow ROADMAP §4.1 (`s5` validation, `s6` cross-check). The validation is

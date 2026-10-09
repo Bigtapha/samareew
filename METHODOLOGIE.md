@@ -831,7 +831,8 @@ d'urbanisation couvrent environ 55 000 ha, plus du double du nouveau bâti carto
   (60 400 ha) est presque égale à la surface cartographiée (61 000 ha), et chaque ville est
   dans sa marge. Les fausses alarmes et les oublis se compensent.
 - **Le nouveau bâti de la carte est surtout de l'urbanisation réelle.** La moitié seulement
-  est bâtie en 2025, mais **les trois quarts** sont bâtis, en chantier ou en lotissement ; les
+  est du bâti vraiment nouveau en 2025 (9 % était déjà bâti en 2016), mais **les trois quarts**
+  sont du bâti nouveau, en chantier ou en lotissement ; les
   vraies fausses détections (végétation, sol nu, piste) ne font que 15 %. Sentinel-2 voit un
   lotissement nivelé ou clôturé comme du bâti : la carte annonce le bâti avec un temps
   d'avance. Le taux d'environ 50 % confirmé par Open Buildings (§13) s'explique donc surtout
@@ -877,7 +878,8 @@ marge est publiée à côté (README, site) ; les types de croissance, surtout l
 Le site (J5) ne lit que `outputs/`. `pipeline/s7_site_data.py` y dépose, dans
 `outputs/site/`, tout ce qu'il lui faut en plus des tableaux d'indicateurs, sous une forme
 légère pour les téléphones et les connexions lentes. Le `manifest.json` liste les fichiers,
-les légendes, l'emprise et le centre de chaque ville, et les licences (format d'échange 0.2).
+les légendes, l'emprise et le centre de chaque ville, l'image satellite (`images`) et les
+licences (format d'échange 0.2).
 
 ### 15.1 Cartes : tuiles PMTiles
 
@@ -912,7 +914,38 @@ et 2,2 Mo (`growth_type_2016_2025`) ; une tuile pèse au plus 14,5 Ko (médiane 
 14), soit moins de 100 Ko pour un écran de téléphone. Cartes de contrôle :
 `data/j5_tiles_<couche>.png`. Les archives ne sont pas dans git : l'étape 7 les reconstruit.
 
-### 15.2 Limites
+### 15.2 Image satellite sous les couches
+
+Sur les cartes des villes, une case affiche sous les couches l'**image Sentinel-2 de 2025**
+(`SITE_IMAGE_*`, décision du 09/10/2026). Elle est **désactivée par défaut** : rien n'est
+téléchargé tant qu'on ne l'affiche pas, et les couches passent alors à 60 % d'opacité
+(curseur réglable).
+
+- **Même image que la carte** : composite médian de la saison sèche 2025 (1er novembre
+  2024 – 31 mai 2025), mêmes scènes et même masque des nuages (Cloud Score+ ≥ 0,60) que la
+  classification (§4–§7), bandes rouge, vert, bleu (B4, B3, B2) à 10 m, sur le rectangle
+  englobant chaque zone. On voit donc ce que le modèle a vu, y compris les lotissements
+  nivelés qui expliquent l'avance du nouveau bâti sur les toits (§14.4).
+- **Même étirement pour toutes les villes** (comparabilité) : réflectance 0,06 → 0 et
+  0,32 → 255 sur les trois bandes (couleurs naturelles), puis gamma 1,1. Choisi à l'œil sur
+  Touba (sable clair, réflectances entre 0,15 et 0,30) et Mbour (mer et végétation sombres) :
+  un seuil bas de 0,10 noircissait la végétation et la mer (`data/j5_image_stretch_*.png`).
+- **Tuiles WebP** (qualité 70), zooms 8 à 14 comme les couches ; moyenne des pixels aux
+  zooms inférieurs. À 10 m, on distingue quartiers, routes et parcelles, pas les maisons.
+- Attribution : « Contient des données Copernicus Sentinel modifiées (2025) ». Les images
+  téléchargées sont en cache dans `data/cities/<ville>/true_colour_2025.tif`
+  (`--refresh` pour les retélécharger).
+
+**Au dernier calcul** (09/10/2026) : 613 tuiles, **2,6 Mo** pour Touba, Thiès et Mbour ; au
+zoom 14, une tuile pèse 4,6 Ko en médiane (11 Ko au plus, en ville dense), soit 100 à 220 Ko
+pour un écran de téléphone tout zoomé, environ 30 Ko pour la vue d'ensemble d'une ville.
+Contrôle à l'œil des tuiles relues (`data/j5_image_tile_check.png`) : routes, Grande Mosquée
+et parcellaire lisibles à Touba. **Dakar manque encore** : le quota mensuel gratuit d'Earth
+Engine du projet était épuisé (mode restreint jusqu'au 1er novembre) ; son image est
+exportée vers Google Drive (`python -m pipeline.s7_site_data --drive dakar`) et la page de
+Dakar l'indique en attendant.
+
+### 15.3 Limites
 
 Zones, communes et secteurs de Touba en GeoJSON (EPSG:4326), avec les noms d'unités de
 `outputs/tables/units.csv` (`city`, `unit_type`, `unit`, `label`), plus les centres.
@@ -922,7 +955,7 @@ identiques (ni trou ni chevauchement) ; coordonnées arrondies à 5 décimales (
 Résultat : surfaces modifiées de moins de 0,1 %, chevauchement nul, communes 138 Ko au lieu
 de 660 Ko. `communes.geojson` reste sous **ODbL** (© OpenStreetMap contributors).
 
-### 15.3 Validation
+### 15.4 Validation
 
 `validation.json` reprend, pour chaque ville et pour les quatre villes, ce que le site
 montre de §14.4 : précision globale, précision bâti / non bâti en 2016 et 2025, précisions

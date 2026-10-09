@@ -20,7 +20,7 @@ read it first.
 | J2 — National model and classification | Done |
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
 | J4 — National validation (480 photo-interpreted points) | Done |
-| **J5 — Website v1** | **In progress** on branch `j5-site`: tools chosen, site data ready (step 7); the site itself (`site/`) is still to build |
+| **J5 — Website v1** | **In progress** on branch `j5-site`: all pages of ROADMAP §4.5 built in `site/` (theme page, one chart page per indicator, 4 city fact sheets, data & method, about), tested on mobile and slow connections; still to do: home map, Dakar satellite image, review |
 | J6 — Publication | To do |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
@@ -32,7 +32,7 @@ read it first.
 | Population (WorldPop) 2016 → 2025 | 3.50 → 4.20 M | 0.97 → 1.34 M | 0.44 → 0.55 M | 0.49 → 0.64 M |
 | Built-up m² per inhabitant | 60 → 76 | 88 → 109 | 84 → 124 | 88 → 123 |
 | SDG 11.3.1 (land / population growth) | 2.24 | 1.69 | 2.77 | 2.32 |
-| Densification / extension / leapfrog (indicative) | 36 / 26 / 38 % | 37 / 35 / 27 % | 28 / 22 / 51 % | 37 / 27 / 36 % |
+| Densification / extension / leapfrog (indicative) | 36 / 26 / 38 % | 38 / 35 / 27 % | 28 / 22 / 51 % | 37 / 27 / 36 % |
 | New built-up confirmed by Open Buildings roofs | 48 % | 57 % | 43 % | 56 % |
 | **Accuracy, built / not built 2025** (J4) | 0.87 ± 0.06 | 0.83 ± 0.07 | 0.86 ± 0.09 | 0.82 ± 0.09 |
 | Accuracy, 3 classes 2016 → 2025 (J4) | 0.85 ± 0.07 | 0.78 ± 0.07 | 0.84 ± 0.09 | 0.77 ± 0.09 |
@@ -58,9 +58,9 @@ read it first.
   corrected against 61,000 ha mapped in 2025, every city within its margin. The 2016
   built-up area is overestimated in Dakar, so its real growth is probably above +50 %.
 - **New built-up area runs ahead of the roofs**: half (0.51 ± 0.08) of the mapped new
-  built-up area is built in 2025; a second reading of the points not built in 2025 shows that
-  another quarter is unbuilt subdivision or construction site, and only 15 % are true false
-  detections (vegetation, bare soil). Sentinel-2 sees a levelled or fenced plot as built-up.
+  built-up area is truly new built-up in 2025 and 9 % was already built in 2016; a second
+  reading of the points not built in 2025 shows that another quarter is unbuilt subdivision or
+  construction site, and only 15 % are true false detections (vegetation, bare soil). Sentinel-2 sees a levelled or fenced plot as built-up.
   The corrected total (27,200 ± 6,800 ha) is close to the map (23,300 ha), but the map misses
   most unbuilt subdivisions: land being urbanised covers about 55,000 ha.
 - **By city**: in Touba, most errors are subdivisions (44 % of the mapped new built-up), and
@@ -73,15 +73,25 @@ read it first.
 The tables keep the mapped values, consistent with the maps; the corrected areas are
 published next to them, and each indicator fact sheet gives the measured accuracy.
 
-**Next step** (J5, branch `j5-site`): create `site/` with **Astro** (static pages),
-**Observable Plot** (charts) and **MapLibre GL + PMTiles** (maps), decided on 09/10/2026 for
-slow mobile connections (ROADMAP §2). The site reads only `outputs/`: start from
-`outputs/site/manifest.json` (cities, map layers and legends, boundaries, validation) and
-`outputs/tables/indicators.json` (fact sheets, exchange format 0.2). Order of work: the
-OWID-style chart template (tabs Chart / Map / Table / Sources / Download, state in the URL),
-a first map on the PMTiles layers with a light basemap whose licence is checked, then the
-pages of ROADMAP §4.5. The map tiles are not in git: run `python -m pipeline.s7_site_data`
-first on a new machine.
+**Next step** (J5, branch `j5-site`): the site lives in [`site/`](site/) (**Astro 7**, Node 24;
+**Observable Plot** charts; **MapLibre GL + PMTiles** maps; ROADMAP §2). It reads only `outputs/`:
+pages read `outputs/site/manifest.json` and `outputs/tables/` at build time, and
+`npm run sync` copies the files the browser loads into `site/public/data/`. Pages:
+
+- `/expansion-urbaine`: theme page, 5 key points whose figures and rankings are computed at
+  build time, charts drawn as static SVG (no JavaScript);
+- `/graphiques/<indicator>`: OWID-style chart template (tabs Chart / Map / Table / Sources /
+  Download, cities, levels city / commune / sector / direction / ring, state in the URL, CSV
+  and PNG / SVG downloads);
+- `/villes/<city>`: fact sheets (key figures with corrected areas, PMTiles map with the 2025
+  satellite image on request, charts, tables by commune and Touba sector, reliability);
+- `/donnees` (data & method, downloads, licences, validation, limits) and `/a-propos`.
+
+Chart drawing is shared by the interactive template and the static pages
+(`site/src/lib/charts.ts`). On a simulated 3G connection, text pages weigh 3-8 kB; a map costs
+about 500 kB the first time (MapLibre), so city maps load only when scrolled to. Still to do:
+the home map (proportional circles), Dakar's satellite image (Earth Engine quota, ROADMAP J5),
+and a review of the texts.
 
 ## Study zones
 
@@ -169,6 +179,13 @@ outputs/             model/ (evaluation), cities/<city>/ (results), tables/ (ind
                      site/ (maps, boundaries and validation for the site), validation/,
                      crosscheck/ (comparison with reference products),
                      legacy_dakar/ (first case study)
+site/                public website (Astro), reads only outputs/
+  scripts/           sync-outputs.mjs (outputs/ -> public/data/), basemap.mjs (OSM basemap)
+  src/config.ts      site settings (city colours, basemap)
+  src/components/    StaticChart (chart drawn at build time as SVG)
+  src/lib/           build-time reading of outputs/ (outputs, facts), chart drawing (charts), formatting
+  src/pages/         expansion-urbaine, graphiques/<indicator> (+ CSV), villes/<city>, donnees, a-propos
+  src/scripts/       browser code: chart template, maps
 docs/                old Dakar web map (GitHub Pages), to be replaced by the site in J5
 ```
 
@@ -190,8 +207,16 @@ python -m pipeline.s5_validation --draw  # validation sample, once -> outputs/va
 python -m pipeline.s5_validation --cover # second reading sheet (points not built in 2025), once
 python -m pipeline.s5_validation         # accuracy from the labels entered so far
 python -m pipeline.s6_crosscheck      # comparison with Open Buildings and GHSL (--refresh to download again)
-python -m pipeline.s7_site_data       # site data: map tiles, boundaries, validation -> outputs/site/
+python -m pipeline.s7_site_data       # site data: map tiles, satellite image, boundaries, validation -> outputs/site/
+python -m pipeline.s7_site_data --drive dakar  # export one city's image to Google Drive (Earth Engine quota)
 pytest
+
+# website (Node 24: https://github.com/nvm-sh/nvm, then `nvm install` in site/)
+cd site && nvm use && npm ci
+npm run basemap       # basemap -> public/basemap/ (needs the pmtiles CLI: github.com/protomaps/go-pmtiles)
+npm run dev           # copies outputs/ into public/data/, serves http://localhost:4321/samareew/
+npm run build         # static site -> site/dist/
+npm run check         # type check
 ```
 
 Practical notes:
@@ -217,10 +242,17 @@ Practical notes:
 - Step 7 writes everything the site reads besides `outputs/tables/`, listed in
   `outputs/site/manifest.json` (exchange format 0.2): one PMTiles archive per map layer
   (paletted PNG tiles, zooms 8-14, about 5 MB for both layers; **ignored by git**, rebuild them
-  with this step), the boundaries as simplified GeoJSON with the unit names of
+  with this step), the 2025 true-colour Sentinel-2 composite as WebP tiles (downloaded once per
+  city from Earth Engine into `data/cities/<city>/true_colour_2025.tif`, `--refresh` to download
+  again; a city whose download fails is left out with a warning), the boundaries as simplified GeoJSON with the unit names of
   `outputs/tables/units.csv` (`communes.geojson` stays ODbL), and `validation.json`. It checks
   its own output: tile areas against the 10 m rasters, and boundary areas before and after
   simplification. Control maps: `data/j5_tiles_<layer>.png`.
+- The site needs step 7 first (`npm run sync` stops with a message if a `.pmtiles` file is
+  missing). The basemap (`site/public/basemap/`, about 15 MB, ignored by git) is an extract of
+  the latest Protomaps daily build over the cities' bounds (zooms 0-14), with its glyphs and
+  sprites, so that no map request leaves the site; rerun `npm run basemap` to refresh it or
+  after adding a city.
 - `requirements.txt` lists the libraries; `requirements-lock.txt` pins the exact versions
   tested with Python 3.12 (the outputs in `outputs/` were checked identical with them). geemap
   uses a geedim function marked as deprecated: keep the pinned versions until it is updated.
@@ -260,8 +292,8 @@ in favour of the national one.
   false detections: 45 % of the leapfrog points are real new built-up in the validation
   (5 out of 16 in Thiès), so growth types are indicative.
 - About half of the new built-up area has Open Buildings roofs within 30 m (75-84 % for the
-  2016 built-up area); the validation shows that half of the mapped new built-up area is not
-  built in 2025, but mostly because it is unbuilt subdivision or construction site.
+  2016 built-up area); the validation shows that 40 % of the mapped new built-up area is not
+  built in 2025, mostly because it is unbuilt subdivision or construction site.
 - Almost half of the validation points (237 of 480) were marked unsure by the interpreter,
   and 21 points in Dakar and Thiès were labelled on 2023 imagery (no 2025 image).
 - Commune boundaries come from OpenStreetMap and are not official (least reliable around Thiès).
@@ -269,7 +301,7 @@ in favour of the national one.
 ## Tools
 
 Python · Google Earth Engine · geemap · rasterio · GeoPandas · Shapely · NumPy · pandas ·
-SciPy · scikit-learn · Matplotlib
+SciPy · scikit-learn · Matplotlib · Astro · Observable Plot · MapLibre GL · PMTiles · Protomaps
 
 ## License
 
@@ -279,5 +311,6 @@ Code: [MIT](LICENSE). Produced data: [CC BY 4.0](LICENSE-DATA.md), except
 ## Author
 
 **Moustapha Cisse** — Geomatics engineer, remote sensing and geospatial data engineering.
-Contains modified Copernicus Sentinel data (2016–2026). Population: WorldPop Global 2
+Contains modified Copernicus Sentinel data (2016–2026). Basemap: © OpenStreetMap
+contributors (ODbL), via Protomaps. Population: WorldPop Global 2
 (R2025A, doi:10.5258/SOTON/WP00839), CC BY 4.0; census: ANSD, RGPH-5 2023, CC BY 4.0.

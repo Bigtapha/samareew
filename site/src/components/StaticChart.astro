@@ -1,0 +1,48 @@
+---
+// A chart drawn at build time: plain SVG, no JavaScript, readable on slow connections.
+import { parseHTML } from "linkedom";
+import { barChart, lineChart, type Row } from "../lib/charts";
+import { cities } from "../lib/outputs";
+import { CITY_COLORS } from "../config";
+
+interface Props {
+  kind: "line" | "bar";
+  rows: Row[];
+  unit: string;
+  /** Cities of a line chart, in label order. */
+  cityOrder?: string[];
+  width?: number;
+  title: string;
+  caption?: string;
+  href?: string;
+  /** Bars in the order of ``Row.order`` rather than sorted by value. */
+  ordered?: boolean;
+}
+const { kind, rows, unit, cityOrder = cities.map((c) => c.slug), width = 420, title, caption, href, ordered } = Astro.props;
+const { document } = parseHTML("<!doctype html><html><body></body></html>");
+const ctx = {
+  unit,
+  cityName: new Map(cities.map((c) => [c.slug, c.name])),
+  cityColor: new Map(cities.map((c) => [c.slug, CITY_COLORS[c.slug]])),
+  accent: "#b8410e",
+  document: document as unknown as Document,
+};
+const svg = (kind === "line" ? lineChart(rows, cityOrder, width, ctx) : barChart(rows, width, ctx, ordered));
+svg.setAttribute("role", "img");
+svg.setAttribute("aria-label", title);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+<figure class="static-chart">
+  <figcaption>
+    <strong>{title}</strong>
+    {caption && <span class="muted small">{caption}</span>}
+  </figcaption>
+  <div class="svg" set:html={svg.outerHTML} />
+  {href && <a class="small" href={base + href}>Explorer ce graphique (villes, communes, tableau, données)</a>}
+</figure>
+
+<style>
+  .static-chart { margin: 0 0 1.75rem; }
+  figcaption { display: flex; flex-direction: column; gap: 0.1rem; margin-bottom: 0.4rem; }
+  .svg :global(svg) { width: 100%; max-width: 560px; height: auto; display: block; }
+</style>

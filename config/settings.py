@@ -35,6 +35,7 @@ CLOUD_SCORE_THRESHOLD = 0.60
 # Direct download of the yearly stacks (step 2): tile size in MB (Earth Engine maximum: 32).
 # Smaller tiles avoid "User memory limit exceeded" with long seasons (many scenes per median).
 DOWNLOAD_MAX_TILE_MB = 8
+DOWNLOAD_THREADS = 2          # parallel requests (step 7 image); more hits the Earth Engine concurrency limit
 
 # --- Classification (one national model) ---------------------------------
 TRAINING_YEAR = 2021          # year of the reference land-cover products (WorldCover 2021)
@@ -203,6 +204,18 @@ SITE_LAYERS = {
         ],
     },
 }
+# Satellite image under the map layers (decided 09/10/2026, ROADMAP §9): the true-colour
+# Sentinel-2 composite of the last published year, with the same dry season and cloud mask
+# as the classification, over the bounding box of each zone. Off by default on the site.
+# Same stretch for every city (comparability): reflectance SITE_IMAGE_STRETCH -> 0-255,
+# then a gamma to lighten dark built-up areas. WebP keeps tiles small on mobile connections.
+SITE_IMAGE_YEAR = PUBLISHED_YEARS[-1]        # 2025, the last published year
+SITE_IMAGE_BANDS = ["B4", "B3", "B2"]        # red, green, blue
+SITE_IMAGE_STRETCH = (0.06, 0.32)            # reflectance mapped to 0 and 255 (data/j5_image_stretch_*.png)
+SITE_IMAGE_GAMMA = 1.1                       # > 1 lightens the dark tones
+SITE_IMAGE_QUALITY = 70                      # WebP quality (0-100)
+SITE_IMAGE_TIF = "true_colour_{year}.tif"    # data/cities/<city>/: reflectance x 10000 (uint16)
+SITE_IMAGE_NAME = "sentinel2_{year}"         # outputs/site/tiles/<name>.pmtiles
 # Boundaries: simplified in metres (shared edges between communes stay shared), then
 # rounded to SITE_COORD_DECIMALS (5 decimals = about 1 m).
 SITE_SIMPLIFY_M = 15

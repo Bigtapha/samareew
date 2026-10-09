@@ -40,7 +40,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 | Unité grand public | **La commune** ; découpage plus fin uniquement si nécessaire (**Touba** : secteurs anneaux × directions ou grille hexagonale) |
 | Licences | **MIT** pour le code, **CC BY 4.0** pour les données produites |
 | Organisation du code | **Un seul dépôt**, avec une frontière stricte `pipeline/` → `outputs/` → `site/` ; séparation en deux dépôts plus tard (voir §6) |
-| Outils du site | Site **statique** généré par **Astro** (pages HTML légères, JavaScript chargé seulement pour les graphiques et les cartes), graphiques **Observable Plot** (SVG), cartes **MapLibre GL** avec des tuiles **PMTiles** (un fichier par couche, sans serveur) ; hébergement GitHub Pages ; pensé d'abord pour le téléphone et les connexions lentes |
+| Outils du site | Site **statique** généré par **Astro** (pages HTML légères, JavaScript chargé seulement pour les graphiques et les cartes), graphiques **Observable Plot** (SVG), cartes **MapLibre GL** avec des tuiles **PMTiles** (un fichier par couche, sans serveur) ; **fond de carte Protomaps auto-hébergé** (extrait OpenStreetMap des zones, variantes « white » en clair et « black » en sombre, polices et icônes servies avec le site) ; Node 24 et Astro 7 ; hébergement GitHub Pages ; pensé d'abord pour le téléphone et les connexions lentes |
 | Période | Saisons sèches **2016 à 2026** (1er novembre – 31 mai) ; indicateurs publiés **jusqu'à l'avant-dernière année** (2025), la dernière sert de confirmation |
 | Type de croissance | Règle de l'**Atlas of Urban Expansion** : emprise de départ = bâti urbain (≥ 25 % de bâti dans un cercle de 1 km²) + frange de 100 m + trous enclavés < 200 ha ; nouveau bâti dedans = **densification**, nouvel îlot qui la touche = **extension**, sinon **saut** ; par période (2016→2020, 2020→2025, 2016→2025) |
 | Population | **WorldPop Global 2** (R2025A, annuel, 100 m, contraint au bâti, CC BY 4.0) ; RGPH-5 2023 en contrôle sur les communes entièrement dans les zones |
@@ -79,7 +79,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 - **Une table « longue »** : `indicateur | ville | commune/secteur | année | valeur`
 - **Une fiche par indicateur** : titre grand public, unité, définition en une phrase, source,
   licence, lien méthode, niveau de fiabilité, palette.
-- **Des cartes par ville** (couches de périodes, tuiles) : depuis la version 0.2, dans `outputs/site/` (étape 7) : une archive PMTiles par couche pour les quatre villes, les limites en GeoJSON simplifié, le résumé de la validation, et un `manifest.json` qui liste les fichiers, les légendes et les licences.
+- **Des cartes par ville** (couches de périodes, tuiles) : depuis la version 0.2, dans `outputs/site/` (étape 7) : une archive PMTiles par couche pour les quatre villes, l'image satellite 2025 (clé `images`, ajout compatible), les limites en GeoJSON simplifié, le résumé de la validation, et un `manifest.json` qui liste les fichiers, les légendes et les licences.
 - **Un numéro de version** du format dans les métadonnées (`FORMAT_VERSION`, 0.2 depuis le 09/10/2026).
 
 Ajouter une ville = ajouter des lignes. Ajouter un indicateur = ajouter une fiche.
@@ -187,25 +187,32 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 ### J5 — Site v1
 - [x] Choisir les outils : Astro, Observable Plot, MapLibre GL + PMTiles (§2)
 - [x] Étape 7, données du site (§4.1) : couches cartographiques (année d'urbanisation, types de croissance) en PMTiles et limites (zones, communes, secteurs de Touba) dans `outputs/`, car le site ne lit que `outputs/` ; surfaces corrigées de la validation dans le format d'échange
-- [ ] Créer `site/` avec Astro (Node 20 installé) : lecture de `outputs/site/manifest.json` et de `outputs/tables/` à la construction, jamais de `pipeline/` ni de `src/`
-- [ ] Choisir le fond de carte : léger, sans clé d'accès, licence vérifiée (par exemple un fond OpenStreetMap, attribution ODbL) ; même fond clair en mode sombre ou fond sombre dédié, à décider en le voyant
-- [ ] Gabarit de graphique OWID (onglets, sélection de villes, URL avec état, téléchargement)
-- [ ] Page thème « Expansion urbaine » avec 4 ou 5 points clés
-- [ ] Les graphiques des indicateurs v1
-- [ ] 4 fiches villes
-- [ ] Fiche Touba : préciser que l'agglomération inclut Mbacké (« un seul ensemble bâti ») ; onglets par secteur et par commune
-- [ ] Page Données & méthode (sources, licences, limites, validation)
-- [ ] Préciser dans les fiches que les chiffres par commune reposent sur des limites OpenStreetMap (ODbL, citer « © OpenStreetMap contributors »)
-- [ ] Ne pas classer Dakar, Touba et Mbour entre elles sur la densification (écarts de 1–2 points, inférieurs à la sensibilité aux paramètres, METHODOLOGIE §11.2)
-- [ ] Chaque carte a sa légende (couleurs et libellés de `manifest.json`) et un tableau à côté : l'orangé clair et le vert d'eau sont peu contrastés sur fond clair (METHODOLOGIE §15.1)
-- [ ] Afficher les surfaces corrigées de la validation à côté des valeurs de la carte (`outputs/site/validation.json`), types de croissance « indicatifs », 2025 « provisoire » (§9, 07/10/2026)
-- [ ] Tests sur mobile et connexion lente
+- [x] Créer `site/` avec Astro 7 (Node 24 installé avec nvm) : lecture de `outputs/site/manifest.json` et de `outputs/tables/` à la construction, jamais de `pipeline/` ni de `src/` ; `npm run sync` copie dans `site/public/data/` les fichiers que le navigateur charge (tuiles, limites, tables)
+- [x] Choisir le fond de carte : Protomaps auto-hébergé, « white » en clair et « black » en sombre (§9, 09/10/2026) ; reconstruit par `npm run basemap` (outil `pmtiles` requis), ignoré par git
+- [x] Gabarit de graphique OWID : une page par indicateur (`/graphiques/<indicateur>`), onglets Graphique / Carte / Tableau / Sources / Télécharger, sélection des villes, niveaux ville / commune / secteur, URL avec état, CSV par graphique
+- [x] Téléchargement du graphique en image (SVG, PNG, avec titre et source) ; directions et anneaux ajoutés au gabarit comme niveaux (`niveau=directions`, `niveau=anneaux`), dans leur ordre naturel
+- [x] Première carte sur les couches PMTiles (`/villes/<ville>`), légende et tableau des surfaces à côté, précision de la validation ; chargée seulement quand elle approche de l'écran
+- [x] Image satellite sous les couches (case à cocher, désactivée par défaut) : composite Sentinel-2 en couleurs naturelles de la saison sèche 2025, celui qu'a classé le modèle, en tuiles WebP produites par l'étape 7 ; curseur d'opacité des couches (environ 30 Ko par vue de ville, 100 à 220 Ko tout zoomé)
+- [ ] Image satellite de Dakar : quota gratuit d'Earth Engine épuisé en octobre (mode restreint jusqu'au 1er novembre) ; export lancé vers Google Drive le 09/10/2026 : déposer `true_colour_2025_dakar.tif` dans `data/cities/dakar/true_colour_2025.tif`, puis relancer l'étape 7
+- [x] Page thème « Expansion urbaine » (`/expansion-urbaine`) : 5 points clés dont les chiffres et les classements sont calculés à la construction depuis `outputs/`, 4 graphiques en SVG statique (sans JavaScript), types de croissance, fiabilité
+- [x] Les graphiques des indicateurs v1 : une page par indicateur (15), les mêmes fonctions de dessin pour le gabarit interactif et les pages statiques (`site/src/lib/charts.ts`)
+- [x] 4 fiches villes (même gabarit) : chiffres clés avec surface corrigée, carte, surface et nouveau bâti par année, nouveau bâti par direction et par anneau, tableau par commune (recensement 2023 quand il existe), fiabilité
+- [x] Fiche Touba : agglomération Touba-Mbacké (« un seul ensemble bâti ») ; tableaux par secteur et par commune (sections repliables)
+- [x] Page Données & méthode (`/donnees`) : méthode en bref, téléchargements, sources et licences, validation par ville, limites, citation ; page À propos
+- [x] Préciser dans les fiches que les chiffres par commune reposent sur des limites OpenStreetMap (ODbL, « © contributeurs OpenStreetMap »)
+- [x] Ne pas classer Dakar, Touba et Mbour entre elles sur la densification (écarts de 1–2 points, inférieurs à la sensibilité aux paramètres, METHODOLOGIE §11.2) : dit sur la page thème
+- [x] Chaque carte a sa légende (couleurs et libellés de `manifest.json`) et un tableau à côté (fiches) ou un onglet Tableau (gabarit) : l'orangé clair et le vert d'eau sont peu contrastés sur fond clair (METHODOLOGIE §15.1)
+- [x] Afficher les surfaces corrigées de la validation à côté des valeurs de la carte (`outputs/site/validation.json`), types de croissance « indicatifs », 2025 « provisoire » (§9, 07/10/2026) : page thème, fiches, Données & méthode
+- [x] Tests sur mobile et connexion lente (09/10/2026, 360 px, 4G lente et 3G simulées, fichiers compressés comme GitHub Pages) : aucune page ne déborde ; accueil, thème et Données & méthode font 3 à 8 Ko et s'affichent en moins d'une seconde en 3G ; une fiche ville fait 24 Ko tant que la carte n'est pas atteinte ; une carte coûte environ 500 Ko la première fois (MapLibre seul : 430 Ko), prête en 6,5 s en 4G lente et 13 s en 3G
+- [x] Contrôle général des chiffres et des textes (09/10/2026) : tableau du README et fiches recoupés avec `outputs/` ; formulation corrigée partout (site, README, METHODOLOGIE, fiches d'indicateurs) : le nouveau bâti cartographié est à 51 % du bâti vraiment nouveau et à 9 % du bâti déjà là en 2016 (et non « bâti en 2025 ») ; la fiabilité du nouveau bâti est décrite ville par ville (lotissements à Touba et Mbour, fausses détections à Thiès, les deux à Dakar) ; liens de méthode sans ancre (GitHub ne reconnaît pas `#8`)
+- [ ] Accueil : carte du Sénégal avec cercles proportionnels à la croissance des villes (§4.5) ; pour l'instant, cartes des villes en tuiles de chiffres, sans carte
+- [ ] Relecture du site par l'utilisateur (textes, titres des points clés, chiffres)
 
 **Critère de fin** : le site fonctionne en local, il est lisible sur téléphone et chaque chiffre renvoie à sa source.
 
 ### J6 — Publication
 - [ ] Rendre public le dépôt GitHub (vérifier avant qu'aucun secret ni fichier lourd n'y figure)
-- [ ] Déploiement (GitHub Pages) ; les archives PMTiles ne sont pas dans git : les reconstruire avec l'étape 7 au déploiement ou les publier en release
+- [ ] Déploiement (GitHub Pages) ; les archives PMTiles ne sont pas dans git : les reconstruire avec l'étape 7 et `npm run basemap` au déploiement, ou les publier en release
 - [ ] Données téléchargeables publiées (releases)
 - [ ] README mis à jour, avec la manière de citer le projet
 - [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)
@@ -217,6 +224,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [ ] Mise à jour annuelle automatisée (nouvelle année Sentinel-2)
 - [ ] Titres ou fiches en wolof
 - [ ] Deuxième thème (voir §7)
+- [ ] Curseur avant / après sur l'image satellite (composites 2016 et 2025 côte à côte, on glisse pour comparer) : double le stockage de l'image, pas le poids d'une vue
+- [ ] Partie WebSIG : une visionneuse plein écran pour naviguer dans toutes les cartes (années, types de croissance, limites, couches des thèmes suivants), en complément des pages éditoriales ; outil à choisir (§8), à partir des mêmes PMTiles de `outputs/site/`
 
 ---
 
@@ -259,7 +268,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 
 | Décision | Jalon |
 |---|---|
-| _(aucune pour l'instant)_ | |
+| Outil de la partie WebSIG (par exemple GeoLibre ou une visionneuse MapLibre maison) : à étudier le moment venu | Après la v1 |
 
 ---
 
@@ -296,3 +305,7 @@ d'indicateurs et le même découpage (communes, secteurs).
 | 07/10/2026 | Seconde lecture des 228 points non bâtis en 2025 : occupation du sol dans une liste fermée de 8 codes fixée avant la lecture ; précision « tolérante » où chantier, lotissement non construit et pixel bâti à moins de moitié comptent comme bâti ; la précision stricte reste officielle | Les erreurs du nouveau bâti ne viennent pas de la qualité des images anciennes (précision utilisateur 0,53 sur les seuls points sûrs, contre 0,51) : 67 des 88 erreurs sont des points vus non bâtis sur les images de 2025, probablement des terrains en cours d'urbanisation que Sentinel-2 voit comme du bâti ; pondérer par la confiance aurait biaisé la précision vers le haut sans traiter ce cas |
 | 08/10/2026 | Lotissements (urbanisation en cours) ajoutés aux thèmes à développer après la v1 ; rien ne change dans la carte v1 | La seconde lecture montre qu'un quart du nouveau bâti cartographié est en lotissement non construit ou en chantier, et que la carte ne voit qu'une partie des lotissements (précision producteur tolérante 0,32) |
 | 09/10/2026 | Outils du site : Astro (statique), Observable Plot, MapLibre GL + PMTiles, GitHub Pages | Critères donnés : pratique, maintenable, bon rendu en débit faible et sur téléphone. Astro sert des pages HTML sans JavaScript par défaut et ne charge le code que pour les graphiques et les cartes ; Plot est léger et produit du SVG téléchargeable ; PMTiles évite tout serveur de tuiles. Écartés : Observable Framework (moins de liberté pour un site éditorial à gabarit OWID), Quarto / MkDocs (interactivité trop limitée) |
+| 09/10/2026 | Partie WebSIG ajoutée après la v1 (navigation libre dans toutes les cartes) ; outil non choisi | Demande de l'utilisateur ; à préciser le moment venu, sans changer le périmètre de J5 |
+| 09/10/2026 | Node 24 (installé avec nvm) et Astro 7 plutôt que Node 20 et Astro 5 | Node 20 n'est plus maintenu depuis avril 2026 et Astro 7 demande Node ≥ 22.12 ; Node 24 est la version maintenue, la même qu'au déploiement |
+| 09/10/2026 | Fond de carte : extrait OpenStreetMap des zones depuis Protomaps, auto-hébergé avec le site (variantes « white » / « black ») | Comparé à OpenFreeMap (`data/j5_basemap_*.png`) : aucun service tiers ni clé, même technique PMTiles que les couches ; 12 Mo jusqu'au zoom 14, chargés par morceaux ; licences vérifiées : tuiles ODbL, style BSD-3, polices OFL, icônes MIT. Variante « light » écartée : ses forêts vertes se confondent avec le vert du « saut » |
+| 09/10/2026 | Image satellite sous les couches des cartes : notre composite Sentinel-2 2025 (10 m, couleurs naturelles), désactivée par défaut ; curseur avant / après 2016-2025 gardé pour après la v1 | On voit ce que le modèle a vu, et les lotissements qui expliquent l'avance du nouveau bâti sur les toits (§14.4 de METHODOLOGIE) ; même saison et mêmes images que la carte, licence Copernicus libre, servie avec le site. Rien n'est chargé tant qu'on ne l'affiche pas. Écartés : imageries très fines (Esri, Google, Bing, Mapbox : clé ou conditions restrictives), EOX Sentinel-2 Cloudless (licence non commerciale, année différente), OpenAerialMap (couverture éparse) |

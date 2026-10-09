@@ -1,0 +1,15 @@
+---
+import Base from "../../layouts/Base.astro";
+import { indicators } from "../../lib/outputs";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+<Base title="Graphiques">
+  <h1>Graphiques</h1>
+  <p class="muted">Un graphique par indicateur, pour comparer Dakar, Touba, Thiès et Mbour de 2016 à 2025.</p>
+  <ul class="cards">
+    {indicators.map((s) => (
+      <li><a href={`${base}/graphiques/${s.slug}`}><strong>{s.title}</strong><span class="muted small">{s.definition}</span></a></li>
+    ))}
+  </ul>
+</Base>

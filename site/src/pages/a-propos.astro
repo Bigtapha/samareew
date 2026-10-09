@@ -1,0 +1,38 @@
+---
+import Base from "../layouts/Base.astro";
+import { REPO_URL } from "../config";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+<Base title="À propos">
+  <h1>À propos</h1>
+  <div class="prose">
+    <p>
+      <strong>SamaReew</strong> (<em>sama réew</em>, « mon pays » en wolof) est un atlas ouvert qui compare les villes
+      du Sénégal à partir de données libres, sur le modèle d'<a href="https://ourworldindata.org">Our World in Data</a> :
+      des chiffres sourcés, la même méthode pour toutes les villes, et tout est téléchargeable.
+    </p>
+    <p>
+      Le premier thème est l'<a href={`${base}/expansion-urbaine`}>expansion urbaine</a> de Dakar, Touba, Thiès et Mbour
+      de 2016 à 2025. D'autres villes et d'autres thèmes (densité de population, végétation, chaleur, inondations)
+      viendront ensuite.
+    </p>
+    <h2>Principes</h2>
+    <ul>
+      <li><strong>Comparer à règle égale</strong> : même définition de ville, même modèle, mêmes indicateurs partout.</li>
+      <li><strong>Dire l'incertitude</strong> : chaque chiffre renvoie à sa source et à sa fiabilité mesurée.</li>
+      <li><strong>Rester léger</strong> : pages sobres, cartes et images chargées seulement à la demande, pour l'internet mobile.</li>
+      <li><strong>Tout ouvrir</strong> : données sous CC BY 4.0, code sous licence MIT, méthode publiée.</li>
+    </ul>
+    <h2>Auteur</h2>
+    <p>
+      Moustapha Cisse, ingénieur en géomatique (télédétection et ingénierie des données géospatiales).
+      Code, méthode et suivi du projet : <a href={REPO_URL}>dépôt GitHub</a>.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .prose { max-width: 42rem; }
+  .prose li { margin-bottom: 0.4rem; }
+</style>

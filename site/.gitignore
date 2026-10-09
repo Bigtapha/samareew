@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.astro/
+# Copied from ../outputs by `npm run sync`
+public/data/
+# Self-hosted basemap, rebuilt by `npm run basemap`
+public/basemap/
