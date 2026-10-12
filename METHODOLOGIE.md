@@ -312,6 +312,7 @@ nouveau bâti : la moitié seulement de celui de la carte est vrai (§14.4).
 | Étiquettes = zones d'accord seulement | Le modèle connaît moins bien les cas limites (bâti épars, lisières) |
 | Résolution 10 m (SWIR à 20 m) | On détecte des ensembles de bâtiments plutôt que des maisons isolées |
 | Sable, plages, tannes | Confusions possibles avec le bâti, réduites mais pas supprimées |
+| Parcelles agricoles aménagées | Le modèle n'a presque pas vu d'exploitations irriguées à l'entraînement : leurs planches régulières, claires en saison sèche, peuvent être classées en bâti année après année, et le filtre temporel ne les retire donc pas. Plus grand cas connu : 75 ha au nord-est de Thiès, laissés sur la carte et signalés (§14.4, §15.6) |
 | 2016 (Sentinel-2A seul), 2017 (peu de scènes claires) | Composites moins bons ; le saut 2016 → 2017 est probablement exagéré |
 | Années sèches (2017, 2019 à Dakar) | Fausses détections en périphérie ; le filtre (dont la condition « année suivante ») les retire en grande partie, mais le saut 2016 → 2017 reste fort à Touba (+14 %, contre +1 % de toits dans Open Buildings, §13) : la validation montre que 4 des 8 points datés de 2017 à Touba ne sont pas bâtis, et que ce sont tous des lotissements non construits : la carte voit l'ouverture des lotissements avant les toits (§14.4). Remède de fond si besoin : entraîner le modèle sur plusieurs années |
 | Filtre temporel en fin de période | Moins d'années pour confirmer : la dernière année publiée (2025) n'est confirmée que par 2026, sa croissance est probablement surestimée. La dernière année classée n'est pas publiée (§8) : avec une saison janvier–mai, non filtrée, elle donnait à Thiès +1 865 ha en 2026 contre environ 200 ha par an avant |
@@ -858,7 +859,15 @@ d'urbanisation couvrent environ 55 000 ha, plus du double du nouveau bâti carto
   qu'ils sont nivelés, alors qu'Open Buildings attend les toits.
 - **Thiès : de vraies fausses détections.** Thiès n'a presque pas de lotissements dans
   l'échantillon ; ses erreurs sont de la végétation et du sol nu (29 % du nouveau bâti
-  cartographié), d'où la précision tolérante la plus basse (0,56).
+  cartographié), d'où la précision tolérante la plus basse (0,56). La plus grande est une
+  **exploitation agricole irriguée de 75 ha** à Fandène, à 9 km au nord-est du centre
+  (repérée le 12/10/2026) : classée en bâti dès 2018 (55 à 88 % du bloc chaque année, d'où
+  un filtre temporel sans effet), sans toit dans Open Buildings, entièrement en « saut ». Deux
+  points de l'échantillon y sont tombés (THI-092, THI-101, vus non bâtis, en végétation) :
+  elle est donc déjà comptée dans la précision de Thiès. Elle pèse 2,4 % du nouveau bâti de
+  Thiès et 4,8 % de son saut ; sans elle, la croissance 2016–2025 serait de +81,1 % au lieu
+  de +83,1 %, et la part de saut de 49,4 % au lieu de 50,6 % : aucun classement ne change.
+  Elle reste sur la carte, signalée (§15.6).
 - **L'année 2025 est en avance plutôt que fausse** : sur les 14 points datés de 2025 non
   bâtis, 10 sont des lotissements ou des chantiers. La surface « nouveau bâti 2025 » annonce
   de la construction qui n'a pas encore eu lieu ; elle reste **provisoire**.
@@ -878,8 +887,9 @@ marge est publiée à côté (README, site) ; les types de croissance, surtout l
 Le site (J5) ne lit que `outputs/`. `pipeline/s7_site_data.py` y dépose, dans
 `outputs/site/`, tout ce qu'il lui faut en plus des tableaux d'indicateurs, sous une forme
 légère pour les téléphones et les connexions lentes. Le `manifest.json` liste les fichiers,
-les légendes, l'emprise et le centre de chaque ville, l'image satellite (`images`) et les
-licences (format d'échange 0.2).
+les légendes, l'emprise et le centre de chaque ville, l'image satellite (`images`), les
+erreurs connues signalées sur les cartes (`notes`, §15.6) et les licences (format d'échange
+0.2).
 
 ### 15.1 Cartes : tuiles PMTiles
 
@@ -979,6 +989,37 @@ de 660 Ko. `communes.geojson` reste sous **ODbL** (© OpenStreetMap contributors
 montre de §14.4 : précision globale, précision bâti / non bâti en 2016 et 2025, précisions
 utilisateur et producteur du nouveau bâti (stricte et tolérante), contenu réel du nouveau
 bâti cartographié, et surfaces cartographiées et corrigées avec leur marge.
+
+### 15.6 Erreurs connues signalées sur les cartes
+
+**La carte n'est pas corrigée à la main** (décision du 12/10/2026, ROADMAP §9). Retirer un
+bloc faux dans une ville romprait la règle commune aux quatre villes et rendrait la
+validation trop optimiste, puisque la carte serait corrigée après la lecture des points.
+Une grande fausse détection vérifiée sur les images reste donc dans les rasters, les
+tableaux et les tuiles ; elle est **entourée et expliquée** sur la carte de sa ville.
+
+- **Liste** : `config/map_notes.py`, une entrée par erreur (ville, ce qu'il y a sur le
+  terrain, rectangle englobant, vérification, date). La liste n'est **pas exhaustive** : c'est
+  la validation (§14) qui mesure les erreurs de toute la carte. Une recherche des blocs
+  denses sans toits dans Open Buildings montre d'autres cas probables, plus diffus (dunes de
+  la côte nord de Dakar, tannes à Mbour, sol nu à l'est de Touba), mêlés à du vrai bâti sans
+  toits (aéroport, port, cimenterie) : ils ne sont pas signalés un par un.
+- **Contour** (`SITE_NOTE_*`) : le bâti cartographié dans le rectangle, interstices refermés
+  (fermeture morphologique de 3 pixels) et trous bouchés, morceaux de moins de 1 ha retirés, tracé 20 m à l'extérieur, simplifié
+  à 15 m (`outputs/site/map_notes.geojson`).
+- **Poids dans les chiffres** (`note_stats`, `src/site_data.py`) : surface cartographiée,
+  année où le bloc apparaît surtout, part du nouveau bâti de la ville, croissance de la ville
+  avec et sans le bloc. Le texte du site est écrit à partir de ces valeurs, jamais à la main.
+- **Sur le site** : contour noir bordé de blanc (lisible sur les deux fonds et sur l'image
+  satellite), cercle repère tant que le zoom est inférieur à 12, explication au toucher, au
+  clic ou au survol, et le même texte sous la carte avec un bouton pour y aller. Le survol
+  seul n'aurait rien montré sur téléphone.
+
+**Au dernier calcul** (12/10/2026) : une note, l'exploitation agricole de Fandène à Thiès
+(§14.4) : 74,9 ha cartographiés, surtout en 2018, 2,4 % du nouveau bâti de Thiès, croissance
++83,1 % avec et +81,1 % sans. Cartes de contrôle : `data/j6_thies_artefact.png` (classification
+brute année par année), `data/j6_blocks_without_roofs.png` (blocs sans toits des quatre
+villes), `data/j6_note_*.png` (rendu sur le site).
 
 ---
 

@@ -38,6 +38,7 @@ const sources = [
 const limits = [
   "À 10 m, Sentinel-2 voit des groupes de bâtiments, pas les maisons : les constructions isolées ou très petites peuvent manquer.",
   "Le sable clair, les plages et les tannes peuvent être confondus avec du bâti ; les indices spectraux et le filtre temporel en retirent l'essentiel, pas tout.",
+  "Des parcelles agricoles aménagées peuvent être classées en bâti. La plus grande erreur connue, une exploitation irriguée de 75 ha au nord-est de Thiès, est laissée sur la carte, entourée et expliquée sur la fiche de Thiès : la carte n'est pas corrigée à la main.",
   `Le nouveau bâti est en avance sur les toits : un terrain nivelé ou clôturé ressemble à du bâti. Environ un quart du nouveau bâti cartographié est en lotissement ou en chantier en ${last}.`,
   `L'année ${last} est provisoire : le filtre temporel a moins d'années pour la confirmer. ${catalogue.years.at(-1)! + 1} sert seulement à confirmer ${last}.`,
   "Les années sèches (2017, 2019) donnent de fausses détections en périphérie ; le filtre en retire la plupart, mais le saut de 2016 à 2017 reste fort à Touba (surtout des lotissements).",

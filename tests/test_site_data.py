@@ -150,3 +150,19 @@ def test_footprint_rgba():
     assert rgba[0, 1, 3] == round(255 * 3 / 4)
     empty = sd.footprint_rgba(np.zeros((2, 2), dtype=np.uint8), 2, colors)
     assert empty[0, 0].tolist() == [0, 0, 0, 0]
+
+
+def test_note_stats_weight_of_a_false_detection():
+    first_year = np.zeros((10, 10), dtype=np.int16)
+    first_year[:5, :4] = 2016          # 20 pixels built at the start
+    first_year[5:, :4] = 2020          # 20 real new pixels
+    first_year[0:2, 5:10] = 2018       # block of 10 pixels...
+    first_year[2, 5:10] = 2025         # ...and 5 more
+    first_year[9, 9] = 2026            # after the period: not counted
+    inside = np.zeros((10, 10), dtype=bool)
+    inside[:4, 5:] = True
+    stats = sd.note_stats(first_year, inside, 2016, 2025, pixel_area_m2=10_000.0)   # 1 ha pixels
+    assert stats == {"mapped_ha": 15.0, "main_year": 2018, "share_of_new_built_pct": 42.9,
+                     "growth_pct": 175.0, "growth_without_pct": 100.0}
+    with pytest.raises(ValueError):
+        sd.note_stats(first_year, np.zeros((10, 10), dtype=bool), 2016, 2025, 10_000.0)

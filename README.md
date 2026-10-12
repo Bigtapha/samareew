@@ -85,7 +85,7 @@ pages read `outputs/site/manifest.json` and `outputs/tables/` at build time, and
   Download, cities, levels city / commune / sector / direction / ring, state in the URL, CSV
   and PNG / SVG downloads);
 - `/villes/<city>`: fact sheets (key figures with corrected areas, PMTiles map with the 2025
-  satellite image on request, charts, tables by commune and Touba sector, reliability);
+  satellite image on request and the known errors outlined, charts, tables by commune and Touba sector, reliability);
 - `/donnees` (data & method, downloads, licences, validation, limits) and `/a-propos`.
 
 Chart drawing is shared by the interactive template and the static pages
@@ -175,6 +175,7 @@ config/
   settings.py        settings shared by all cities (years, season, model, thresholds, paths)
   cities.py          one entry per city: name, seed point, centre, sectors
   indicators.py      one fact sheet per indicator (public title, unit, definition, sources)
+  map_notes.py       known errors of the map, outlined and explained on the site maps
 pipeline/            one step = one module, run from the project root
   s0_zones.py        study zones, communes, centres, sectors -> zones/ (frozen)
   s1_train.py        training samples + national Random Forest, agreement by city
@@ -263,7 +264,9 @@ Practical notes:
   pixel, about 90 kB for the four), the 2025 true-colour Sentinel-2 composite as WebP tiles (downloaded once per
   city from Earth Engine into `data/cities/<city>/true_colour_2025.tif`, `--refresh` to download
   again; a city whose download fails is left out with a warning), the boundaries as simplified GeoJSON with the unit names of
-  `outputs/tables/units.csv` (`communes.geojson` stays ODbL), and `validation.json`. It checks
+  `outputs/tables/units.csv` (`communes.geojson` stays ODbL), `validation.json`, and the known
+  errors outlined on the maps (`map_notes.geojson`, from `config/map_notes.py`: outline of the
+  mapped built-up area inside the box of each note, and its weight in the city's figures). It checks
   its own output: tile areas against the 10 m rasters, and boundary areas before and after
   simplification. Control maps: `data/j5_tiles_<layer>.png`.
 - The site needs step 7 first (`npm run sync` stops with a message if a `.pmtiles` file is
@@ -317,6 +320,12 @@ in favour of the national one.
   0.35 (dense working-class areas) to 2.9 (business, wealthy or resort areas), so WorldPop
   is published for whole cities only. The census covers only 2023 and only the communes
   entirely inside a zone (not Touba Mosquée).
+- Laid-out farmland can be mapped as built-up. The largest known case is an irrigated farm of
+  75 ha north-east of Thiès (commune of Fandène), mapped as built-up since 2018: 2.4 % of the
+  new built-up area of Thiès (growth +81 % without it, instead of +83 %). The map is not
+  corrected by hand: the block stays in the rasters and tables, already counted in the measured
+  accuracy (two validation points fell in it), and is outlined and explained on the Thiès map
+  (`config/map_notes.py`). Other, smaller false detections are not listed.
 - Leapfrog growth includes growth around villages and most of the remaining isolated
   false detections: 45 % of the leapfrog points are real new built-up in the validation
   (5 out of 16 in Thiès), so growth types are indicative.

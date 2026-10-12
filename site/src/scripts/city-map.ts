@@ -7,7 +7,15 @@ interface CityMapData {
   layers: { id: string; file: string; attribution: string; minZoom: number; maxZoom: number }[];
   image: { id: string; file: string; attribution: string } | null;
   zones: string;
+  /** Known errors of the map, outlined and explained (step 7). */
+  notes: { file: string; items: MapNote[] } | null;
 }
+
+interface MapNote { id: string; kindLabel: string; title: string; text: string; lon: number; lat: number }
+
+/** Below this zoom a note is too small to see: a ring marks the place. */
+const NOTE_RING_MAX_ZOOM = 12;
+const NOTE_ZOOM = 13.5;
 
 /** Opacity of the data layers over the basemap, and over the satellite image by default. */
 const OPACITY = 0.9;
@@ -93,6 +101,8 @@ async function init() {
     paint: { "line-color": "#5d5a54", "line-width": 1.2, "line-dasharray": [3, 2] },
   }, labels);
 
+  if (data.notes) await addNotes(map, data.notes);
+
   function show(id: string) {
     for (const layer of data.layers) map.setLayoutProperty(layer.id, "visibility", layer.id === id ? "visible" : "none");
     legends.forEach((l) => (l.hidden = l.dataset.layerLegend !== id));
@@ -115,4 +125,65 @@ async function init() {
   opacityInput?.addEventListener("input", () => setOpacity(Number(opacityInput.value) / 100));
   show(radios.find((r) => r.checked)!.value);
   showImage(!!imageBox?.checked);
+}
+
+/** Outline of the known errors, above the place names; the explanation opens on tap or hover. */
+async function addNotes(map: Awaited<ReturnType<typeof createMap>>, notes: NonNullable<CityMapData["notes"]>) {
+  const [{ Popup }, all] = await Promise.all([
+    import("maplibre-gl"),
+    fetch(dataUrl(notes.file)).then((r) => r.json()),
+  ]);
+  const byId = new Map(notes.items.map((n) => [n.id, n]));
+  all.features = all.features.filter((f: any) => byId.has(f.properties.id));
+  map.addSource("notes", { type: "geojson", data: all });
+  map.addSource("note-points", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: notes.items.map((n) => ({
+        type: "Feature", properties: { id: n.id }, geometry: { type: "Point", coordinates: [n.lon, n.lat] },
+      })),
+    },
+  });
+  // White under black: readable on the light and dark basemaps and on the satellite image.
+  map.addLayer({ id: "notes-fill", type: "fill", source: "notes", paint: { "fill-color": "#000", "fill-opacity": 0.01 } });
+  map.addLayer({ id: "notes-casing", type: "line", source: "notes", paint: { "line-color": "#fff", "line-width": 4.5 } });
+  map.addLayer({ id: "notes-line", type: "line", source: "notes", paint: { "line-color": "#111", "line-width": 2 } });
+  map.addLayer({
+    id: "notes-ring", type: "circle", source: "note-points", maxzoom: NOTE_RING_MAX_ZOOM,
+    paint: { "circle-radius": 13, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#111", "circle-stroke-width": 2 },
+  });
+  map.addLayer({
+    id: "notes-ring-casing", type: "circle", source: "note-points", maxzoom: NOTE_RING_MAX_ZOOM,
+    paint: { "circle-radius": 15.5, "circle-color": "rgba(0,0,0,0)", "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 },
+  });
+
+  const popup = new Popup({ maxWidth: "min(20rem, 80vw)", className: "note-popup" });
+  function open(id: string) {
+    const note = byId.get(id);
+    if (!note) return;
+    const box = document.createElement("div");
+    const head = document.createElement("strong");
+    head.textContent = note.kindLabel;
+    const body = document.createElement("p");
+    body.textContent = `${note.title}. ${note.text}`;
+    box.append(head, body);
+    popup.setLngLat([note.lon, note.lat]).setDOMContent(box).addTo(map);
+  }
+  for (const layer of ["notes-fill", "notes-ring"]) {
+    map.on("click", layer, (e) => open(e.features![0].properties.id));
+    map.on("mouseenter", layer, (e) => {
+      map.getCanvas().style.cursor = "pointer";
+      open(e.features![0].properties.id);
+    });
+    map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
+  }
+  root.querySelectorAll<HTMLButtonElement>("button[data-note]").forEach((button) =>
+    button.addEventListener("click", () => {
+      const note = byId.get(button.dataset.note!);
+      if (!note) return;
+      map.flyTo({ center: [note.lon, note.lat], zoom: NOTE_ZOOM });
+      open(note.id);
+      root.querySelector<HTMLElement>("[data-map]")!.scrollIntoView({ block: "nearest" });
+    }));
 }

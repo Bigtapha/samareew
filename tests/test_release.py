@@ -20,6 +20,7 @@ def test_data_package_keeps_frozen_zones_and_leaves_out_unpublished_files():
     pairs = rl.data_package_files(Path("/repo"), ["dakar"], PERIODS)
     sources = {a: s for s, a in pairs}
     assert sources[f"{rl.DATA_PREFIX}/boundaries/communes.geojson"] == Path("/repo/zones/communes.geojson")
+    assert sources[f"{rl.DATA_PREFIX}/known_errors/map_notes.geojson"] == Path("/repo/outputs/site/map_notes.geojson")
     names = " ".join(sources)
     assert "_init" not in names            # intermediate validation sheets
     assert "worldpop_by_commune" not in names  # WorldPop is published by city only

@@ -90,3 +90,8 @@ select { padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 
 [hidden] { display: none !important; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border-radius: 2px; flex: none; }
+
+/* Map popups (known errors): always dark text on white, whatever the theme */
+.note-popup .maplibregl-popup-content { color: #1b1b1b; background: #fff; font-size: 0.85rem; line-height: 1.4; padding: 0.7rem 0.9rem; }
+.note-popup p { margin: 0.25rem 0 0; }
+.note-popup .maplibregl-popup-close-button { font-size: 1.2rem; padding: 0 0.4rem; color: #1b1b1b; }

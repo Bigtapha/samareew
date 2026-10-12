@@ -34,6 +34,7 @@ def data_package_files(root: Path, cities: list, growth_periods: list) -> list:
             pairs.append((out / "cities" / city / name, f"rasters/{city}/{name}"))
     for name in ("zones", "urban_clusters", "communes", "sectors", "centres"):
         pairs.append((root / "zones" / f"{name}.geojson", f"boundaries/{name}.geojson"))
+    pairs.append((out / "site" / "map_notes.geojson", "known_errors/map_notes.geojson"))
     for name in ("labels.csv", "cover_2025.csv", "sample_key.csv", "strata.csv",
                  "accuracy.json", "points.kml"):
         pairs.append((out / "validation" / name, f"validation/{name}"))
@@ -80,6 +81,7 @@ every year from Sentinel-2 imagery with one national Random Forest model.
 | `rasters/<city>/urbanisation_year.tif` | Year a 10 m pixel became built-up: {years[0]} = built in {years[0]} or before, 0 = not built, -1 = no data (int16, EPSG:32628) |
 | `rasters/<city>/growth_type_<start>_<end>.tif` | Type of the new built-up area of each period ({periods}): {GROWTH_CODES} (uint8, EPSG:32628) |
 | `boundaries/*.geojson` | Study zones, GHSL urban clusters, communes, Touba sectors and centres (EPSG:4326) |
+| `known_errors/map_notes.geojson` | Large false detections checked on the imagery and left in the map: outline, mapped area, weight in the city's figures (not exhaustive) |
 | `validation/` | National accuracy sample: points and strata, photo-interpreted labels, second reading of {years[-1]}, map class of each point (`sample_key.csv`), accuracy and corrected areas (`accuracy.json`) |
 | `crosscheck/` | Comparison with Google Open Buildings, GHSL and the 2023 census (RGPH-5) |
 | `model/accuracy_by_city.json` | Agreement of the national model with the reference labels, by city |
@@ -89,5 +91,7 @@ every year from Sentinel-2 imagery with one national Random Forest model.
 Tables and rasters give the values of the map. The validation measured how far they can be
 trusted: the built-up area of {years[-1]} is right on average, but only about half of the
 mapped new built-up area is truly new (the rest is mostly subdivisions or building sites);
-growth types are indicative and {years[-1]} is provisional. Details in `METHODOLOGIE.md`.
+growth types are indicative and {years[-1]} is provisional. The map is not corrected by hand:
+known large false detections stay in the rasters and tables and are listed in `known_errors/`.
+Details in `METHODOLOGIE.md`.
 """

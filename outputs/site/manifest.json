@@ -1,6 +1,6 @@
 {
  "format_version": "0.2",
- "generated": "2026-10-09",
+ "generated": "2026-10-12",
  "cities": {
   "dakar": {
    "name": "Dakar",
@@ -218,6 +218,35 @@
    "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)",
    "features": 4
   }
+ },
+ "notes": {
+  "file": "map_notes.geojson",
+  "licence": "CC BY 4.0",
+  "attribution": "SamaReew (CC BY 4.0), Sentinel-2 (Copernicus)",
+  "kinds": {
+   "false_detection": "Fausse détection connue"
+  },
+  "notes": [
+   {
+    "id": "thies-fandene-farm",
+    "city": "thies",
+    "kind": "false_detection",
+    "title": "Exploitation agricole irriguée (parcelles et bassin), à Fandène",
+    "evidence": "aucun toit dans Open Buildings 2023, et deux points de validation y ont été vus non bâtis (végétation)",
+    "reported": "2026-10-12",
+    "mapped_ha": 74.9,
+    "main_year": 2018,
+    "share_of_new_built_pct": 2.4,
+    "growth_pct": 83.1,
+    "growth_without_pct": 81.1,
+    "period": [
+     2016,
+     2025
+    ],
+    "lon": -16.85005,
+    "lat": 14.82636
+   }
+  ]
  },
  "validation": "validation.json"
 }

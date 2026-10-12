@@ -226,6 +226,12 @@ SITE_FOOTPRINT_LEVELS = 8                    # opacity levels of the paletted PN
 # rounded to SITE_COORD_DECIMALS (5 decimals = about 1 m).
 SITE_SIMPLIFY_M = 15
 SITE_COORD_DECIMALS = 5
+# Known errors outlined on the maps (config/map_notes.py, decided 12/10/2026): the outline is
+# the mapped built-up area inside the box of the note, closed over SITE_NOTE_CLOSE_PX pixels
+# with its holes filled, parts under SITE_NOTE_MIN_PART_HA dropped, drawn SITE_NOTE_MARGIN_M outside.
+SITE_NOTE_CLOSE_PX = 3
+SITE_NOTE_MIN_PART_HA = 1
+SITE_NOTE_MARGIN_M = 20
 
 # --- Files ---------------------------------------------------------------
 ZONES_GEOJSON = ZONES_DIR / "zones.geojson"
@@ -268,6 +274,7 @@ SITE_MANIFEST_JSON = SITE_DATA_DIR / "manifest.json"       # list of files, laye
 SITE_VALIDATION_JSON = SITE_DATA_DIR / "validation.json"   # accuracy and corrected areas, by city
 SITE_TILES_DIR = SITE_DATA_DIR / "tiles"                   # <layer>.pmtiles (ignored by git, rebuilt by step 7)
 SITE_BOUNDARIES_DIR = SITE_DATA_DIR / "boundaries"         # zones, communes, sectors, centres (GeoJSON)
+SITE_NOTES_GEOJSON = SITE_DATA_DIR / "map_notes.geojson"   # known errors outlined on the maps
 
 # Release (step 8, J6): two assets attached to a GitHub release tagged v<RELEASE_VERSION>.
 # Asset names do not change from one release to the next, so that

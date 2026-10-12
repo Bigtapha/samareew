@@ -8,7 +8,8 @@ connections:
    SITE_MAX_ZOOM (14 is about the 10 m pixel); lower zooms keep the most common class;
 2. the boundaries (zones, communes, Touba sectors, centres) as simplified GeoJSON, with the
    same unit names as outputs/tables/units.csv;
-3. the validation results the site shows (accuracy and corrected areas, by city);
+3. the validation results the site shows (accuracy and corrected areas, by city), and the
+   known errors outlined on the maps (config/map_notes.py) with their weight in the figures;
 4. a manifest listing files, layers, legends, cities and licences;
 5. the city footprints at the same scale (home page): one small paletted PNG per city;
 6. the satellite image shown under the layers on request: the true-colour Sentinel-2
@@ -21,6 +22,7 @@ Inputs : outputs/cities/<city>/urbanisation_year.tif, growth_type_<start>_<end>.
 Outputs: outputs/site/tiles/<layer>.pmtiles      (ignored by git: rebuilt by this step)
          outputs/site/footprints/<city>.png
          outputs/site/boundaries/*.geojson
+         outputs/site/map_notes.geojson
          outputs/site/validation.json, outputs/site/manifest.json
          data/j5_tiles_<layer>.png               control map of the tiles read back
 
@@ -45,6 +47,7 @@ import rasterio
 import rasterio.features
 import shapely
 from PIL import Image
+from scipy import ndimage
 from pmtiles.reader import MmapSource, Reader
 from pmtiles.tile import Compression, TileType, zxy_to_tileid
 from pmtiles.writer import write
@@ -430,6 +433,40 @@ def check_boundaries() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# --- 2b. Map notes ---------------------------------------------------------------------
+
+def build_notes() -> dict:
+    """Known errors of the map (config/map_notes.py): outline of the mapped built-up area
+    inside the box of each note, and its weight in the figures of the city."""
+    features = []
+    for note in cfg.MAP_NOTES:
+        with rasterio.open(cfg.city_output_dir(note["city"]) / cfg.FIRST_YEAR_TIF) as src:
+            first_year, transform, crs = src.read(1), src.transform, src.crs
+        box = shapely.box(*transform_bounds("EPSG:4326", crs, *note["bounds"]))
+        inside = rasterio.features.geometry_mask([box], first_year.shape, transform, invert=True)
+        stats = sd.note_stats(first_year, inside, START, END, abs(transform.a * transform.e))
+        block = ndimage.binary_closing((first_year > 0) & inside, iterations=cfg.SITE_NOTE_CLOSE_PX)
+        block = ndimage.binary_fill_holes(block) & inside
+        parts = [shapely.geometry.shape(g) for g, v in
+                 rasterio.features.shapes(block.astype(np.uint8), mask=block, transform=transform) if v]
+        parts = [p for p in parts if p.area >= cfg.SITE_NOTE_MIN_PART_HA * 10_000]
+        outline = shapely.union_all(parts).buffer(cfg.SITE_NOTE_MARGIN_M).simplify(cfg.SITE_SIMPLIFY_M)
+        outline = gpd.GeoSeries([outline], crs=crs).to_crs("EPSG:4326").iloc[0]
+        outline = shapely.set_precision(outline, 10 ** -cfg.SITE_COORD_DECIMALS)
+        if outline.is_empty or not outline.is_valid:
+            raise ValueError(f"{note['id']}: empty or invalid outline")
+        point = outline.representative_point()
+        properties = {k: note[k] for k in ("id", "city", "kind", "title", "evidence", "reported")}
+        properties |= stats | {"period": [START, END], "lon": round(point.x, 5), "lat": round(point.y, 5)}
+        features.append({"type": "Feature", "properties": properties,
+                         "geometry": shapely.geometry.mapping(outline)})
+    cfg.SITE_NOTES_GEOJSON.write_text(json.dumps({"type": "FeatureCollection", "features": features},
+                                                 ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return {"file": cfg.SITE_NOTES_GEOJSON.name, "licence": "CC BY 4.0", "attribution": SAMAREEW_ATTRIBUTION,
+            "kinds": {"false_detection": "Fausse détection connue"},
+            "notes": [f["properties"] for f in features]}
+
+
 # --- 3. Validation summary -------------------------------------------------------------
 
 def build_validation() -> dict:
@@ -446,7 +483,7 @@ def build_validation() -> dict:
 
 # --- 4. Manifest -----------------------------------------------------------------------
 
-def build_manifest(layers: dict, image: dict, footprints: dict, boundaries: dict) -> None:
+def build_manifest(layers: dict, image: dict, footprints: dict, boundaries: dict, notes: dict) -> None:
     zones = gpd.read_file(cfg.ZONES_GEOJSON)
     centres = gpd.read_file(cfg.ZONES_DIR / "centres.geojson")
     cities = {}
@@ -483,6 +520,7 @@ def build_manifest(layers: dict, image: dict, footprints: dict, boundaries: dict
                                   for c, f in footprints.items()},
                        "licence": "CC BY 4.0", "attribution": SAMAREEW_ATTRIBUTION},
         "boundaries": boundaries,
+        "notes": notes,
         "validation": "validation.json",
     }
     cfg.SITE_MANIFEST_JSON.write_text(json.dumps(manifest, indent=1, ensure_ascii=False))
@@ -505,9 +543,13 @@ def main(refresh: bool) -> None:
           f"{image['mean_tile_kb']} kB per tile (per zoom: {image['tiles']})")
     boundaries = build_boundaries()
     print(check_boundaries().to_string(index=False))
+    notes = build_notes()
+    print("map notes:", {n["id"]: f"{n['mapped_ha']} ha, {n['share_of_new_built_pct']} % of the new built-up area, "
+                                  f"growth {n['growth_pct']:+} % ({n['growth_without_pct']:+} % without)"
+                         for n in notes["notes"]})
     validation = build_validation()
     print(f"validation: {len(validation['cities'])} cities + national")
-    build_manifest(layers, image, footprints, boundaries)
+    build_manifest(layers, image, footprints, boundaries, notes)
     print(f"-> {cfg.SITE_DATA_DIR}")
 
 

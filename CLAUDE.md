@@ -25,6 +25,9 @@ theme urban expansion 2016–2026, Sentinel-2 + Google Earth Engine + one nation
   Never tune one city alone without saying so and logging it.
 - **Settings in `config/`, not in code**: shared settings in `config/settings.py`, one entry
   per city in `config/cities.py`.
+- **The map is never corrected by hand** (decided 12/10/2026): a large false detection checked
+  on the imagery stays in the rasters and tables; add an entry to `config/map_notes.py` and
+  re-run step 7, so that the site outlines and explains it.
 - **Keep `METHODOLOGIE.md` in sync** (French, theory of the method with the actual values):
   update it in the same change whenever a method, setting or result it cites changes, and
   add a section when a new step is built (indicators, cross-check, validation…).

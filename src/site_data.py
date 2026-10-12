@@ -182,6 +182,35 @@ def mercator_to_lat(y: np.ndarray) -> np.ndarray:
     return np.degrees(2 * np.arctan(np.exp(np.asarray(y) / EARTH_RADIUS)) - math.pi / 2)
 
 
+# --- Map notes ---------------------------------------------------------------------
+
+def note_stats(first_year: np.ndarray, inside: np.ndarray, start: int, end: int,
+               pixel_area_m2: float) -> dict:
+    """Weight of a known false detection in the figures of its city.
+
+    ``first_year`` is the urbanisation year of the whole city (0 or less = not built),
+    ``inside`` the pixels of the note. Returns the mapped built-up area of the note (ha), the
+    year most of it appears, its share of the city's new built-up area, and the growth of the
+    city from ``start`` to ``end`` with and without it.
+    """
+    built = (first_year > 0) & (first_year <= end)
+    at_start = built & (first_year <= start)
+    block = built & inside
+    if not block.any():
+        raise ValueError("no built-up pixel inside the note")
+    new = built & ~at_start
+    years, counts = np.unique(first_year[block], return_counts=True)
+    n_start, n_end = int(at_start.sum()), int(built.sum())
+    without_start, without_end = n_start - int((block & at_start).sum()), n_end - int(block.sum())
+    return {
+        "mapped_ha": round(float(block.sum() * pixel_area_m2 / 10_000), 1),
+        "main_year": int(years[counts.argmax()]),
+        "share_of_new_built_pct": round(100 * float((block & new).sum()) / max(int(new.sum()), 1), 1),
+        "growth_pct": round(100 * (n_end / n_start - 1), 1),
+        "growth_without_pct": round(100 * (without_end / without_start - 1), 1),
+    }
+
+
 # --- Validation summary ------------------------------------------------------------
 
 def validation_summary(report: dict, start: int, end: int) -> dict:

@@ -121,12 +121,32 @@ function unitTable(type: string) {
 }
 const typeTitle: Record<string, string> = { commune: "Par commune", sector: "Par secteur" };
 
+// --- Known errors outlined on the map (step 7, config/map_notes.py)
+interface MapNote {
+  id: string; kind: string; title: string; evidence: string; lon: number; lat: number;
+  mapped_ha: number; main_year: number; share_of_new_built_pct: number;
+  growth_pct: number; growth_without_pct: number;
+}
+const notes = ((manifest.notes?.notes ?? []) as (MapNote & { city: string })[])
+  .filter((note) => note.city === city.slug)
+  .map((note) => ({
+    ...note,
+    kindLabel: (manifest.notes.kinds[note.kind] ?? "Erreur connue") as string,
+    text: `Classée à tort en bâti, surtout depuis ${note.main_year} : ${n(note.mapped_ha)} ha, soit `
+      + `${formatValue(note.share_of_new_built_pct, "%")}\u202f% du nouveau bâti de ${city.name}. Sans elle, la croissance `
+      + `${first}–${last} serait de +${Math.round(note.growth_without_pct)}\u202f% au lieu de +${Math.round(note.growth_pct)}\u202f%. `
+      + `Vérification : ${note.evidence}.`,
+  }));
+
 const data = {
   city: city.slug,
   bounds: city.bounds,
   layers: layers.map(({ legend, title, ...l }) => l),
   image: image ? { id: imageId, file: image.file, attribution: image.attribution } : null,
   zones: manifest.boundaries.zones.file,
+  notes: notes.length
+    ? { file: manifest.notes.file, items: notes.map(({ id, kindLabel, title, text, lon, lat }) => ({ id, kindLabel, title, text, lon, lat })) }
+    : null,
 };
 const json = JSON.stringify(data).replace(/</g, "\\u003c");
 ---
@@ -204,6 +224,22 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
         )}
       </div>
     ))}
+    {notes.length > 0 && (
+      <div class="map-notes small">
+        {notes.map((note) => (
+          <p>
+            <span class="note-swatch" aria-hidden="true"></span>
+            <strong>{note.kindLabel}</strong> (contour noir sur la carte, à toucher pour l'explication) :
+            {" "}{note.title.charAt(0).toLowerCase() + note.title.slice(1)}. {note.text}{" "}
+            <button type="button" class="link" data-note={note.id}>La montrer sur la carte</button>
+          </p>
+        ))}
+        <p class="muted">
+          La carte n'est pas corrigée à la main : cette erreur est déjà comptée dans la précision ci-dessus, et
+          d'autres, plus petites, ne sont pas signalées.
+        </p>
+      </div>
+    )}
     <p class="small muted">
       Tirets : limite de la zone d'étude (agglomération GHSL 2025 + 2 km).
       {image && <>{" "}{image.title} : {image.description.charAt(0).toLowerCase() + image.description.slice(1)} ; chargée seulement si vous l'affichez.</>}
@@ -293,6 +329,10 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
   .legend-table { max-width: 32rem; margin-bottom: 0.6rem; }
   .legend-table th[scope="row"] { font-weight: 400; white-space: normal; position: static; }
   .legend-table .swatch { vertical-align: -0.1rem; margin-right: 0.35rem; }
+  .map-notes { max-width: 46rem; border-left: 4px solid var(--text); padding-left: 0.75rem; margin: 0.75rem 0; }
+  .map-notes p { margin: 0 0 0.4rem; }
+  .note-swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border: 2px solid var(--text); border-radius: 2px; vertical-align: -0.1rem; margin-right: 0.35rem; }
+  .map-notes button.link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .lead { max-width: 46rem; }
   .map { position: relative; }
   .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 1rem; text-align: center; }
