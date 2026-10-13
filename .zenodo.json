@@ -1,0 +1,19 @@
+{
+  "title": "SamaReew: urban expansion in Senegalese cities, 2016–2025",
+  "description": "<p>Open-data atlas comparing Senegalese cities (Dakar, Touba, Thiès, Mbour). Built-up areas are mapped every year from Sentinel-2 imagery with Google Earth Engine and one national Random Forest model, cleaned with a temporal consistency filter and checked by an independent accuracy assessment of 480 photo-interpreted points.</p><p>This record archives the source code, the method (METHODOLOGIE.md, French) and the indicator tables. The yearly rasters are in <code>samareew-data.zip</code>, attached to each GitHub release.</p><p>Website: <a href=\"https://bigtapha.github.io/samareew/\">https://bigtapha.github.io/samareew/</a></p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {"name": "Cisse, Moustapha"}
+  ],
+  "keywords": [
+    "urban expansion",
+    "Senegal",
+    "Sentinel-2",
+    "Google Earth Engine",
+    "remote sensing",
+    "open data"
+  ],
+  "notes": "Code: MIT. Produced data (outputs/): CC BY 4.0. zones/communes.geojson: ODbL 1.0, © OpenStreetMap contributors. See LICENSE and LICENSE-DATA.md."
+}

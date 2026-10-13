@@ -204,6 +204,7 @@ site/                public website (Astro), reads only outputs/
   src/scripts/       browser code: chart template, maps
 .github/workflows/   deploy.yml: builds site/ and deploys it to GitHub Pages
 CITATION.cff         how to cite the project
+.zenodo.json         metadata of the Zenodo record made from each GitHub release
 ```
 
 ## How to run
@@ -281,7 +282,9 @@ Practical notes:
   `.../releases/latest/download/<asset>` stays a valid link. To publish a new version: bump
   `RELEASE_VERSION` in `config/settings.py` and `version` / `date-released` in `CITATION.cff`,
   commit and push, run step 8, then `gh release create v<version>` with the three files (the
-  step prints the command). The workflow `.github/workflows/deploy.yml` then builds the site
+  step prints the command). Zenodo archives the source code of each release and gives it a
+  DOI (metadata in `.zenodo.json`; the release assets are not archived, so the rasters stay
+  in `samareew-data.zip`). The workflow `.github/workflows/deploy.yml` then builds the site
   with the map archives of the latest release and deploys it to GitHub Pages; it also runs on
   every push to `main` that changes `site/` or `outputs/` (repository setting: Pages, source
   "GitHub Actions").
