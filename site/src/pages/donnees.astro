@@ -3,7 +3,7 @@
 import Base from "../layouts/Base.astro";
 import { catalogue, cities, manifest, validation } from "../lib/outputs";
 import { formatValue } from "../lib/format";
-import { AUTHOR, DATA_ZIP_URL, METHOD_URL, RELEASES_URL, REPO_URL } from "../config";
+import { AUTHOR, DATA_DOI_URL, DATA_ZIP_URL, DOI_URL, METHOD_URL, RELEASES_URL, REPO_URL } from "../config";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
@@ -83,6 +83,7 @@ const limits = [
     <a href={DATA_ZIP_URL}><strong>Toutes les données (ZIP, 6 Mo)</strong></a> : tableaux, cartes de chaque ville en
     GeoTIFF (année d'urbanisation et types de croissance, pixels de 10 m), limites, échantillon de validation avec ses
     étiquettes, contrôle croisé, avec la note de méthode. <a href={RELEASES_URL}>Versions précédentes</a>.
+    La même archive est conservée sur Zenodo : <a href={DATA_DOI_URL}>{DATA_DOI_URL}</a>.
   </p>
   <p class="small muted">Ou fichier par fichier :</p>
   <ul class="downloads">
@@ -153,7 +154,11 @@ const limits = [
   <h2 id="citer">Citer</h2>
   <p class="cite">
     {AUTHOR} ({new Date(catalogue.generated).getFullYear()}). SamaReew : <em>Expansion urbaine de Dakar, Touba, Thiès et Mbour, {first}–{last}</em>.
-    Données CC BY 4.0, d'après Copernicus Sentinel-2. {REPO_URL}
+    Zenodo. <a href={DOI_URL}>{DOI_URL}</a>. Données CC BY 4.0, d'après Copernicus Sentinel-2.
+  </p>
+  <p>
+    Ce DOI désigne le code, la méthode et les tableaux, et renvoie toujours à la dernière version. Pour citer l'archive
+    des données (avec les cartes en GeoTIFF) : <a href={DATA_DOI_URL}>{DATA_DOI_URL}</a>.
   </p>
 </Base>
 
@@ -163,6 +168,6 @@ const limits = [
   .steps li, .limits li, .downloads li { margin-bottom: 0.45rem; }
   .downloads { padding-left: 1.1rem; }
   table.wrap td, table.wrap th { white-space: normal; text-align: left; min-width: 8rem; }
-  .cite { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.95rem; }
+  .cite { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.95rem; overflow-wrap: anywhere; }
   h2 { scroll-margin-top: 1rem; }
 </style>

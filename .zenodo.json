@@ -5,7 +5,9 @@
   "access_right": "open",
   "license": "MIT",
   "creators": [
-    {"name": "Cisse, Moustapha"}
+    {
+      "name": "Cisse, Moustapha"
+    }
   ],
   "keywords": [
     "urban expansion",
@@ -15,5 +17,13 @@
     "remote sensing",
     "open data"
   ],
-  "notes": "Code: MIT. Produced data (outputs/): CC BY 4.0. zones/communes.geojson: ODbL 1.0, © OpenStreetMap contributors. See LICENSE and LICENSE-DATA.md."
+  "notes": "Code: MIT. Produced data (outputs/): CC BY 4.0. zones/communes.geojson: ODbL 1.0, © OpenStreetMap contributors. See LICENSE and LICENSE-DATA.md.",
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.23338529",
+      "relation": "isSupplementedBy",
+      "scheme": "doi",
+      "resource_type": "dataset"
+    }
+  ]
 }

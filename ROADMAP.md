@@ -221,7 +221,8 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [x] Données téléchargeables publiées : release `v1.0.0` du 13/10/2026 (commande affichée par l'étape 8) ; lien « Toutes les données (ZIP) » déjà sur la page Données & méthode
 - [x] README mis à jour, avec la manière de citer le projet ; `CITATION.cff` (bouton « Cite this repository » de GitHub)
 - [x] Archivage Zenodo du code à chaque release (métadonnées dans `.zenodo.json`) : DOI 10.5281/zenodo.23337573 (toutes versions), 10.5281/zenodo.23337574 (v1.0.0), ajouté au README et à `CITATION.cff`
-- [ ] Zenodo : déposer `samareew-data.zip` à la main (les rasters ne sont pas dans l'archive automatique) ; DOI à afficher aussi sur la page Données & méthode du site
+- [x] DOI affiché dans la section « Citer » de la page Données & méthode du site
+- [x] `samareew-data.zip` déposé à la main sur Zenodo (13/10/2026, les rasters ne sont pas dans l'archive automatique) : DOI 10.5281/zenodo.23338529 (toutes versions), 10.5281/zenodo.23338530 (v1.0.0), ajouté au README, à `CITATION.cff` et au site ; à refaire à chaque version (« New version » sur la fiche)
 - [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)
 
 **Critère de fin** : le site est en ligne et partageable.

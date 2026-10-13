@@ -13,6 +13,10 @@ authors:
 version: 1.0.0
 date-released: 2026-10-13
 doi: 10.5281/zenodo.23337573
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23338529
+    description: "Data archive (samareew-data.zip, with the rasters), all versions"
 repository-code: "https://github.com/Bigtapha/samareew"
 url: "https://bigtapha.github.io/samareew/"
 license:

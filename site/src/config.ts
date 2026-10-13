@@ -15,6 +15,11 @@ export const METHOD_URL = `${REPO_URL}/blob/main/METHODOLOGIE.md`;
 export const DATA_ZIP_URL = `${REPO_URL}/releases/latest/download/samareew-data.zip`;
 export const RELEASES_URL = `${REPO_URL}/releases`;
 export const AUTHOR = "Moustapha Cisse";
+/** Zenodo DOI of all versions (always resolves to the latest one). */
+export const DOI = "10.5281/zenodo.23337573";
+export const DOI_URL = `https://doi.org/${DOI}`;
+/** Zenodo DOI of the data archive (samareew-data.zip, with the rasters), all versions. */
+export const DATA_DOI_URL = "https://doi.org/10.5281/zenodo.23338529";
 
 /** Unit types shown in the chart template, in the order of the "Niveau" menu. */
 export const TEMPLATE_UNIT_TYPES = ["city", "commune", "sector", "direction", "ring"] as const;
