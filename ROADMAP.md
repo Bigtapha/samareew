@@ -212,15 +212,16 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 **Critère de fin** : le site fonctionne en local, il est lisible sur téléphone et chaque chiffre renvoie à sa source.
 
 ### J6 — Publication
-- [ ] Rendre public le dépôt GitHub (vérifier avant qu'aucun secret ni fichier lourd n'y figure)
+- [x] Dépôt GitHub public (13/10/2026), après un second audit : adresse e-mail des commits remplacée par l'adresse « noreply » de GitHub (historique réécrit, dépôt recréé), `CLAUDE.md` et `.vscode/` retirés et ignorés
 - [x] Audit avant publication (09/10/2026) : aucun secret, chemin personnel ni gros fichier dans tout l'historique (plus gros fichier 2 Mo, dépôt 8,8 Mo) ; ancienne carte web de Dakar (`docs/`) retirée ; `sample_key.csv` publié (validation terminée)
 - [x] Étape 8, `python -m pipeline.s8_release` : `samareew-data.zip` (tableaux, GeoTIFF par ville, limites, validation et étiquettes, contrôle croisé, README, licence, citation ; 6 Mo) et `site-assets.tar.gz` (PMTiles de l'étape 7 et fond de carte ; 22,5 Mo), avec `SHA256SUMS` ; noms fixes pour que `releases/latest/download/…` reste un lien valable
 - [x] Workflow `.github/workflows/deploy.yml` : récupère `site-assets.tar.gz` dans la dernière release, vérifie la somme, `npm ci`, `check`, `build`, déploie sur Pages ; simulé dans un clone propre (25 pages construites)
 - [x] Fausse détection au nord-est de Thiès (exploitation agricole irriguée de 75 ha à Fandène, classée en bâti depuis 2018, repérée le 12/10/2026) : laissée sur la carte, entourée et expliquée sur la fiche de Thiès (`config/map_notes.py`, étape 7, METHODOLOGIE §14.4 et §15.6) ; relancer l'étape 8 avant la release
-- [ ] Déploiement (GitHub Pages) : réglage Pages « source : GitHub Actions », après la première release
-- [ ] Données téléchargeables publiées : release `v1.0.0` (commande affichée par l'étape 8) ; lien « Toutes les données (ZIP) » déjà sur la page Données & méthode
+- [x] Déploiement (GitHub Pages, source « GitHub Actions ») : site en ligne le 13/10/2026, pages et cartes vérifiées dans un navigateur ; la release n'a pas déclenché le workflow, lancé à la main (`gh workflow run deploy.yml`)
+- [x] Données téléchargeables publiées : release `v1.0.0` du 13/10/2026 (commande affichée par l'étape 8) ; lien « Toutes les données (ZIP) » déjà sur la page Données & méthode
 - [x] README mis à jour, avec la manière de citer le projet ; `CITATION.cff` (bouton « Cite this repository » de GitHub)
-- [ ] Archivage Zenodo : activer le dépôt sur Zenodo avant la release (dépôt public requis) ; métadonnées dans `.zenodo.json` ; après la release, ajouter le DOI au README et à `CITATION.cff`, et déposer `samareew-data.zip` à la main (les rasters ne sont pas dans l'archive automatique)
+- [x] Archivage Zenodo du code à chaque release (métadonnées dans `.zenodo.json`) : DOI 10.5281/zenodo.23337573 (toutes versions), 10.5281/zenodo.23337574 (v1.0.0), ajouté au README et à `CITATION.cff`
+- [ ] Zenodo : déposer `samareew-data.zip` à la main (les rasters ne sont pas dans l'archive automatique) ; DOI à afficher aussi sur la page Données & méthode du site
 - [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)
 
 **Critère de fin** : le site est en ligne et partageable.

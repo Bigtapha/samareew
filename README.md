@@ -4,6 +4,8 @@
 Senegalese cities, inspired by [Our World in Data](https://ourworldindata.org). The first
 theme is **urban expansion, 2016–2026**, in four cities: **Dakar, Touba, Thiès and Mbour**.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23337573.svg)](https://doi.org/10.5281/zenodo.23337573)
+
 Built-up areas are mapped every year from **Sentinel-2** imagery with **Google Earth Engine**
 and **one national Random Forest** model, then cleaned with a temporal consistency filter
 and checked by an independent accuracy assessment.
@@ -21,7 +23,7 @@ read it first.
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
 | J4 — National validation (480 photo-interpreted points) | Done |
 | J5 — Website v1 | Done: all pages of ROADMAP §4.5 in `site/` (home with the cities at the same scale, theme page, one chart page per indicator, 4 city fact sheets, data & method, about), tested on mobile and slow connections |
-| **J6 — Publication** | **In progress**: release of the data (step 8) and GitHub Pages deployment ready; public repository, first release and first story to come |
+| **J6 — Publication** | **In progress**: repository public, release `v1.0.0` published and archived on Zenodo, site online (13/10/2026); first story to come |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
 
@@ -105,7 +107,10 @@ and a first story (ROADMAP J6).
 - **How to cite** (see also [`CITATION.cff`](CITATION.cff), or "Cite this repository" on GitHub):
 
   > Cisse, M. (2026). *SamaReew: urban expansion in Senegalese cities, 2016–2025* (version 1.0.0)
-  > [Data and code]. https://github.com/Bigtapha/samareew. Data CC BY 4.0, code MIT.
+  > [Data and code]. Zenodo. https://doi.org/10.5281/zenodo.23337573. Data CC BY 4.0, code MIT.
+
+  The DOI [10.5281/zenodo.23337573](https://doi.org/10.5281/zenodo.23337573) always points to
+  the latest version; version 1.0.0 is [10.5281/zenodo.23337574](https://doi.org/10.5281/zenodo.23337574).
 
 ## Study zones
 
