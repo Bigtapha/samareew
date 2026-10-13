@@ -10,3 +10,6 @@ myvenv/
 *.tif
 # Map tiles: rebuilt by step 7 (python -m pipeline.s7_site_data)
 *.pmtiles
+# Local tooling, not part of the project
+CLAUDE.md
+.vscode/
