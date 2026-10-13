@@ -106,9 +106,9 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
   /* Wide screens: the cities beside the introduction, the four footprints on one line */
   @media (min-width: 70rem) {
     .home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 3rem; }
-    .hero { grid-area: 1 / 1; align-self: center; }
+    .hero { grid-area: 1 / 1; padding-top: 0; }
     .cities-block { grid-area: 1 / 2; }
-    .cities-block h2 { margin-top: 0.5rem; }
+    .cities-block h2 { margin-top: 0.3rem; }
     .cities { grid-template-columns: repeat(2, 1fr); margin: 0; }
     .footprints-block { grid-area: 2 / 1 / auto / -1; }
     .explore { grid-area: 3 / 1 / auto / -1; }
