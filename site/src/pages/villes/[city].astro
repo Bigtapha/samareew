@@ -170,7 +170,7 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
     </p>
   )}
 
-  <dl class="figures">
+  <dl class="figures" style={`--n:${figures.length}`}>
     {figures.map((f) => (
       <div><dt>{f.label}</dt><dd><strong>{f.value}</strong><span class="small muted">{f.note}</span></dd></div>
     ))}
@@ -179,6 +179,7 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
   <h2>Carte</h2>
 
   <section class="city-map" data-city-map>
+    <div class="map-controls">
     <fieldset class="layer-switch">
       <legend class="visually-hidden">Couche affichée</legend>
       {layers.map((l, i) => (
@@ -192,9 +193,10 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
       </div>
     )}
     {imageAll && !image && <p class="small muted">{imageAll.title} : pas encore disponible pour {city.name}.</p>}
+    </div>
     <div class="map" data-map><p class="map-loading small muted" data-map-loading>Chargement de la carte (environ 0,5 Mo la première fois)…</p></div>
     {layers.map((l, i) => (
-      <div data-layer-legend={l.id} hidden={i !== 0}>
+      <div class="map-legend" data-layer-legend={l.id} hidden={i !== 0}>
         <div class="table-scroll legend-table">
         <table>
           <caption class="visually-hidden">{l.title}</caption>
@@ -240,7 +242,7 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
         </p>
       </div>
     )}
-    <p class="small muted">
+    <p class="small muted map-foot">
       Tirets : limite de la zone d'étude (agglomération GHSL 2025 + 2 km).
       {image && <>{" "}{image.title} : {image.description.charAt(0).toLowerCase() + image.description.slice(1)} ; chargée seulement si vous l'affichez.</>}
     </p>
@@ -334,7 +336,7 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
   .note-swatch { display: inline-block; width: 0.9rem; height: 0.9rem; border: 2px solid var(--text); border-radius: 2px; vertical-align: -0.1rem; margin-right: 0.35rem; }
   .map-notes button.link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   .lead { max-width: 46rem; }
-  .map { position: relative; }
+  .map { position: relative; scroll-margin-top: calc(var(--header-h) + 0.5rem); }
   .map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 1rem; text-align: center; }
   .note { max-width: 46rem; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--muted); border-radius: var(--radius); padding: 0.6rem 0.9rem; }
   .figures { display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); margin: 1.25rem 0 0; }
@@ -347,4 +349,18 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
   .units summary h2 { display: inline; }
   .units { margin: 1.5rem 0; }
   .units .table-scroll { margin-top: 0.75rem; }
+
+  /* Wide screens: key figures on one line, legend and areas beside the map */
+  @media (min-width: 70rem) {
+    .figures { grid-template-columns: repeat(var(--n), 1fr); }
+    .city-map { display: grid; grid-template-columns: minmax(0, 1fr) 26rem; column-gap: 1.5rem; }
+    .map-controls { grid-area: 1 / 1; }
+    .map { grid-area: 2 / 1; height: min(75vh, 620px); }
+    .map-notes { grid-area: 3 / 1; }
+    .map-foot { grid-area: 4 / 1; max-width: 46rem; }
+    .map-legend { grid-area: 2 / 2 / span 3; }
+    .legend-table { max-width: none; }
+    .legend-table th, .legend-table td { padding-inline: 0.5rem; }
+    .legend-table th[scope="row"] { white-space: nowrap; }
+  }
 </style>

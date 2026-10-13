@@ -7,6 +7,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 <Base title="À propos">
   <h1>À propos</h1>
   <div class="prose">
+    <div class="intro">
     <p>
       <strong>SamaReew</strong> (<em>sama réew</em>, « mon pays » en wolof) est un atlas ouvert qui compare les villes
       du Sénégal à partir de données libres, sur le modèle d'<a href="https://ourworldindata.org">Our World in Data</a> :
@@ -17,6 +18,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
       de 2016 à 2025. D'autres villes et d'autres thèmes (densité de population, végétation, chaleur, inondations)
       viendront ensuite.
     </p>
+    </div>
+    <section class="principles">
     <h2>Principes</h2>
     <ul>
       <li><strong>Comparer à règle égale</strong> : même définition de ville, même modèle, mêmes indicateurs partout.</li>
@@ -24,15 +27,28 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
       <li><strong>Rester léger</strong> : pages sobres, cartes et images chargées seulement à la demande, pour l'internet mobile.</li>
       <li><strong>Tout ouvrir</strong> : données sous CC BY 4.0, code sous licence MIT, méthode publiée.</li>
     </ul>
+    </section>
+    <section class="author">
     <h2>Auteur</h2>
     <p>
       Moustapha Cisse, ingénieur en géomatique (télédétection et ingénierie des données géospatiales).
       Code, méthode et suivi du projet : <a href={REPO_URL}>dépôt GitHub</a>.
     </p>
+    </section>
   </div>
 </Base>
 
 <style>
   .prose { max-width: 42rem; }
   .prose li { margin-bottom: 0.4rem; }
+
+  /* Wide screens: the principles sit beside the text */
+  @media (min-width: 70rem) {
+    .prose { max-width: none; display: grid; grid-template-columns: minmax(0, 42rem) minmax(0, 1fr); column-gap: 3rem; align-items: start; }
+    .intro { grid-area: 1 / 1; }
+    .author { grid-area: 2 / 1; }
+    .principles { grid-area: 1 / 2 / span 2; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.25rem 0.5rem; }
+    .principles h2 { margin-top: 0; }
+    .principles ul { padding-left: 1.1rem; margin: 0; }
+  }
 </style>

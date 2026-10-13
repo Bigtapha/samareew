@@ -55,10 +55,12 @@ const limits = [
     les réglages, est dans <a href={METHOD_URL}>METHODOLOGIE.md</a>.
   </p>
 
+  <div class="with-toc">
   <nav class="toc small" aria-label="Sur cette page">
     <a href="#methode">Méthode</a><a href="#telecharger">Télécharger</a><a href="#sources">Sources et licences</a>
     <a href="#validation">Validation</a><a href="#limites">Limites</a><a href="#citer">Citer</a>
   </nav>
+  <div class="body">
 
   <h2 id="methode">La méthode en bref</h2>
   <ol class="steps">
@@ -160,6 +162,8 @@ const limits = [
     Ce DOI désigne le code, la méthode et les tableaux, et renvoie toujours à la dernière version. Pour citer l'archive
     des données (avec les cartes en GeoTIFF) : <a href={DATA_DOI_URL}>{DATA_DOI_URL}</a>.
   </p>
+  </div>
+  </div>
 </Base>
 
 <style>
@@ -169,5 +173,12 @@ const limits = [
   .downloads { padding-left: 1.1rem; }
   table.wrap td, table.wrap th { white-space: normal; text-align: left; min-width: 8rem; }
   .cite { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0.7rem 0.9rem; font-size: 0.95rem; overflow-wrap: anywhere; }
-  h2 { scroll-margin-top: 1rem; }
+  h2 { scroll-margin-top: calc(var(--header-h) + 1rem); }
+
+  /* Wide screens: the table of contents stays in the left margin */
+  @media (min-width: 70rem) {
+    .with-toc { display: grid; grid-template-columns: 11rem minmax(0, 1fr); column-gap: 2.5rem; align-items: start; }
+    .toc { position: sticky; top: calc(var(--header-h) + 1rem); flex-direction: column; flex-wrap: nowrap; gap: 0.5rem; margin: 2rem 0 0; padding-left: 0.75rem; border-left: 1px solid var(--line); }
+    .body > h2:first-child { margin-top: 1.75rem; }
+  }
 </style>

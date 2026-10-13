@@ -10,7 +10,8 @@
   --focus: #2f6db5;
   --radius: 6px;
   --gutter: 16px;
-  --max: 64rem;
+  --max: 80rem;
+  --header-h: 0px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -63,10 +64,22 @@ p { margin: 0 0 1rem; }
 .brand { font-weight: 700; font-size: 1.15rem; color: var(--text); text-decoration: none; }
 .brand span { color: var(--accent-text); }
 .site-nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: 0.95rem; }
-.site-nav a { color: var(--muted); text-decoration: none; padding: 0.25rem 0; }
-.site-nav a[aria-current="page"], .site-nav a:hover { color: var(--text); text-decoration: underline; }
+.site-nav a { color: var(--muted); text-decoration: none; padding: 0.25rem 0; border-bottom: 2px solid transparent; }
+.site-nav a:hover { color: var(--text); }
+.site-nav a[aria-current="page"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+/* Room for one line: the menu moves to the right, with larger targets */
+@media (min-width: 44rem) {
+  .site-header .wrap { padding-block: 0.4rem; }
+  .site-nav { margin-left: auto; gap: 0.25rem 1.5rem; }
+  .site-nav a { padding: 0.5rem 0; }
+}
+/* Wide screens: the header stays in view; anchors and sticky blocks leave room for it */
+@media (min-width: 70rem) {
+  :root { --header-h: 3.5rem; }
+  .site-header { position: sticky; top: 0; z-index: 10; }
+}
 
-main { padding-block: 1.5rem 3rem; }
+main.wrap { padding-block: 1.5rem 3rem; }
 
 .site-footer { border-top: 1px solid var(--line); padding-block: 1.5rem; font-size: 0.875rem; color: var(--muted); }
 
@@ -82,7 +95,7 @@ th, td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--line); text-alig
 th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); }
 thead th { font-weight: 600; color: var(--muted); }
 tbody th { font-weight: 500; }
-tbody tr:last-child td { border-bottom: 0; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
 
 button, select { font: inherit; color: inherit; }
 select { padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); max-width: 100%; }

@@ -18,11 +18,13 @@ const total = (k: "start" | "end") => stats.reduce((s, c) => s + c[k], 0);
 const footprints = manifest.footprints;
 const legend = footprints ? manifest.layers[footprints.layer].legend : [];
 const maxKm = footprints ? Math.max(...Object.values(footprints.cities).map((f: any) => f.width_km)) : 1;
+const sumKm = footprints ? Object.values(footprints.cities).reduce((s: number, f: any) => s + f.width_km, 0) : 1;
 const SCALE_KM = 10;
 const spanWords: Record<number, string> = { 9: "neuf", 10: "dix", 11: "onze", 12: "douze" };
 const span = `${spanWords[last - first] ?? last - first} ans`;
 ---
 <Base title="SamaReew">
+  <div class="home">
   <section class="hero">
     <h1>Comment grandissent les villes du Sénégal ?</h1>
     <p class="muted">
@@ -34,7 +36,7 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
   </section>
 
   {footprints && (
-    <section class="footprints-block" aria-labelledby="echelle">
+    <section class="footprints-block" aria-labelledby="echelle" style={`--sum-km:${sumKm}`}>
       <h2 id="echelle">Les quatre villes à la même échelle</h2>
       <p class="muted small">Surface bâtie en {first}, puis nouveau bâti jusqu'en {last}, d'après les images satellite.</p>
       <ul class="legend-inline small">
@@ -56,6 +58,7 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
     </section>
   )}
 
+  <section class="cities-block">
   <h2>Les villes</h2>
   <ul class="cities">
     {stats.map((c) => (
@@ -68,12 +71,16 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
       </li>
     ))}
   </ul>
+  </section>
 
+  <section class="explore">
   <h2>Explorer</h2>
   <ul class="cards">
     <li><a href={`${base}/graphiques`}><strong>Graphiques</strong><span class="muted small">Un graphique par indicateur, avec carte, tableau et données.</span></a></li>
     <li><a href={`${base}/donnees`}><strong>Données & méthode</strong><span class="muted small">Téléchargements, sources, validation et limites.</span></a></li>
   </ul>
+  </section>
+  </div>
 </Base>
 
 <style>
@@ -95,4 +102,16 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
   .legend-inline { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; list-style: none; padding: 0; margin: 0 0 0.75rem; }
   .legend-inline li { display: inline-flex; align-items: center; gap: 0.35rem; }
   .big { font-size: 1.8rem; font-weight: 700; line-height: 1.1; color: var(--city); }
+
+  /* Wide screens: the cities beside the introduction, the four footprints on one line */
+  @media (min-width: 70rem) {
+    .home { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 3rem; }
+    .hero { grid-area: 1 / 1; align-self: center; }
+    .cities-block { grid-area: 1 / 2; }
+    .cities-block h2 { margin-top: 0.5rem; }
+    .cities { grid-template-columns: repeat(2, 1fr); margin: 0; }
+    .footprints-block { grid-area: 2 / 1 / auto / -1; }
+    .explore { grid-area: 3 / 1 / auto / -1; }
+    .footprints, .scale { --px-km: min(calc((100cqw - 2.5rem) / var(--sum-km)), 10.5px); }
+  }
 </style>
