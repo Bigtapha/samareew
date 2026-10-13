@@ -223,11 +223,12 @@ Accueil            carte du Sénégal, cercles proportionnels = croissance des v
 - [x] Archivage Zenodo du code à chaque release (métadonnées dans `.zenodo.json`) : DOI 10.5281/zenodo.23337573 (toutes versions), 10.5281/zenodo.23337574 (v1.0.0), ajouté au README et à `CITATION.cff`
 - [x] DOI affiché dans la section « Citer » de la page Données & méthode du site
 - [x] `samareew-data.zip` déposé à la main sur Zenodo (13/10/2026, les rasters ne sont pas dans l'archive automatique) : DOI 10.5281/zenodo.23338529 (toutes versions), 10.5281/zenodo.23338530 (v1.0.0), ajouté au README, à `CITATION.cff` et au site ; à refaire à chaque version (« New version » sur la fiche)
-- [ ] Premier récit à partager (par exemple « Touba a grandi de X % en 10 ans »)
+- [x] Premier récit à partager : ébauche du 13/10/2026, « Les villes sénégalaises s'étendent deux à trois fois plus vite que leur population » (article et version courte pour les réseaux, dans `data/recit/`, hors git) ; à relire et à diffuser par l'utilisateur ; J6 terminé
 
 **Critère de fin** : le site est en ligne et partageable.
 
 ### Après la v1
+- [ ] Déploiement : ni la release ni un push sur `main` touchant `site/` n'ont déclenché le workflow le 13/10/2026 (seul le lancement manuel a marché, `gh workflow run deploy.yml --ref main`) ; chercher la cause
 - [ ] Ajouter d'autres villes (Kaolack, Saint-Louis, Ziguinchor…)
 - [ ] Mise à jour annuelle automatisée (nouvelle année Sentinel-2)
 - [ ] Titres ou fiches en wolof

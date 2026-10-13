@@ -23,7 +23,7 @@ read it first.
 | J3 — Indicators and cross-check with GHSL / Open Buildings | Done |
 | J4 — National validation (480 photo-interpreted points) | Done |
 | J5 — Website v1 | Done: all pages of ROADMAP §4.5 in `site/` (home with the cities at the same scale, theme page, one chart page per indicator, 4 city fact sheets, data & method, about), tested on mobile and slow connections |
-| **J6 — Publication** | **In progress**: repository public, release `v1.0.0` published and archived on Zenodo, site online (13/10/2026); first story to come |
+| J6 — Publication | Done (13/10/2026): repository public, release `v1.0.0` published and archived on Zenodo (code and data), site online at https://bigtapha.github.io/samareew/ |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
 
@@ -93,9 +93,8 @@ pages read `outputs/site/manifest.json` and `outputs/tables/` at build time, and
 Chart drawing is shared by the interactive template and the static pages
 (`site/src/lib/charts.ts`). On a simulated 3G connection, text pages weigh 3-8 kB; a map costs
 about 500 kB the first time (MapLibre), so city maps load only when scrolled to. A home map with
-proportional circles is optional. **Next step (J6)**: make the repository public, deploy on
-GitHub Pages (rebuilding the `.pmtiles` with step 7 and `npm run basemap`), publish the data
-and a first story (ROADMAP J6).
+proportional circles is optional. **Next steps**: see "Après la v1" in ROADMAP §5 (more
+cities, yearly update, retraining of the model).
 
 ## Data and citation
 
