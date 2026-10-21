@@ -120,6 +120,38 @@ def stratified_ratio(points: pd.DataFrame, weights: dict, num: str, den: str) ->
     return float(r), float(np.sqrt(var))
 
 
+def log_interval(est: float, se: float) -> tuple:
+    """95 % interval of a positive ratio, computed on its logarithm (delta method:
+    se(ln r) = se(r) / r). A ratio of areas is skewed: the symmetric interval est ± 1.96 se
+    is too wide below and too narrow above (checked against a stratified bootstrap)."""
+    if not est > 0:
+        return float("nan"), float("nan")
+    half = Z95 * se / est
+    return float(est * np.exp(-half)), float(est * np.exp(half))
+
+
+def growth_estimate(points: pd.DataFrame, weights: dict, start_col: str, end_col: str) -> dict:
+    """Growth of the built-up area between two dates from the photo-interpreted 0/1 labels:
+    ratio of the estimated areas built at the end and at the start, minus one. Both areas come
+    from the same points, so the ratio estimator accounts for their correlation."""
+    r, se = stratified_ratio(points, weights, end_col, start_col)
+    low, high = log_interval(r, se)
+    return {"estimate": round(r - 1, 3), "low95": round(low - 1, 3), "high95": round(high - 1, 3),
+            "log_se": round(se / r, 4)}
+
+
+def growth_difference(a: dict, b: dict) -> dict:
+    """Compare the corrected growth of two cities (outputs of ``growth_estimate``). The
+    samples of two cities are independent, so the variances of the log growth factors add.
+    ``established`` is True when the 95 % interval of the ratio of the factors excludes 1."""
+    d = np.log1p(a["estimate"]) - np.log1p(b["estimate"])
+    se = float(np.hypot(a["log_se"], b["log_se"]))
+    return {"factor_ratio": round(float(np.exp(d)), 3),
+            "low95": round(float(np.exp(d - Z95 * se)), 3),
+            "high95": round(float(np.exp(d + Z95 * se)), 3),
+            "established": bool(abs(d) > Z95 * se)}
+
+
 def accuracy_report(points: pd.DataFrame, weights: dict, total_area_ha: float) -> dict:
     """Area-weighted accuracies and corrected areas from labelled points.
 

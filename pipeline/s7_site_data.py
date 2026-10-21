@@ -476,7 +476,9 @@ def build_validation() -> dict:
            "note": ("Précisions pondérées par la surface, marges à 95 %. Les tableaux et les cartes "
                     "gardent les valeurs de la carte ; les surfaces corrigées sont publiées à côté."),
            "cities": {c: sd.validation_summary(r, START, END) for c, r in report["cities"].items()},
-           "national": sd.validation_summary(report["national"], START, END)}
+           "national": sd.validation_summary(report["national"], START, END),
+           # Pairs of cities: is one growing faster, once corrected? (95 %, METHODOLOGIE §14.4)
+           "growth_comparison": report.get("growth_comparison", [])}
     cfg.SITE_VALIDATION_JSON.write_text(json.dumps(out, indent=1, ensure_ascii=False))
     return out
 

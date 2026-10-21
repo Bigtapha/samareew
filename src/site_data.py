@@ -215,7 +215,8 @@ def note_stats(first_year: np.ndarray, inside: np.ndarray, start: int, end: int,
 
 def validation_summary(report: dict, start: int, end: int) -> dict:
     """What the site shows of one accuracy report of step 5 (a city or the four cities):
-    accuracies and corrected areas with their 95 % margins, next to the mapped areas."""
+    accuracies, corrected areas and corrected growth with their 95 % margins, next to the
+    mapped values."""
     mapped = report["mapped_area_ha"]
     out = {
         "n_points": report["n_points"],
@@ -236,6 +237,10 @@ def validation_summary(report: dict, start: int, end: int) -> dict:
                        "corrected_ha": report["built_area_ha"][str(end)]},
         },
     }
+    growth = report.get("built_area_growth")
+    if growth:
+        out["growth"] = {"mapped": growth["mapped"],
+                         "corrected": {k: growth[k] for k in ("estimate", "low95", "high95")}}
     tolerant = report.get("tolerant")
     if tolerant:
         out["new_built"]["users_accuracy_tolerant"] = tolerant["users_accuracy"]["new_built"]

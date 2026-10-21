@@ -1,9 +1,15 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { catalogue, cities } from "../../lib/outputs";
+import { catalogue, cities, validation } from "../../lib/outputs";
 import { value } from "../../lib/facts";
 import { formatValue } from "../../lib/format";
 
+// Growth corrected by the validation, with its 95 % interval (step 5)
+const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(100 * x))}\u202f%`;
+const correctedGrowth = (slug: string) => {
+  const g = validation.cities[slug].growth.corrected;
+  return `${signedPct(g.estimate)} (de ${signedPct(g.low95)} à ${signedPct(g.high95)})`;
+};
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
 ---
@@ -16,7 +22,7 @@ const [first, last] = [catalogue.years[0], catalogue.years.at(-1)];
       const b = value("built_area_ha", c.slug, last)!;
       return (
         <li><a href={`${base}/villes/${c.slug}`}><strong>{c.name}</strong>
-          <span class="muted small">{formatValue(b, "ha")} ha bâtis en {last}, +{Math.round(100 * (b / a - 1))}&#8239;% depuis {first}</span></a></li>
+          <span class="muted small">{formatValue(b, "ha")} ha bâtis en {last}, +{Math.round(100 * (b / a - 1))}&#8239;% depuis {first} sur la carte, {correctedGrowth(c.slug)} une fois corrigée</span></a></li>
       );
     })}
   </ul>

@@ -257,8 +257,9 @@ def year_check(points: pd.DataFrame) -> dict:
 
 
 def extra_measures(points: pd.DataFrame, weights: dict, total_area_ha: float) -> dict:
-    """Built / not-built accuracy and corrected built-up area at each date, and the overall
-    accuracy on sure labels only (an upper bound: the unsure points are the hard ones)."""
+    """Built / not-built accuracy and corrected built-up area at each date, the corrected
+    growth between them, and the overall accuracy on sure labels only (an upper bound: the
+    unsure points are the hard ones)."""
     out = {"date_accuracy": va.date_accuracy(
         points.rename(columns={f"built_{START}": "ref_start", f"built_{END}": "ref_end"}), weights),
         "built_area_ha": {}}
@@ -266,12 +267,33 @@ def extra_measures(points: pd.DataFrame, weights: dict, total_area_ha: float) ->
         est, se = va.stratified_mean(points, weights, f"built_{year}")
         out["built_area_ha"][str(year)] = {"estimate": round(est * total_area_ha),
                                            "margin95": round(va.Z95 * se * total_area_ha)}
+    out["built_area_growth"] = va.growth_estimate(points, weights, f"built_{START}", f"built_{END}")
     sure = points[points["sure"] == 1]
     try:
         oa = va.accuracy_report(sure, weights, 1.0)["overall_accuracy"]
         out["overall_accuracy_sure_only"] = {**oa, "n_points": int(len(sure))}
     except ValueError:                       # a stratum without any sure label
         out["overall_accuracy_sure_only"] = None
+    return out
+
+
+def mapped_growth(report: dict) -> float:
+    """Growth of the mapped built-up area over the validation period (pixel counts)."""
+    m = report["mapped_area_ha"]
+    return round((m["built_at_start"] + m["new_built"]) / m["built_at_start"] - 1, 3)
+
+
+def growth_comparison(cities: dict) -> list:
+    """Every pair of cities: is the corrected growth of one established as faster?"""
+    names = list(cities)
+    out = []
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            d = va.growth_difference(cities[a]["built_area_growth"], cities[b]["built_area_growth"])
+            out.append({"cities": [a, b], **d})
+            verdict = "established" if d["established"] else "not established"
+            print(f"growth {a} / {b}: factor ratio {d['factor_ratio']:.2f} "
+                  f"[{d['low95']:.2f}, {d['high95']:.2f}], {verdict}")
     return out
 
 
@@ -308,6 +330,7 @@ def report() -> None:
         r = va.accuracy_report(p.assign(stratum=p["stratum"]), weights, s["area_ha"].sum())
         r["year_check"] = year_check(p)
         r.update(extra_measures(p, weights, s["area_ha"].sum()))
+        r["built_area_growth"]["mapped"] = mapped_growth(r)
         r["unsure_labels"] = int((p["sure"] == 0).sum())
         if tolerant is not None:
             r["tolerant"] = tolerant_measures(tolerant[tolerant["city"] == city], weights, s["area_ha"].sum())
@@ -323,6 +346,7 @@ def report() -> None:
         r.pop("by_stratum")
         r["year_check"] = year_check(points)
         r.update(extra_measures(national, weights, strata["area_ha"].sum()))
+        r["built_area_growth"]["mapped"] = mapped_growth(r)
         r["unsure_labels"] = int((points["sure"] == 0).sum())
         if tolerant is not None:
             r["tolerant"] = tolerant_measures(
@@ -335,6 +359,8 @@ def report() -> None:
             t = r["tolerant"]
             print(f"national, tolerant: overall accuracy {t['overall_accuracy']['estimate']:.3f}, "
                   f"user's accuracy of new built-up {t['users_accuracy']['new_built']['estimate']:.3f}")
+    if len(complete) == len(cfg.CITIES):
+        result["growth_comparison"] = growth_comparison(result["cities"])
     cfg.VALIDATION_REPORT_JSON.write_text(json.dumps(result, indent=2, ensure_ascii=False))
 
 

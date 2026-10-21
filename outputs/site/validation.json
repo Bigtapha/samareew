@@ -1,5 +1,5 @@
 {
- "date": "2026-10-08",
+ "date": "2026-10-21",
  "period": [
   2016,
   2025
@@ -84,6 +84,14 @@
       "margin95": 5470
      }
     }
+   },
+   "growth": {
+    "mapped": 0.504,
+    "corrected": {
+     "estimate": 0.705,
+     "low95": 0.373,
+     "high95": 1.118
+    }
    }
   },
   "touba": {
@@ -154,6 +162,14 @@
       "estimate": 13005,
       "margin95": 2871
      }
+    }
+   },
+   "growth": {
+    "mapped": 0.707,
+    "corrected": {
+     "estimate": 0.858,
+     "low95": 0.418,
+     "high95": 1.436
     }
    }
   },
@@ -230,6 +246,14 @@
       "margin95": 3225
      }
     }
+   },
+   "growth": {
+    "mapped": 0.831,
+    "corrected": {
+     "estimate": 0.655,
+     "low95": 0.212,
+     "high95": 1.26
+    }
    }
   },
   "mbour": {
@@ -304,6 +328,14 @@
       "estimate": 8948,
       "margin95": 2562
      }
+    }
+   },
+   "growth": {
+    "mapped": 0.804,
+    "corrected": {
+     "estimate": 1.585,
+     "low95": 0.763,
+     "high95": 2.791
     }
    }
   }
@@ -385,6 +417,76 @@
      "margin95": 7425
     }
    }
+  },
+  "growth": {
+   "mapped": 0.616,
+   "corrected": {
+    "estimate": 0.821,
+    "low95": 0.582,
+    "high95": 1.097
+   }
   }
- }
+ },
+ "growth_comparison": [
+  {
+   "cities": [
+    "dakar",
+    "touba"
+   ],
+   "factor_ratio": 0.918,
+   "low95": 0.649,
+   "high95": 1.298,
+   "established": false
+  },
+  {
+   "cities": [
+    "dakar",
+    "thies"
+   ],
+   "factor_ratio": 1.03,
+   "low95": 0.705,
+   "high95": 1.506,
+   "established": false
+  },
+  {
+   "cities": [
+    "dakar",
+    "mbour"
+   ],
+   "factor_ratio": 0.66,
+   "low95": 0.425,
+   "high95": 1.024,
+   "established": false
+  },
+  {
+   "cities": [
+    "touba",
+    "thies"
+   ],
+   "factor_ratio": 1.123,
+   "low95": 0.743,
+   "high95": 1.696,
+   "established": false
+  },
+  {
+   "cities": [
+    "touba",
+    "mbour"
+   ],
+   "factor_ratio": 0.719,
+   "low95": 0.45,
+   "high95": 1.149,
+   "established": false
+  },
+  {
+   "cities": [
+    "thies",
+    "mbour"
+   ],
+   "factor_ratio": 0.64,
+   "low95": 0.391,
+   "high95": 1.049,
+   "established": false
+  }
+ ]
 }

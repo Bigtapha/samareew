@@ -1,6 +1,6 @@
 {
   "format_version": "0.2",
-  "generated": "2026-10-09",
+  "generated": "2026-10-21",
   "years": [
     2016,
     2017,
@@ -84,7 +84,7 @@
         "samareew"
       ],
       "method": "METHODOLOGIE.md#11",
-      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Croissance 2016-2025 corrigée par la validation, avec sa marge à 95 % : Dakar +71 % (+37 à +112), Touba +86 % (+42 à +144), Thiès +66 % (+21 à +126), Mbour +159 % (+76 à +279), pour +50, +71, +83 et +80 % sur la carte. Aucun écart entre deux villes n'est établi : les villes ne sont pas classées par leur rythme de croissance."
     },
     "built_share_pct": {
       "title": "Part de la surface bâtie",
@@ -196,7 +196,7 @@
         "worldpop"
       ],
       "method": "METHODOLOGIE.md#12",
-      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
+      "reliability": "Validée sur 480 points photo-interprétés : 85 % (± 4) de la surface bien classée bâti / non bâti en 2025, de 82 % à Mbour à 87 % à Dakar. La surface bâtie 2025 est juste en moyenne (corrigée : 60 400 ± 7 400 ha pour 61 000 ha cartographiés dans les quatre villes) ; le bâti 2016 est surestimé à Dakar. Croissance 2016-2025 corrigée par la validation, avec sa marge à 95 % : Dakar +71 % (+37 à +112), Touba +86 % (+42 à +144), Thiès +66 % (+21 à +126), Mbour +159 % (+76 à +279), pour +50, +71, +83 et +80 % sur la carte. Aucun écart entre deux villes n'est établi : les villes ne sont pas classées par leur rythme de croissance. Avec la croissance corrigée, le rapport dépasse 1 dans les quatre villes, même à la borne basse de sa marge, sauf à Thiès (0,9). Population modélisée (projection répartie sur le bâti), pas un recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur les communes de Dakar), publiée seulement pour les villes entières."
     },
     "census_population": {
       "title": "Population recensée en 2023",

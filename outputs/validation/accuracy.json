@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-08",
+  "date": "2026-10-21",
   "period": [
     2016,
     2025
@@ -164,6 +164,13 @@
           "estimate": 29026,
           "margin95": 5470
         }
+      },
+      "built_area_growth": {
+        "estimate": 0.705,
+        "low95": 0.373,
+        "high95": 1.118,
+        "log_se": 0.1106,
+        "mapped": 0.504
       },
       "overall_accuracy_sure_only": {
         "estimate": 0.888,
@@ -446,6 +453,13 @@
           "margin95": 2871
         }
       },
+      "built_area_growth": {
+        "estimate": 0.858,
+        "low95": 0.418,
+        "high95": 1.436,
+        "log_se": 0.138,
+        "mapped": 0.707
+      },
       "overall_accuracy_sure_only": {
         "estimate": 0.872,
         "margin95": 0.081,
@@ -722,6 +736,13 @@
           "estimate": 9382,
           "margin95": 3225
         }
+      },
+      "built_area_growth": {
+        "estimate": 0.655,
+        "low95": 0.212,
+        "high95": 1.26,
+        "log_se": 0.1589,
+        "mapped": 0.831
       },
       "overall_accuracy_sure_only": {
         "estimate": 0.91,
@@ -1000,6 +1021,13 @@
           "margin95": 2562
         }
       },
+      "built_area_growth": {
+        "estimate": 1.585,
+        "low95": 0.763,
+        "high95": 2.791,
+        "log_se": 0.1953,
+        "mapped": 0.804
+      },
       "overall_accuracy_sure_only": {
         "estimate": 0.859,
         "margin95": 0.119,
@@ -1263,6 +1291,13 @@
         "margin95": 7425
       }
     },
+    "built_area_growth": {
+      "estimate": 0.821,
+      "low95": 0.582,
+      "high95": 1.097,
+      "log_se": 0.0719,
+      "mapped": 0.616
+    },
     "overall_accuracy_sure_only": {
       "estimate": 0.884,
       "margin95": 0.038,
@@ -1406,5 +1441,67 @@
         }
       }
     }
-  }
+  },
+  "growth_comparison": [
+    {
+      "cities": [
+        "dakar",
+        "touba"
+      ],
+      "factor_ratio": 0.918,
+      "low95": 0.649,
+      "high95": 1.298,
+      "established": false
+    },
+    {
+      "cities": [
+        "dakar",
+        "thies"
+      ],
+      "factor_ratio": 1.03,
+      "low95": 0.705,
+      "high95": 1.506,
+      "established": false
+    },
+    {
+      "cities": [
+        "dakar",
+        "mbour"
+      ],
+      "factor_ratio": 0.66,
+      "low95": 0.425,
+      "high95": 1.024,
+      "established": false
+    },
+    {
+      "cities": [
+        "touba",
+        "thies"
+      ],
+      "factor_ratio": 1.123,
+      "low95": 0.743,
+      "high95": 1.696,
+      "established": false
+    },
+    {
+      "cities": [
+        "touba",
+        "mbour"
+      ],
+      "factor_ratio": 0.719,
+      "low95": 0.45,
+      "high95": 1.149,
+      "established": false
+    },
+    {
+      "cities": [
+        "thies",
+        "mbour"
+      ],
+      "factor_ratio": 0.64,
+      "low95": 0.391,
+      "high95": 1.049,
+      "established": false
+    }
+  ]
 }

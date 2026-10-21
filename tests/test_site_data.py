@@ -79,6 +79,11 @@ def test_validation_summary():
                           "cover_of_map_class": {"new_built": {"built": v(0.6)}}}
     s = sd.validation_summary(report, 2016, 2025)
     assert s["new_built"]["users_accuracy_tolerant"]["estimate"] == 0.75
+    assert "growth" not in s
+    report["built_area_growth"] = {"estimate": 0.72, "low95": 0.4, "high95": 1.1, "log_se": 0.1,
+                                   "mapped": 0.5}
+    g = sd.validation_summary(report, 2016, 2025)["growth"]
+    assert g == {"mapped": 0.5, "corrected": {"estimate": 0.72, "low95": 0.4, "high95": 1.1}}
 
 
 def test_split_tiles_and_overlay_on_rgba():

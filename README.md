@@ -39,6 +39,7 @@ read it first.
 | **Accuracy, built / not built 2025** (J4) | 0.87 ± 0.06 | 0.83 ± 0.07 | 0.86 ± 0.09 | 0.82 ± 0.09 |
 | Accuracy, 3 classes 2016 → 2025 (J4) | 0.85 ± 0.07 | 0.78 ± 0.07 | 0.84 ± 0.09 | 0.77 ± 0.09 |
 | Corrected built-up area 2016 → 2025 (ha, J4) | 17,019 ± 3,150 → 29,026 ± 5,470 | 6,998 ± 2,019 → 13,005 ± 2,871 | 5,668 ± 2,611 → 9,382 ± 3,225 | 3,461 ± 1,344 → 8,948 ± 2,562 |
+| Corrected growth 2016 → 2025 (95 % interval) | +71 % (+37 to +112) | +86 % (+42 to +144) | +66 % (+21 to +126) | +159 % (+76 to +279) |
 
 - **Model** (J2): agreement with reference products 0.924 (kappa 0.849), 0.906 to 0.946 by city.
 - **Indicators** (J3, step 4): by city, commune, Touba sector, direction and 2 km ring, in a
@@ -71,6 +72,12 @@ read it first.
   least reliable growth type (45 % real, extension 69 %): growth types are indicative. The
   year of change is right within one year for 2 points out of 3; 2025 is provisional (half
   of its points are still subdivisions or bare soil).
+
+- **Corrected growth does not rank the cities**: corrected with the 480 points, the built-up
+  area of the four cities grew by +82 % (+58 to +110 %) against +62 % on the map, still two to
+  three times faster than the population (SDG 11.3.1: 2.8, from 2.1 to 3.4). City by city, no
+  difference in growth between two cities is established at 95 %, so the site does not rank
+  them (METHODOLOGIE §14.4).
 
 The tables keep the mapped values, consistent with the maps; the corrected areas are
 published next to them, and each indicator fact sheet gives the measured accuracy.

@@ -726,6 +726,7 @@ Toutes les valeurs sont données avec leur **marge à 95 %** (1,96 erreur type) 
 | Précision par strate | En particulier : le saut est-il fiable dans chaque ville ? |
 | Surface corrigée par classe | Surface de nouveau bâti estimée d'après la réalité, avec sa marge, à comparer à la surface cartographiée |
 | Année d'urbanisation | Part des points bien datés à ±1 an près, d'après `year_built` (année 2017, année 2025) |
+| Croissance corrigée | Croissance du bâti 2016 → 2025 d'après les points, avec sa marge : les villes se classent-elles comme sur la carte ? |
 
 Le niveau national traite les 20 strates ville × strate comme un seul tirage, pondéré par
 la surface de chaque zone. Lancement : `python -m pipeline.s5_validation` (sur les points
@@ -782,6 +783,38 @@ justement les cas difficiles.
 | Bâti 2025 carte | 31 775 | 14 578 | 6 813 | 7 813 | 60 979 |
 | Nouveau bâti 2016–2025 corrigé | 12 007 ± 5 346 | 6 007 ± 2 639 | 3 714 ± 2 193 | 5 487 ± 2 386 | 27 214 ± 6 786 |
 | Nouveau bâti 2016–2025 carte | 10 641 | 6 036 | 3 092 | 3 483 | 23 252 |
+
+**Croissance corrigée 2016 → 2025** (ajoutée le 21/10/2026, jalon v1.0.1). C'est le rapport
+des surfaces bâties corrigées de 2025 et de 2016, moins un (`growth_estimate`). Les deux
+surfaces viennent des mêmes points : l'estimateur de rapport (Stehman, 2014) tient compte de
+leur corrélation. Un rapport de surfaces est dissymétrique, donc la marge est calculée sur
+son logarithme (méthode delta) ; un bootstrap stratifié (20 000 tirages) donne les mêmes
+bornes à 3 points près (Dakar : +37 à +112 % contre +40 à +115 %).
+
+| | Dakar | Touba | Thiès | Mbour | Quatre villes |
+|---|---|---|---|---|---|
+| Croissance cartographiée | +50 % | +71 % | +83 % | +80 % | +62 % |
+| Croissance corrigée | **+71 %** | **+86 %** | **+66 %** | **+159 %** | **+82 %** |
+| Intervalle à 95 % | +37 à +112 % | +42 à +144 % | +21 à +126 % | +76 à +279 % | +58 à +110 % |
+
+**Écarts entre villes** (`growth_difference`, `growth_comparison` dans `accuracy.json`). Les
+échantillons des villes sont indépendants : on compare les logarithmes des facteurs de
+croissance, dont les variances s'ajoutent. **Aucun écart n'est établi à 95 %** pour les six
+paires. Le plus net est Mbour face à Dakar (rapport des facteurs 0,66, intervalle 0,42 à
+1,02) et face à Thiès (0,64, de 0,39 à 1,05). Le classement de la carte (Thiès, Mbour,
+Touba, Dakar) n'est donc pas soutenu par la validation : corrigé, Thiès passe dernière et
+Mbour première, mais ce classement n'est pas établi non plus. Sur les seuls points sûrs
+(borne biaisée, les points douteux sont les cas difficiles), les valeurs bougent encore
+(Touba +40 %, Thiès +29 %, Mbour +176 %) : seule Mbour reste nettement au-dessus.
+
+Ce qui tient : **le bâti croît plus vite que la population**. Avec la croissance corrigée et
+la population WorldPop (§12.2), l'ODD 11.3.1 vaut 2,9 à Dakar (intervalle 1,7 à 4,1),
+2,0 à Touba (1,1 à 2,8), 2,3 à Thiès (0,9 à 3,7) et 3,7 à Mbour (2,2 à 5,3) : il dépasse 1
+même à la borne basse sauf à Thiès, où ce n'est pas établi (l'incertitude de WorldPop n'est
+pas comptée). Pour les quatre villes ensemble (population +24 %), il vaut 2,8 (2,1 à 3,4),
+contre 2,2 avec la carte. Sur les quatre villes, la croissance corrigée (+82 %) est
+plus forte que celle de la carte (+62 %), surtout parce que le bâti 2016 de Dakar est
+surestimé.
 
 **Par strate** (points dont la référence est « nouveau bâti », sur 16 par ville et 64 au total ;
 non pondéré) :

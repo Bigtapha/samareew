@@ -11,6 +11,9 @@ const pct = (x: { estimate: number; margin95: number }) =>
   `${Math.round(100 * x.estimate)} ± ${Math.round(100 * x.margin95)}`;
 const ha = (x: { estimate: number; margin95: number }) =>
   `${formatValue(x.estimate, "ha")} ± ${formatValue(x.margin95, "ha")}`;
+const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(100 * x))}`;
+const growth = (g: any) => `${signedPct(g.corrected.estimate)} (${signedPct(g.corrected.low95)} à ${signedPct(g.corrected.high95)})`;
+const anyEstablished = (validation.growth_comparison ?? []).some((d: any) => d.established);
 const image = Object.values(manifest.images ?? {})[0] as any;
 
 const downloads = [
@@ -126,6 +129,8 @@ const limits = [
           <th scope="col">Nouveau bâti réel (%)</th>
           <th scope="col">Bâti {last} : carte (ha)</th>
           <th scope="col">Corrigé (ha)</th>
+          <th scope="col">Croissance {first}–{last} : carte (%)</th>
+          <th scope="col">Corrigée (%)</th>
         </tr>
       </thead>
       <tbody>
@@ -137,6 +142,8 @@ const limits = [
             <td>{pct(r.new_built.users_accuracy)}</td>
             <td>{formatValue(r.built_area[String(last)].mapped_ha, "ha")}</td>
             <td>{ha(r.built_area[String(last)].corrected_ha)}</td>
+            <td>{signedPct(r.growth.mapped)}</td>
+            <td>{growth(r.growth)}</td>
           </tr>
         ))}
       </tbody>
@@ -145,9 +152,11 @@ const limits = [
   <p class="small muted">
     « 3 classes » : non bâti, bâti en {first}, nouveau bâti. « Nouveau bâti réel » : part du nouveau bâti cartographié
     qui est vraiment devenu bâti entre {first} et {last} ; le reste est surtout en lotissement ou en chantier, ou
-    était déjà bâti en {first}. Les tableaux et les cartes
-    gardent les valeurs de la carte ; les surfaces corrigées sont plus justes en moyenne mais trop incertaines par
-    ville pour les remplacer.
+    était déjà bâti en {first}. « Croissance corrigée » : rapport des surfaces bâties corrigées de {last} et de {first},
+    avec sa marge à 95 % ; {anyEstablished
+      ? "certains écarts de croissance entre villes y sont établis (détail dans le JSON de la validation)."
+      : "aucun écart de croissance entre deux villes n'y est établi, les villes ne sont donc pas classées par leur rythme de croissance."} Les tableaux et les cartes gardent les valeurs de la carte ; les valeurs
+    corrigées sont plus justes en moyenne mais trop incertaines par ville pour les remplacer.
   </p>
 
   <h2 id="limites">Limites</h2>

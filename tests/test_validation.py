@@ -107,3 +107,26 @@ def test_class_shares():
     assert shares["b"]["estimate"] == pytest.approx(0.75)
     assert shares["c"]["estimate"] == pytest.approx(0.25)
     assert "a" not in shares
+
+
+def test_log_interval_is_skewed_upwards():
+    low, high = va.log_interval(2.0, 0.4)
+    assert low > 2.0 - 1.96 * 0.4 and high > 2.0 + 1.96 * 0.4
+    assert math.isclose(low * high, 4.0)                    # symmetric on the log scale
+    assert all(math.isnan(v) for v in va.log_interval(0.0, 0.1))
+
+
+def test_growth_estimate():
+    # One stratum: half the points built at the start, all built at the end -> growth +100 %
+    points = pd.DataFrame({"stratum": ["a"] * 4, "b0": [1, 1, 0, 0], "b1": [1, 1, 1, 1]})
+    g = va.growth_estimate(points, {"a": 1.0}, "b0", "b1")
+    assert g["estimate"] == 1.0 and g["low95"] < 1.0 < g["high95"]
+
+
+def test_growth_difference():
+    a = {"estimate": 1.0, "log_se": 0.1}                     # factor 2
+    b = {"estimate": 0.0, "log_se": 0.1}                     # factor 1
+    d = va.growth_difference(a, b)
+    assert math.isclose(d["factor_ratio"], 2.0) and d["established"]
+    assert d["low95"] > 1.0
+    assert not va.growth_difference(a, {"estimate": 0.8, "log_se": 0.3})["established"]

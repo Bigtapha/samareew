@@ -1,6 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
-import { catalogue, cities, manifest } from "../lib/outputs";
+import { catalogue, cities, manifest, validation } from "../lib/outputs";
 import { value } from "../lib/facts";
 import { formatValue } from "../lib/format";
 import { CITY_COLORS } from "../config";
@@ -12,6 +12,12 @@ const stats = cities.map((c) => {
   const b = value("built_area_ha", c.slug, last)!;
   return { ...c, start: a, end: b, growth: Math.round(100 * (b / a - 1)) };
 });
+// Growth corrected by the validation, with its 95 % interval (step 5)
+const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(100 * x))}\u202f%`;
+const correctedGrowth = (slug: string) => {
+  const g = validation.cities[slug].growth.corrected;
+  return `${signedPct(g.estimate)} (de ${signedPct(g.low95)} à ${signedPct(g.high95)})`;
+};
 const total = (k: "start" | "end") => stats.reduce((s, c) => s + c[k], 0);
 
 // Footprints at the same scale: each picture's width is proportional to the ground it covers.
@@ -66,7 +72,8 @@ const span = `${spanWords[last - first] ?? last - first} ans`;
         <a href={`${base}/villes/${c.slug}`}>
           <strong>{c.name}</strong>
           <span class="big">+{c.growth}&#8239;%</span>
-          <span class="muted small">de bâti entre {first} et {last}, {formatValue(c.end, "ha")} ha en {last}</span>
+          <span class="muted small">de bâti entre {first} et {last} sur la carte, {formatValue(c.end, "ha")} ha en {last}</span>
+          <span class="muted small">corrigée par la validation : {correctedGrowth(c.slug)}</span>
         </a>
       </li>
     ))}

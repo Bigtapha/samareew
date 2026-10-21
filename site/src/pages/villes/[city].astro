@@ -78,18 +78,22 @@ const m2a = value("built_m2_per_capita", city.slug, first);
 const m2b = value("built_m2_per_capita", city.slug, last);
 const sdg = value("sdg_11_3_1", city.slug, last, first);
 const n = (v: number, unit = "ha") => formatValue(v, unit);
+const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${Math.round(Math.abs(100 * x))}\u202f%`;
+const g = v.growth.corrected;
+const correctedGrowth = `${signedPct(g.estimate)} (de ${signedPct(g.low95)} à ${signedPct(g.high95)})`;
+// SDG 11.3.1 with the corrected growth: is it above 1 even at the low bound?
+const sdgLow = pop0 && pop1 ? Math.log(1 + g.low95) / Math.log(pop1 / pop0) : undefined;
 const people = (v: number) => `${formatValue(v / 1e6, "ratio")}\u202fmillion${v >= 2e6 ? "s" : ""}`;
 const figures = [
   { label: `Surface bâtie ${last}`, value: `${n(built2025)} ha`,
     note: `corrigée par la validation : ${n(corrected.estimate)} ± ${n(corrected.margin95)} ha` },
   { label: `Croissance ${first}–${last}`, value: `+${growthPct}\u202f%`,
-    note: startOverestimated
-      ? `de ${n(built2016)} ha ; le bâti ${first} est surestimé, la croissance réelle est probablement plus forte`
-      : `de ${n(built2016)} ha en ${first}` },
+    note: `carte, de ${n(built2016)} ha en ${first} ; corrigée par la validation : ${correctedGrowth}${startOverestimated ? `, le bâti ${first} de la carte étant surestimé` : ""}` },
   { label: "Nouveau bâti par an", value: `${n(sumNew(first + 1, last) / (last - first))} ha`, note: `moyenne ${first + 1}–${last}` },
   ...(pop0 && pop1 ? [{ label: `Population ${last}`, value: people(pop1), note: `${people(pop0)} en ${first} (WorldPop, modélisée)` }] : []),
   ...(m2a && m2b ? [{ label: "Surface bâtie par habitant", value: `${n(m2b, "m²")} m²`, note: `${n(m2a, "m²")} m² en ${first}` }] : []),
-  ...(sdg ? [{ label: "Bâti / population (ODD 11.3.1)", value: formatValue(sdg, "ratio"), note: sdg > 1 ? "le bâti s'étend plus vite que la population" : "la population croît plus vite que le bâti" }] : []),
+  ...(sdg ? [{ label: "Bâti / population (ODD 11.3.1)", value: formatValue(sdg, "ratio"), note: (sdg > 1 ? "le bâti s'étend plus vite que la population" : "la population croît plus vite que le bâti")
+      + (sdgLow === undefined ? "" : sdgLow > 1 ? ", même avec la borne basse de la croissance corrigée" : ` ; pas établi avec la borne basse de la croissance corrigée (${formatValue(sdgLow, "ratio")})`) }] : []),
 ];
 
 // --- Charts (static SVG)
@@ -159,7 +163,7 @@ const json = JSON.stringify(data).replace(/</g, "\\u003c");
   <h1>{city.name}</h1>
   <p class="muted lead">
     De {first} à {last}, la surface bâtie de {city.name} est passée de {n(built2016)} à {n(built2025)} ha
-    (+{growthPct}&#8239;%). Zone d'étude : l'agglomération telle que la voit GHSL en 2025, plus 2 km, la même règle
+    (+{growthPct}&#8239;% sur la carte ; {correctedGrowth} une fois corrigée par la validation). Zone d'étude : l'agglomération telle que la voit GHSL en 2025, plus 2 km, la même règle
     pour les quatre villes.
   </p>
   {city.slug === "touba" && (

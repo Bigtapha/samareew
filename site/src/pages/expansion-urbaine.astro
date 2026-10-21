@@ -24,17 +24,31 @@ const built = cities.map((c) => ({
 const total0 = built.reduce((s, b) => s + b.start, 0);
 const total1 = built.reduce((s, b) => s + b.end, 0);
 
-// 2. Fastest in proportion, largest in area
-const byRate = [...built].sort((a, b) => b.end / b.start - a.end / a.start);
+// 2. Fastest in proportion, largest in area. A city is called the fastest only when the
+// validation establishes it (corrected growth faster than every other city at 95 %, step 5).
 const byArea = [...built].sort((a, b) => (b.end - b.start) - (a.end - a.start));
 const rate = (b: { start: number; end: number }) => 100 * (b.end / b.start - 1);
-const fastest = byRate.filter((b) => rate(b) >= rate(byRate[0]) - 5);   // within 5 points: a tie
 const largest = byArea[0];
+const growthOf = (slug: string) => validation.cities[slug].growth;
+const signedPct = (x: number) => `${x >= 0 ? "+" : "−"}${pct(Math.abs(100 * x))}`;
+const corrected = (g: any) => `${signedPct(g.corrected.estimate)} (${signedPct(g.corrected.low95)} à ${signedPct(g.corrected.high95)})`;
+const fasterThan = (a: string, b: string) =>
+  (validation.growth_comparison as any[]).some((d) => d.established &&
+    ((d.cities[0] === a && d.cities[1] === b && d.factor_ratio > 1) || (d.cities[0] === b && d.cities[1] === a && d.factor_ratio < 1)));
+const leader = cities.find((c) => cities.every((o) => o.slug === c.slug || fasterThan(c.slug, o.slug)))?.slug;
 const biggest = [...built].sort((a, b) => b.end - a.end)[0];
 
 // 3. Land consumption against population (SDG 11.3.1 over the whole period)
 const sdg = cities.map((c) => ({ city: c.slug, v: value("sdg_11_3_1", c.slug, last, first)! }));
-const allAbove = sdg.every((s) => s.v > 1);
+// Same ratio with the corrected growth of the built-up area and its 95 % bounds
+const popRate = (slug: string) => Math.log(value("population", slug, last)! / value("population", slug, first)!);
+const sdgCorrected = cities.map((c) => {
+  const g = validation.cities[c.slug].growth.corrected;
+  const r = (x: number) => Math.log(1 + x) / popRate(c.slug);
+  return { city: c.slug, v: r(g.estimate), low: r(g.low95), high: r(g.high95) };
+});
+const notEstablished = sdgCorrected.filter((s) => s.low <= 1).map((s) => s.city);
+const allAbove = sdg.every((s) => s.v > 1) && sdgCorrected.every((s) => s.v > 1);
 const sdgSorted = [...sdg].sort((a, b) => a.v - b.v);
 const m2 = cities.map((c) => ({
   city: c.slug, start: value("built_m2_per_capita", c.slug, first)!, end: value("built_m2_per_capita", c.slug, last)!,
@@ -60,17 +74,19 @@ const falseDetections = (cover.vegetation?.estimate ?? 0) + (cover.bare_soil?.es
 const keyPoints = [
   {
     title: `Les quatre villes ont gagné ${ha(total1 - total0)} ha de bâti en ${span}`,
-    text: `De ${ha(total0)} ha en ${first} à ${ha(total1)} ha en ${last} (+${pct(100 * (total1 / total0 - 1))}), soit en moyenne ${ha((total1 - total0) / (last - first))} ha par an.`,
+    text: `De ${ha(total0)} ha en ${first} à ${ha(total1)} ha en ${last} (+${pct(100 * (total1 / total0 - 1))}), soit en moyenne ${ha((total1 - total0) / (last - first))} ha par an. Corrigée par la validation, la croissance est plus forte : ${corrected(nat.growth)}.`,
     href: "/graphiques/built_area_ha",
   },
   {
-    title: `${listNames(fastest.map((b) => b.city))} grandi${fastest.length > 1 ? "ssent" : "t"} le plus vite, ${name.get(largest.city)} gagne le plus de surface`,
-    text: `${byRate.map((b) => `${name.get(b.city)} +${pct(rate(b))}`).join(", ")} entre ${first} et ${last}. ${name.get(largest.city)} ajoute à elle seule ${ha(largest.end - largest.start)} ha, ${pct(100 * (largest.end - largest.start) / (total1 - total0))} du nouveau bâti des quatre villes.`,
+    title: leader
+      ? `${name.get(leader)} grandit le plus vite, ${name.get(largest.city)} gagne le plus de surface`
+      : `${name.get(largest.city)} gagne le plus de surface ; les rythmes de croissance ne se départagent pas`,
+    text: `Sur la carte, entre ${first} et ${last} : ${built.map((b) => `${name.get(b.city)} +${pct(rate(b))}`).join(", ")}. Corrigée par la validation, avec sa marge à 95 % : ${cities.map((c) => `${c.name} ${corrected(growthOf(c.slug))}`).join(", ")}. ${leader ? "" : "Les marges se recouvrent : aucune ville n'est établie comme plus rapide qu'une autre. "}${name.get(largest.city)} ajoute à elle seule ${ha(largest.end - largest.start)} ha, ${pct(100 * (largest.end - largest.start) / (total1 - total0))} du nouveau bâti des quatre villes.`,
     href: "/graphiques/growth_index",
   },
   {
     title: allAbove ? "Partout, le bâti s'étend plus vite que la population" : "Le bâti s'étend plus vite que la population dans certaines villes",
-    text: `Le rapport entre la croissance du bâti et celle de la population (ODD 11.3.1) va de ${formatValue(sdgSorted[0].v, "ratio")} (${name.get(sdgSorted[0].city)}) à ${formatValue(sdgSorted.at(-1)!.v, "ratio")} (${name.get(sdgSorted.at(-1)!.city)}). La surface bâtie par habitant augmente : ${m2.map((m) => `${name.get(m.city)} ${formatValue(m.start, "m²/hab.")} → ${formatValue(m.end, "m²/hab.")} m²`).join(", ")}.`,
+    text: `Le rapport entre la croissance du bâti et celle de la population (ODD 11.3.1) va de ${formatValue(sdgSorted[0].v, "ratio")} (${name.get(sdgSorted[0].city)}) à ${formatValue(sdgSorted.at(-1)!.v, "ratio")} (${name.get(sdgSorted.at(-1)!.city)}). La surface bâtie par habitant augmente : ${m2.map((m) => `${name.get(m.city)} ${formatValue(m.start, "m²/hab.")} → ${formatValue(m.end, "m²/hab.")} m²`).join(", ")}. Avec la croissance corrigée par la validation, le rapport va de ${formatValue(Math.min(...sdgCorrected.map((s) => s.v)), "ratio")} à ${formatValue(Math.max(...sdgCorrected.map((s) => s.v)), "ratio")}${notEstablished.length === 0 ? ", au-dessus de 1 même à la borne basse de sa marge" : notEstablished.length < cities.length ? ` ; il reste au-dessus de 1 à la borne basse de sa marge, sauf à ${listNames(notEstablished)}` : ""}.`,
     href: "/graphiques/sdg_11_3_1",
   },
   {
@@ -126,7 +142,8 @@ const typeLabels = ["Densification", "Extension", "Saut"];
     <h2 id="graphiques">Graphiques</h2>
     <div class="charts">
       <StaticChart kind="line" rows={cityRows("growth_index")} unit="indice"
-        title={`${listNames(fastest.map((b) => b.city))} grandi${fastest.length > 1 ? "ssent" : "t"} le plus vite`} caption={`Croissance du bâti, ${first} = 100`}
+        title={leader ? `${name.get(leader)} grandit le plus vite` : `Les quatre villes grandissent de ${pct(Math.min(...built.map(rate)))} à ${pct(Math.max(...built.map(rate)))} sur la carte`}
+        caption={`Croissance du bâti, ${first} = 100 (valeurs de la carte ; croissance corrigée et marges plus bas, « Jusqu'où s'y fier ? »)`}
         href="/graphiques/growth_index" />
       <StaticChart kind="line" rows={cityRows("built_area_ha")} unit="ha"
         title={`${name.get(biggest.city)} reste de loin la plus grande`} caption="Surface bâtie, en hectares"
@@ -176,15 +193,21 @@ const typeLabels = ["Densification", "Extension", "Saut"];
     <div class="table-scroll">
       <table>
         <caption class="visually-hidden">Surface bâtie {last} : carte et surface corrigée</caption>
-        <thead><tr><th scope="col">Ville</th><th scope="col">Carte (ha)</th><th scope="col">Corrigée (ha)</th></tr></thead>
+        <thead><tr><th scope="col">Ville</th><th scope="col">Surface {last} : carte (ha)</th><th scope="col">Corrigée (ha)</th><th scope="col">Croissance {first}–{last} : carte</th><th scope="col">Corrigée (marge à 95 %)</th></tr></thead>
         <tbody>
           {cities.map((c) => {
             const b = validation.cities[c.slug].built_area[String(last)];
-            return <tr><th scope="row">{c.name}</th><td>{formatValue(b.mapped_ha, "ha")}</td><td>{formatValue(b.corrected_ha.estimate, "ha")} ± {formatValue(b.corrected_ha.margin95, "ha")}</td></tr>;
+            const g = growthOf(c.slug);
+            return <tr><th scope="row">{c.name}</th><td>{formatValue(b.mapped_ha, "ha")}</td><td>{formatValue(b.corrected_ha.estimate, "ha")} ± {formatValue(b.corrected_ha.margin95, "ha")}</td><td>{signedPct(g.mapped)}</td><td>{corrected(g)}</td></tr>;
           })}
         </tbody>
       </table>
     </div>
+    <p>
+      La croissance corrigée {leader ? "établit" : "ne permet pas de classer les villes :"} {leader
+        ? `que ${name.get(leader)} grandit plus vite que les trois autres.`
+        : "ses marges se recouvrent pour toutes les paires de villes. Les écarts de croissance de la carte ne sont donc pas à commenter ; ce qui tient, c'est que le bâti des quatre villes croît plus vite que leur population."}
+    </p>
     <p class="small"><a href={`${base}/donnees#validation`}>Méthode, validation et limites</a></p>
   </section>
 </Base>
@@ -199,6 +222,6 @@ const typeLabels = ["Densification", "Extension", "Saut"];
   .key-points p { margin: 0 0 0.35rem; max-width: 46rem; }
   .charts { display: grid; gap: 0.5rem 2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
   section > p { max-width: 46rem; }
-  .table-scroll { max-width: 34rem; margin-bottom: 0.5rem; }
+  .table-scroll { max-width: 46rem; margin-bottom: 0.5rem; }
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>

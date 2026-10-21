@@ -50,6 +50,11 @@ _NEW_BUILT_RELIABILITY = ("Le nouveau bâti est en avance sur les toits : la moi
 _GROWTH_TYPE_RELIABILITY = ("Indicatif : seuls 45 % des points de saut sont vraiment du nouveau "
                             "bâti (5 sur 16 à Thiès, où les autres sont surtout de la végétation), "
                             "contre 48 % pour la densification et 69 % pour l'extension.")
+_GROWTH_RELIABILITY = ("Croissance 2016-2025 corrigée par la validation, avec sa marge à 95 % : "
+                       "Dakar +71 % (+37 à +112), Touba +86 % (+42 à +144), Thiès +66 % (+21 à "
+                       "+126), Mbour +159 % (+76 à +279), pour +50, +71, +83 et +80 % sur la carte. "
+                       "Aucun écart entre deux villes n'est établi : les villes ne sont pas classées "
+                       "par leur rythme de croissance.")
 _POP_RELIABILITY = ("Population modélisée (projection répartie sur le bâti), pas un "
                     "recensement : bonne à l'échelle de la ville (97 % du recensement 2023 sur "
                     "les communes de Dakar), publiée seulement pour les villes entières.")
@@ -86,7 +91,7 @@ INDICATORS = {
         "period": "year",
         "sources": ["samareew"],
         "method": "METHODOLOGIE.md#11",
-        "reliability": _MAP_RELIABILITY,
+        "reliability": _MAP_RELIABILITY + " " + _GROWTH_RELIABILITY,
     },
     "built_share_pct": {
         "title": "Part de la surface bâtie",
@@ -180,7 +185,10 @@ INDICATORS = {
         "period": "period",
         "sources": ["samareew", "worldpop"],
         "method": "METHODOLOGIE.md#12",
-        "reliability": _MAP_RELIABILITY + " " + _POP_RELIABILITY,
+        "reliability": " ".join([_MAP_RELIABILITY, _GROWTH_RELIABILITY,
+                                 "Avec la croissance corrigée, le rapport dépasse 1 dans les quatre "
+                                 "villes, même à la borne basse de sa marge, sauf à Thiès (0,9).",
+                                 _POP_RELIABILITY]),
     },
     "census_population": {
         "title": "Population recensée en 2023",
