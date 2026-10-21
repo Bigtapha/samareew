@@ -24,6 +24,7 @@ read it first.
 | J4 — National validation (480 photo-interpreted points) | Done |
 | J5 — Website v1 | Done: all pages of ROADMAP §4.5 in `site/` (home with the cities at the same scale, theme page, one chart page per indicator, 4 city fact sheets, data & method, about), tested on mobile and slow connections |
 | J6 — Publication | Done (13/10/2026): repository public, release `v1.0.0` published and archived on Zenodo (code and data), site online at https://bigtapha.github.io/samareew/ |
+| v1.0.1 — Uncertainty of the v1 results | Done (21/10/2026): corrected growth with its 95 % margin (the cities are not ranked), sensitivity of the temporal filter, SDG 11.3.1 against the census; release `v1.0.1` on GitHub and Zenodo |
 
 **Results so far** (2016 → 2025, details and limits in [METHODOLOGIE.md](METHODOLOGIE.md)):
 
@@ -111,14 +112,16 @@ cities, yearly update, retraining of the model).
   tables, GeoTIFF rasters by city (year of urbanisation, growth types, 10 m), boundaries,
   validation sample with its labels, cross-check, with a README and the method notes.
   The same archive is kept on Zenodo: [10.5281/zenodo.23338529](https://doi.org/10.5281/zenodo.23338529) (all versions; version
-  1.0.0 is [10.5281/zenodo.23338530](https://doi.org/10.5281/zenodo.23338530)).
+  1.0.1 is [10.5281/zenodo.23537896](https://doi.org/10.5281/zenodo.23537896), version 1.0.0
+  [10.5281/zenodo.23338530](https://doi.org/10.5281/zenodo.23338530)).
 - **How to cite** (see also [`CITATION.cff`](CITATION.cff), or "Cite this repository" on GitHub):
 
   > Cisse, M. (2026). *SamaReew: urban expansion in Senegalese cities, 2016–2025* (version 1.0.1)
   > [Data and code]. Zenodo. https://doi.org/10.5281/zenodo.23337573. Data CC BY 4.0, code MIT.
 
   The DOI [10.5281/zenodo.23337573](https://doi.org/10.5281/zenodo.23337573) always points to
-  the latest version; version 1.0.0 is [10.5281/zenodo.23337574](https://doi.org/10.5281/zenodo.23337574).
+  the latest version; version 1.0.1 is [10.5281/zenodo.23537715](https://doi.org/10.5281/zenodo.23537715),
+  version 1.0.0 [10.5281/zenodo.23337574](https://doi.org/10.5281/zenodo.23337574).
   It covers the code, the method and the tables; the data archive with the rasters has its
   own DOI (above).
 
