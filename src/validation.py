@@ -231,3 +231,23 @@ def binomial_margin(k: int, n: int) -> float:
         return float("nan")
     p = k / n
     return float(Z95 * np.sqrt(p * (1 - p) / (n - 1)))
+
+
+def map_measures(points: pd.DataFrame, weights: dict) -> dict:
+    """Main accuracies of one map against the labelled points (95 % margins), to compare maps.
+
+    The sample may have been drawn from another map: the strata stay a fixed partition of the
+    area, so the stratified estimators remain unbiased (Stehman, 2014). ``points`` columns:
+    stratum, map_class, map_year, ref_class, ref_start, ref_end, year_built (NaN if unread).
+    """
+    r = accuracy_report(points, weights, 1.0)
+    end = date_accuracy(points, weights)["end"]
+    both_new = points[(points["map_class"] == NEW_BUILT) & (points["ref_class"] == NEW_BUILT)
+                      & points["year_built"].notna()]
+    within = int(((both_new["map_year"] - both_new["year_built"]).abs() <= 1).sum())
+    return {"overall_accuracy": r["overall_accuracy"],
+            "built_accuracy_end": end,
+            "new_built_users": r["users_accuracy"]["new_built"],
+            "new_built_producers": r["producers_accuracy"]["new_built"],
+            "year_within_one": {"estimate": round(within / len(both_new), 3) if len(both_new) else None,
+                                "n": int(len(both_new))}}

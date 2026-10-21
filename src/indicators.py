@@ -142,3 +142,14 @@ def sdg_11_3_1(built_start: float, built_end: float, pop_start: float, pop_end: 
     if min(built_start, built_end, pop_start, pop_end) <= 0 or pop_end <= pop_start:
         return float("nan")
     return float(np.log(built_end / built_start) / np.log(pop_end / pop_start))
+
+
+def sdg_11_3_1_annual(built_start: float, built_end: float, built_years: float,
+                      pop_start: float, pop_end: float, pop_years: float) -> float:
+    """SDG 11.3.1 when the built-up area and the population are known over different periods
+    (e.g. the map from 2016, the census from 2013): ratio of the annual rates, assuming each
+    one is constant over its period."""
+    if min(built_start, built_end, pop_start, pop_end) <= 0 or pop_end <= pop_start:
+        return float("nan")
+    return float((np.log(built_end / built_start) / built_years)
+                 / (np.log(pop_end / pop_start) / pop_years))

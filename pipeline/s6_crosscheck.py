@@ -13,12 +13,14 @@ Inputs : outputs/cities/<city>/urbanisation_year.tif (step 3), data/worldpop_by_
 Outputs: outputs/crosscheck/built_area_sources.csv   area per city, source and year
          outputs/crosscheck/agreement.csv            agreement measures per city
          outputs/crosscheck/population_census.csv    WorldPop and census per commune
+         outputs/crosscheck/sdg_census.csv           SDG 11.3.1 with the census or WorldPop, by city
          data/cities/<city>/reference_roofs.tif, ghsl_built_surface.json (downloads)
          data/j3_crosscheck.png                      growth of the three sources (control)
 
 Usage
     python -m pipeline.s6_crosscheck              # uses cached downloads when present
     python -m pipeline.s6_crosscheck --refresh    # download the references again
+    python -m pipeline.s6_crosscheck --census     # only WorldPop and SDG 11.3.1 against the census
 """
 import argparse
 import json
@@ -164,6 +166,39 @@ def census_check() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def census_sdg(census: pd.DataFrame) -> pd.DataFrame:
+    """SDG 11.3.1 on the communes counted in both censuses: population growth from the census
+    (2013-2023) or from WorldPop (2016-2023), built-up growth from the map (2016-2023).
+    WorldPop spreads the population over a satellite map of the built-up area, so its growth
+    may follow the built-up area: the census tells whether the ratio is partly circular."""
+    first, last = cfg.PUBLISHED_YEARS[0], cfg.CENSUS_YEARS[-1]
+    table = pd.read_csv(cfg.INDICATORS_CSV)
+    built = table[(table["indicator"] == "built_area_ha") & (table["unit_type"] == "commune")]
+    built = built.set_index(["city", "unit", "year"])["value"]
+    c = census.dropna(subset=["census_2013", "census_2023", f"worldpop_{first}", "worldpop_2023"]).copy()
+    c["built_start"] = [built.get((ci, co, first), np.nan) for ci, co in zip(c["city"], c["commune"])]
+    c["built_end"] = [built.get((ci, co, last), np.nan) for ci, co in zip(c["city"], c["commune"])]
+    rows = []
+    for city, g in c.groupby("city", sort=False):
+        s = g[["census_2013", "census_2023", f"worldpop_{first}", "worldpop_2023",
+               "built_start", "built_end"]].sum()
+        n_census, n_map = cfg.CENSUS_YEARS[-1] - cfg.CENSUS_YEARS[0], last - first
+        rows.append({
+            "city": city, "communes": len(g),
+            "census_2013": int(s["census_2013"]), "census_2023": int(s["census_2023"]),
+            f"worldpop_{first}": round(s[f"worldpop_{first}"]), "worldpop_2023": round(s["worldpop_2023"]),
+            f"built_{first}_ha": round(s["built_start"]), f"built_{last}_ha": round(s["built_end"]),
+            "census_annual_growth_pct": round(cc.annual_growth_pct(s["census_2013"], s["census_2023"], n_census), 2),
+            "worldpop_annual_growth_pct": round(cc.annual_growth_pct(s[f"worldpop_{first}"], s["worldpop_2023"], n_map), 2),
+            "built_annual_growth_pct": round(cc.annual_growth_pct(s["built_start"], s["built_end"], n_map), 2),
+            "sdg_11_3_1_census": round(ind.sdg_11_3_1_annual(s["built_start"], s["built_end"], n_map,
+                                                             s["census_2013"], s["census_2023"], n_census), 2),
+            "sdg_11_3_1_worldpop": round(ind.sdg_11_3_1(s["built_start"], s["built_end"],
+                                                        s[f"worldpop_{first}"], s["worldpop_2023"]), 2),
+        })
+    return pd.DataFrame(rows)
+
+
 def growth_chart(areas: pd.DataFrame, path) -> None:
     styles = {"samareew": ("SamaReew (pixels bâtis)", "#d95f0e", "-"),
               "open_buildings": ("Open Buildings (toits)", "#2b8cbe", "-"),
@@ -187,6 +222,19 @@ def growth_chart(areas: pd.DataFrame, path) -> None:
     plt.close(fig)
 
 
+def census_outputs() -> None:
+    census = census_check()
+    census.to_csv(cfg.CROSSCHECK_DIR / "population_census.csv", index=False)
+    by_city = census.groupby("city", sort=False).agg(
+        communes=("commune", "size"), census_2023=("census_2023", "sum"),
+        worldpop_2023=("worldpop_2023", "sum"), median_ratio=("worldpop_to_census", "median"))
+    by_city["ratio_of_sums"] = (by_city["worldpop_2023"] / by_city["census_2023"]).round(3)
+    print(by_city.to_string())
+    sdg = census_sdg(census)
+    sdg.to_csv(cfg.CROSSCHECK_DIR / "sdg_census.csv", index=False)
+    print(sdg.to_string(index=False))
+
+
 def main(refresh: bool):
     missing = [c for c in cfg.CITIES if not (cfg.city_output_dir(c) / cfg.FIRST_YEAR_TIF).exists()]
     if missing:
@@ -204,13 +252,7 @@ def main(refresh: bool):
     agreement.to_csv(cfg.CROSSCHECK_DIR / "agreement.csv", index=False)
     growth_chart(areas, cfg.DATA_DIR / "j3_crosscheck.png")
 
-    census = census_check()
-    census.to_csv(cfg.CROSSCHECK_DIR / "population_census.csv", index=False)
-    by_city = census.groupby("city", sort=False).agg(
-        communes=("commune", "size"), census_2023=("census_2023", "sum"),
-        worldpop_2023=("worldpop_2023", "sum"), median_ratio=("worldpop_to_census", "median"))
-    by_city["ratio_of_sums"] = (by_city["worldpop_2023"] / by_city["census_2023"]).round(3)
-    print(by_city.to_string())
+    census_outputs()
     print(agreement.pivot_table(index=["metric", "reference", "group", "year"], columns="city",
                                 values="value").round(2).to_string())
 
@@ -219,4 +261,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--refresh", action="store_true", help="download the references again")
-    main(parser.parse_args().refresh)
+    parser.add_argument("--census", action="store_true",
+                        help="only the population checks against the census (no rasters)")
+    args = parser.parse_args()
+    if args.census:
+        census_outputs()
+    else:
+        main(args.refresh)

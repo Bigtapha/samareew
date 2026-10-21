@@ -130,3 +130,19 @@ def test_growth_difference():
     assert math.isclose(d["factor_ratio"], 2.0) and d["established"]
     assert d["low95"] > 1.0
     assert not va.growth_difference(a, {"estimate": 0.8, "log_se": 0.3})["established"]
+
+
+def test_map_measures():
+    # Two strata; the map is right everywhere except one new built-up point that is not built
+    points = pd.DataFrame({
+        "stratum": ["a", "a", "b", "b"],
+        "map_class": [va.NOT_BUILT, va.NOT_BUILT, va.NEW_BUILT, va.NEW_BUILT],
+        "map_year": [0, 0, 2020, 2022],
+        "ref_class": [va.NOT_BUILT, va.NOT_BUILT, va.NEW_BUILT, va.NOT_BUILT],
+        "ref_start": [0, 0, 0, 0], "ref_end": [0, 0, 1, 0],
+        "year_built": [np.nan, np.nan, 2021, np.nan],
+    })
+    m = va.map_measures(points, {"a": 0.8, "b": 0.2})
+    assert math.isclose(m["overall_accuracy"]["estimate"], 0.9)
+    assert math.isclose(m["new_built_users"]["estimate"], 0.5)
+    assert m["year_within_one"] == {"estimate": 1.0, "n": 1}

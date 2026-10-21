@@ -35,6 +35,12 @@ def test_next_valid_year_must_be_built(series, expected):
     assert pp.urbanisation_year(pixel(series), years, 0.8)[0, 0] == expected
 
 
+def test_next_year_condition_can_be_switched_off():
+    years = list(range(2016, 2026))
+    series = [0, 1, 0, 1, 1, 1, 1, 1, 1, 1]                  # dry-year false detection in 2017
+    assert pp.urbanisation_year(pixel(series), years, 0.8, confirm_next=False)[0, 0] == 2017
+
+
 def test_wrong_number_of_bands():
     with pytest.raises(ValueError):
         pp.urbanisation_year(pixel([0, 1]), YEARS, 0.8)

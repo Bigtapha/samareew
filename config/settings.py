@@ -171,6 +171,10 @@ VALIDATION_COVER_CLASSES = {
 }
 # Covers counted as land being urbanised in the tolerant accuracy (the strict one is official)
 VALIDATION_URBANISING = ("partly_built", "construction", "subdivision")
+# Sensitivity of the temporal filter (step 5, --filter-sensitivity): each persistence ratio,
+# with and without the next-year condition, is evaluated on the same labelled points.
+# Diagnostic only: choosing a setting from these points would make them no longer independent.
+FILTER_SENSITIVITY_RATIOS = (0.6, 0.7, 0.8, 0.9, 1.0)
 
 # --- Site data (step 7, ROADMAP §4.1) -----------------------------------
 # Map layers as raster tiles (PNG with a palette, Web Mercator), one PMTiles file per layer
@@ -267,6 +271,7 @@ VALIDATION_KML = VALIDATION_DIR / "points.kml"            # points and their 10 
 VALIDATION_REPORT_JSON = VALIDATION_DIR / "accuracy.json"
 VALIDATION_COVER_CSV = VALIDATION_DIR / "cover_2025.csv"  # second reading: cover of the points not built at the end
 VALIDATION_COVER_KML = VALIDATION_DIR / "cover_2025.kml"  # the same points, for Google Earth Pro
+VALIDATION_FILTER_CSV = VALIDATION_DIR / "filter_sensitivity.csv"  # accuracy of each filter setting
 
 # Site data (step 7), in outputs/site/: everything the site reads besides outputs/tables/
 SITE_DATA_DIR = OUTPUT_DIR / "site"

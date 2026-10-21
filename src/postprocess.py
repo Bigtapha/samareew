@@ -6,7 +6,8 @@ NODATA_IN = 255   # no clear Sentinel-2 observation for that year
 NODATA_OUT = -1   # never observed
 
 
-def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float) -> np.ndarray:
+def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float,
+                      confirm_next: bool = True) -> np.ndarray:
     """Year in which each pixel became built-up, with a temporal consistency rule.
 
     Parameters
@@ -18,6 +19,8 @@ def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float) 
         and if its most recent valid observation is built (urbanisation is considered
         irreversible). The next-year condition stops an isolated false detection in a
         dry year from dating real, later construction too early.
+    confirm_next : apply the next-year condition (True in the published maps; False only
+        to measure its effect, METHODOLOGIE §14.4).
 
     Returns
     -------
@@ -47,7 +50,9 @@ def urbanisation_year(stack: np.ndarray, years: list, persistence_ratio: float) 
         status = np.where(valid[i], built[i], status)
 
     persistent = built & (built_after >= persistence_ratio * valid_after)
-    candidate = persistent & next_built & last_status[np.newaxis]
+    candidate = persistent & last_status[np.newaxis]
+    if confirm_next:
+        candidate &= next_built
 
     has_year = candidate.any(axis=0)
     first_index = candidate.argmax(axis=0)

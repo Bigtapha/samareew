@@ -134,3 +134,10 @@ def test_sdg_11_3_1():
     assert ind.sdg_11_3_1(100, 400, 1000, 2000) == pytest.approx(2)
     assert math.isnan(ind.sdg_11_3_1(100, 200, 1000, 900))   # population falling
     assert math.isnan(ind.sdg_11_3_1(0, 200, 1000, 2000))
+
+
+def test_sdg_11_3_1_annual():
+    # Same annual rates over different periods give the same ratio as sdg_11_3_1
+    assert math.isclose(ind.sdg_11_3_1_annual(100, 100 * np.exp(0.7), 7, 50, 50 * np.exp(0.5), 10), 2.0)
+    assert math.isclose(ind.sdg_11_3_1_annual(1, 2, 5, 1, 2, 5), ind.sdg_11_3_1(1, 2, 1, 2))
+    assert math.isnan(ind.sdg_11_3_1_annual(1, 2, 5, 2, 2, 5))

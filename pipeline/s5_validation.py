@@ -8,6 +8,9 @@
 3. Without ``--draw``, the labels are compared with the map: area-weighted accuracies,
    corrected areas and their 95 % margins, by city and for the four cities together
    (src/validation.py, METHODOLOGIE §14).
+5. ``--filter-sensitivity`` runs the temporal filter of step 3 again with other settings
+   (config.settings FILTER_SENSITIVITY_RATIOS, with and without the next-year condition) and
+   evaluates each resulting map on the same labelled points.
 4. ``--cover`` prepares a second blind reading of the points labelled not built at the end:
    what covers them (config.settings VALIDATION_COVER_CLASSES). Once it is complete, the
    report adds a tolerant accuracy where land being urbanised counts as built.
@@ -20,12 +23,14 @@ Outputs: outputs/validation/labels.csv      sheet to fill (id, city, lon, lat, e
          outputs/validation/accuracy.json   accuracy report (after labelling)
          outputs/validation/cover_2025.csv  second reading sheet (--cover)
          outputs/validation/cover_2025.kml  its points, for Google Earth Pro
+         outputs/validation/filter_sensitivity.csv  accuracy of each filter setting (--filter-sensitivity)
          data/j4_sample_<city>.png          control map of the sample
 
 Usage
     python -m pipeline.s5_validation --draw          # once; refuses to erase labels already entered
     python -m pipeline.s5_validation --cover         # once, after labelling: second reading sheet
     python -m pipeline.s5_validation                 # accuracy from the labels entered so far
+    python -m pipeline.s5_validation --filter-sensitivity   # temporal filter settings, on the labels
 """
 import argparse
 import json
@@ -43,6 +48,7 @@ import rasterio
 from rasterio.warp import transform as warp_transform
 
 import config as cfg
+from src import postprocess as pp
 from src import validation as va
 
 START, END = cfg.VALIDATION_PERIOD
@@ -364,12 +370,98 @@ def report() -> None:
     cfg.VALIDATION_REPORT_JSON.write_text(json.dumps(result, indent=2, ensure_ascii=False))
 
 
+# --- 5. Sensitivity of the temporal filter ----------------------------------------------
+
+def filter_variants() -> list:
+    return [(ratio, confirm) for confirm in (True, False) for ratio in cfg.FILTER_SENSITIVITY_RATIOS]
+
+
+def variant_maps(city: str, points: pd.DataFrame, block_rows: int = 512) -> tuple:
+    """For each filter setting: urbanisation year at the points, and mapped built-up areas
+    (ha) at the start and the end of the validation period. The stack is read by blocks of
+    rows: the filter needs several full-size integer arrays (2 GB each for Dakar)."""
+    variants = filter_variants()
+    rows, cols = points["row"].to_numpy(), points["col"].to_numpy()
+    at_points = {v: np.zeros(len(points), dtype=np.int16) for v in variants}
+    counts = {v: [0, 0] for v in variants}
+    with rasterio.open(cfg.city_data_dir(city) / cfg.BUILT_STACK_TIF) as src:
+        pixel_ha = abs(src.transform.a * src.transform.e) / 10_000
+        for r0 in range(0, src.height, block_rows):
+            window = rasterio.windows.Window(0, r0, src.width, min(block_rows, src.height - r0))
+            stack = src.read(window=window)
+            inside = (rows >= r0) & (rows < r0 + window.height)
+            for v in variants:
+                first_year = pp.urbanisation_year(stack, cfg.YEARS, v[0], confirm_next=v[1])
+                first_year[first_year > cfg.PUBLISHED_YEARS[-1]] = 0      # same rule as step 3
+                at_points[v][inside] = first_year[rows[inside] - r0, cols[inside]]
+                built = first_year > 0
+                counts[v][0] += int((built & (first_year <= START)).sum())
+                counts[v][1] += int((built & (first_year <= END)).sum())
+    areas = {v: (c[0] * pixel_ha, c[1] * pixel_ha) for v, c in counts.items()}
+    return at_points, areas
+
+
+def filter_sensitivity() -> None:
+    points = labelled_points().rename(columns={f"built_{START}": "ref_start", f"built_{END}": "ref_end"})
+    strata = pd.read_csv(cfg.VALIDATION_STRATA_CSV)
+    published = (cfg.PERSISTENCE_RATIO, True)
+    per_city, areas = {}, {}
+    for city in cfg.CITIES:
+        p = points[points["city"] == city]
+        at_points, areas[city] = variant_maps(city, p)
+        # The published setting must give back the published map exactly
+        if not (at_points[published] == p["map_year"].to_numpy()).all():
+            raise SystemExit(f"{city}: the published filter setting does not reproduce urbanisation_year.tif")
+        per_city[city] = at_points
+        print(f"{city}: {len(filter_variants())} filter settings")
+    rows = []
+    total = strata["pixels"].sum()
+    national_w = {(c, h): px / total for c, h, px in zip(strata["city"], strata["stratum"], strata["pixels"])}
+    for variant in filter_variants():
+        frames = []
+        for city in list(cfg.CITIES) + ["national"]:
+            if city == "national":
+                p = pd.concat(frames)
+                p = p.assign(stratum=list(zip(p["city"], p["stratum"])))
+                weights = national_w
+                start_ha = sum(areas[c][variant][0] for c in cfg.CITIES)
+                end_ha = sum(areas[c][variant][1] for c in cfg.CITIES)
+            else:
+                s = strata[strata["city"] == city]
+                p = points[points["city"] == city].copy()
+                p["map_year"] = per_city[city][variant]
+                p["map_class"] = va.map_classes(p["map_year"].to_numpy(), START, END)
+                frames.append(p)
+                weights = dict(zip(s["stratum"], s["weight"]))
+                start_ha, end_ha = areas[city][variant]
+            m = va.map_measures(p, weights)
+            rows.append({"persistence_ratio": variant[0], "next_year": variant[1], "unit": city,
+                         "published": variant == published,
+                         "overall_accuracy": m["overall_accuracy"]["estimate"],
+                         "overall_accuracy_margin95": m["overall_accuracy"]["margin95"],
+                         f"built_accuracy_{END}": m["built_accuracy_end"]["estimate"],
+                         "new_built_users": m["new_built_users"]["estimate"],
+                         "new_built_users_margin95": m["new_built_users"]["margin95"],
+                         "new_built_producers": m["new_built_producers"]["estimate"],
+                         "new_built_producers_margin95": m["new_built_producers"]["margin95"],
+                         "year_within_one": m["year_within_one"]["estimate"],
+                         "year_points": m["year_within_one"]["n"],
+                         f"mapped_built_{START}_ha": round(start_ha),
+                         f"mapped_built_{END}_ha": round(end_ha),
+                         "mapped_growth": round(end_ha / start_ha - 1, 3)})
+    table = pd.DataFrame(rows)
+    table.to_csv(cfg.VALIDATION_FILTER_CSV, index=False)
+    print(table[table["unit"] == "national"].drop(columns=["unit"]).to_string(index=False))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--draw", action="store_true", help="draw the sample (once)")
     parser.add_argument("--cover", action="store_true",
                         help="prepare the second reading of the points labelled not built (once)")
+    parser.add_argument("--filter-sensitivity", action="store_true",
+                        help="evaluate other settings of the temporal filter on the labelled points")
     parser.add_argument("--force", action="store_true",
                         help="with --draw or --cover: erase what was entered")
     args = parser.parse_args()
@@ -377,5 +469,7 @@ if __name__ == "__main__":
         draw(args.force)
     elif args.cover:
         cover(args.force)
+    elif args.filter_sensitivity:
+        filter_sensitivity()
     else:
         report()

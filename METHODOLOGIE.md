@@ -248,6 +248,9 @@ Exemples (années 2016 → 2026) :
 Les surfaces sont ensuite comptées en pixels : surface bâtie de l'année Y = nombre de pixels
 urbanisés en Y ou avant × 100 m².
 
+La sensibilité de la carte au seuil de 80 % et à la condition « année suivante » est
+mesurée avec les points de validation au §14.4 : la précision ne change presque pas.
+
 **La dernière année n'est pas publiée.** Elle n'a qu'une observation, donc la règle des 80 % y
 est toujours remplie : sa surface serait le bâti brut, bruit compris. La dernière année
 classée (2026) sert seulement à confirmer les années précédentes ; les pixels qui ne
@@ -608,6 +611,33 @@ apostrophes ; sept variantes d'orthographe sont listées dans `CENSUS_COMMUNE_AL
   2013 n'est pas disponible sous le même nom pour toutes les communes (communes créées ou
   renommées depuis).
 
+**ODD 11.3.1 contrôlé avec le recensement** (21/10/2026, `python -m pipeline.s6_crosscheck
+--census`, `outputs/crosscheck/sdg_census.csv`). WorldPop répartit la population d'après une
+carte satellitaire du bâti : sa croissance pourrait suivre le bâti, ce qui rendrait l'ODD
+11.3.1 en partie circulaire. Sur les communes présentes aux deux recensements (2013 et 2023)
+et entièrement dans une zone, on calcule l'ODD avec la population recensée et avec WorldPop.
+Les périodes diffèrent (recensement 2013–2023, carte et WorldPop 2016–2023) : on compare des
+taux annuels, en les supposant constants (`sdg_11_3_1_annual`).
+
+| | Communes | Habitants 2023 (recensement) | Population, % par an : recensement | WorldPop | Bâti, % par an | ODD 11.3.1 : recensement | WorldPop |
+|---|---|---|---|---|---|---|---|
+| Dakar | 33 | 2 628 289 | 1,41 | 1,42 | 1,13 | 0,80 | 0,80 |
+| Thiès | 3 | 391 253 | 2,10 | 2,39 | 2,65 | 1,26 | 1,11 |
+
+Mbour et Touba n'ont aucune commune comparable (communes créées ou renommées depuis 2013).
+
+- **Pas de circularité visible au total.** Sur les 33 communes de Dakar (2,6 millions
+  d'habitants), la croissance de WorldPop est celle du recensement à 0,01 point près, et
+  l'ODD est le même. La répartition de WorldPop entre communes est fausse (voir plus haut),
+  mais ses erreurs se compensent dans la somme. À Thiès, WorldPop surestime la croissance de
+  la population (2,39 contre 2,10 % par an) : l'ODD de WorldPop serait plutôt **sous**-estimé.
+- **Ces communes sont le cœur ancien, qui se densifie.** Dans les 33 communes de Dakar, la
+  population croît plus vite que le bâti (ODD 0,80) ; elles ne portent que 12 600 des
+  28 700 ha bâtis de la zone en 2023. L'étalement de Dakar (ODD 2,24 pour la ville) se fait
+  donc dans les communes périphériques, en partie hors zone, que le recensement de 2013 ne
+  permet pas de contrôler. Le contrôle couvre le cœur, pas la périphérie où WorldPop est le
+  plus incertain.
+
 **Conséquence** (décision du 06/10/2026, ROADMAP §9). Les indicateurs WorldPop (population,
 m² bâtis par habitant, ODD 11.3.1) ne sont publiés que pour les **villes** ; par commune, on
 publie la population recensée en 2023 et les m² bâtis par habitant qui en découlent (§12.2).
@@ -815,6 +845,47 @@ pas comptée). Pour les quatre villes ensemble (population +24 %), il vaut 2,8 (
 contre 2,2 avec la carte. Sur les quatre villes, la croissance corrigée (+82 %) est
 plus forte que celle de la carte (+62 %), surtout parce que le bâti 2016 de Dakar est
 surestimé.
+
+**Sensibilité du filtre temporel** (21/10/2026, `python -m pipeline.s5_validation
+--filter-sensitivity`, `outputs/validation/filter_sensitivity.csv`). Le filtre de l'étape 3
+(§8) est rejoué sur les piles annuelles avec un seuil de persistance de 0,6, 0,7, 0,8
+(publié), 0,9 et 1,0, avec et sans la condition « année suivante » (10 réglages), et chaque
+carte obtenue est évaluée sur les mêmes 480 points. L'échantillon a été tiré dans la carte
+publiée, mais ses strates restent une partition fixe des zones : les estimations pondérées
+restent sans biais pour une autre carte (Stehman, 2014). Le réglage publié redonne
+exactement la carte publiée (contrôle du calcul). Quatre villes :
+
+| Réglage | Globale, 3 classes | Nouveau bâti : utilisateur | producteur | Année à ±1 an | Bâti 2016 (ha) | Croissance de la carte |
+|---|---|---|---|---|---|---|
+| 0,6 | 0,82 | 0,52 | 0,43 | 0,66 | 38 674 | +62 % |
+| 0,7 | 0,82 | 0,52 | 0,43 | 0,66 | 38 307 | +61 % |
+| **0,8 (publié)** | **0,82** | **0,51** | **0,43** | **0,66** | **37 727** | **+62 %** |
+| 0,9 | 0,82 | 0,50 | 0,45 | 0,63 | 36 696 | +64 % |
+| 1,0 | 0,82 | 0,48 | 0,45 | 0,61 | 34 433 | +74 % |
+| 0,8 sans « année suivante » | 0,82 | 0,51 | 0,43 | 0,69 | 38 097 | +60 % |
+
+Marges à 95 % : ± 0,04 (globale), ± 0,08 (utilisateur), ± 0,11 (producteur), ± 0,12 (année).
+
+- **Le filtre n'explique pas les erreurs de la carte.** Sur les dix réglages, la précision
+  globale ne bouge que d'un millième (0,817 à 0,819), et les précisions du nouveau bâti de
+  3 à 5 points, bien moins que leur marge. Les erreurs viennent de la classification
+  annuelle (lotissements, sol nu, végétation vus comme du bâti), pas de la règle qui en
+  déduit l'année : c'est le modèle qu'il faut améliorer (v1.1), pas le filtre.
+- **La croissance de la carte dépend du seuil seulement aux extrêmes.** De 0,6 à 0,9, elle
+  reste entre +59 et +64 % pour les quatre villes ; à 1,0 (bâti toutes les années), le
+  bâti 2016 perd 3 300 ha de pixels qui clignotent et la croissance monte à +74 %. Aucun
+  réglage n'atteint la croissance corrigée (+82 %, de +58 à +110 %), qui ne dépend pas de
+  la carte. Le bâti 2016 de Dakar reste au-dessus de la valeur corrigée même au seuil 1,0
+  (19 405 ha contre 17 019 ± 3 150) : sa surestimation vient surtout de la classification.
+- **La condition « année suivante » ne change ni la précision ni, de façon mesurable, la
+  datation** (0,66 avec, 0,69 sans, sur 55 points : écart bien moindre que la marge). Elle
+  reste justifiée par le mécanisme qu'elle corrige (années sèches, §7 et §8), que 55 points
+  datés ne suffisent pas à mesurer.
+- **Le classement des villes sur la carte n'est pas stable non plus** : Thiès a la plus
+  forte croissance de 0,6 à 0,8, Mbour à 0,9 et 1,0. Cela rejoint la conclusion de la
+  croissance corrigée : les villes ne sont pas classées.
+- Le réglage publié est gardé. Ce tableau est un diagnostic : choisir un réglage d'après
+  ces points les rendrait juges et parties, et la validation ne serait plus indépendante.
 
 **Par strate** (points dont la référence est « nouveau bâti », sur 16 par ville et 64 au total ;
 non pondéré) :
