@@ -10,8 +10,8 @@ type: software
 authors:
   - family-names: Cisse
     given-names: Moustapha
-version: 1.0.0
-date-released: 2026-10-13
+version: 1.0.1
+date-released: 2026-10-21
 doi: 10.5281/zenodo.23337573
 identifiers:
   - type: doi

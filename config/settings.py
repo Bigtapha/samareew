@@ -285,7 +285,7 @@ SITE_NOTES_GEOJSON = SITE_DATA_DIR / "map_notes.geojson"   # known errors outlin
 # Asset names do not change from one release to the next, so that
 # <REPO_URL>/releases/latest/download/<asset> is a stable link (data page, deployment).
 REPO_URL = "https://github.com/Bigtapha/samareew"
-RELEASE_VERSION = "1.0.0"                     # bump at each new release of the data
+RELEASE_VERSION = "1.0.1"                     # bump at each new release of the data
 RELEASE_DIR = DATA_DIR / "release"            # where step 8 writes the assets
 RELEASE_DATA_ZIP = "samareew-data.zip"        # downloadable data (CC BY 4.0, communes ODbL)
 RELEASE_SITE_ASSETS = "site-assets.tar.gz"    # map archives ignored by git, for the deployment

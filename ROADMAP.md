@@ -79,7 +79,7 @@ Africapolis (OCDE / CSAO), ONS Census Maps (Royaume-Uni), Tree Equity Score, Gé
 - **Une table « longue »** : `indicateur | ville | commune/secteur | année | valeur`
 - **Une fiche par indicateur** : titre grand public, unité, définition en une phrase, source,
   licence, lien méthode, niveau de fiabilité, palette.
-- **Des cartes par ville** (couches de périodes, tuiles) : depuis la version 0.2, dans `outputs/site/` (étape 7) : une archive PMTiles par couche pour les quatre villes, l'image satellite 2025 (clé `images`, ajout compatible), les limites en GeoJSON simplifié, les erreurs connues signalées sur les cartes (clé `notes`, ajout compatible du 12/10/2026), le résumé de la validation, et un `manifest.json` qui liste les fichiers, les légendes et les licences.
+- **Des cartes par ville** (couches de périodes, tuiles) : depuis la version 0.2, dans `outputs/site/` (étape 7) : une archive PMTiles par couche pour les quatre villes, l'image satellite 2025 (clé `images`, ajout compatible), les limites en GeoJSON simplifié, les erreurs connues signalées sur les cartes (clé `notes`, ajout compatible du 12/10/2026), le résumé de la validation (croissance corrigée `growth` et comparaison des villes `growth_comparison`, ajout compatible du 21/10/2026), et un `manifest.json` qui liste les fichiers, les légendes et les licences.
 - **Un numéro de version** du format dans les métadonnées (`FORMAT_VERSION`, 0.2 depuis le 09/10/2026).
 
 Ajouter une ville = ajouter des lignes. Ajouter un indicateur = ajouter une fiche.

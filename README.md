@@ -114,7 +114,7 @@ cities, yearly update, retraining of the model).
   1.0.0 is [10.5281/zenodo.23338530](https://doi.org/10.5281/zenodo.23338530)).
 - **How to cite** (see also [`CITATION.cff`](CITATION.cff), or "Cite this repository" on GitHub):
 
-  > Cisse, M. (2026). *SamaReew: urban expansion in Senegalese cities, 2016–2025* (version 1.0.0)
+  > Cisse, M. (2026). *SamaReew: urban expansion in Senegalese cities, 2016–2025* (version 1.0.1)
   > [Data and code]. Zenodo. https://doi.org/10.5281/zenodo.23337573. Data CC BY 4.0, code MIT.
 
   The DOI [10.5281/zenodo.23337573](https://doi.org/10.5281/zenodo.23337573) always points to
