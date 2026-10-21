@@ -241,7 +241,7 @@ carte attend la v1.1 (voir « Après la v1 »).
 le récit ne dit rien que la validation ne soutient.
 
 ### Après la v1
-- [ ] Déploiement : ni la release ni un push sur `main` touchant `site/` n'ont déclenché le workflow le 13/10/2026 (seul le lancement manuel a marché, `gh workflow run deploy.yml --ref main`) ; chercher la cause
+- [ ] Déploiement : ni la release ni un push sur `main` touchant `site/` n'ont déclenché le workflow le 13/10/2026 (seul le lancement manuel a marché, `gh workflow run deploy.yml --ref main`) ; chercher la cause ; diagnostic du 21/10/2026 : un petit workflow de test et une copie exacte de `deploy.yml` sous un autre nom, poussés sur une branche de test, se lancent bien (le déploiement y est refusé par la règle de branche de `github-pages`) : le contenu est bon, c'est l'entrée que GitHub garde pour `deploy.yml` qui ne reçoit plus les événements, sans doute depuis que le dépôt a été recréé le 13/10 ; fichier renommé `pages.yml` ; à confirmer au premier push sur `main`
 - [ ] Ajouter d'autres villes (Kaolack, Saint-Louis, Ziguinchor…)
 - [ ] Mise à jour annuelle automatisée (nouvelle année Sentinel-2)
 - [ ] Titres ou fiches en wolof

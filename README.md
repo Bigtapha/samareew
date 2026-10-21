@@ -220,7 +220,7 @@ site/                public website (Astro), reads only outputs/
   src/lib/           build-time reading of outputs/ (outputs, facts), chart drawing (charts), formatting
   src/pages/         expansion-urbaine, graphiques/<indicator> (+ CSV), villes/<city>, donnees, a-propos
   src/scripts/       browser code: chart template, maps
-.github/workflows/   deploy.yml: builds site/ and deploys it to GitHub Pages
+.github/workflows/   pages.yml: builds site/ and deploys it to GitHub Pages
 CITATION.cff         how to cite the project
 .zenodo.json         metadata of the Zenodo record made from each GitHub release
 ```
@@ -302,7 +302,7 @@ Practical notes:
   commit and push, run step 8, then `gh release create v<version>` with the three files (the
   step prints the command). Zenodo archives the source code of each release and gives it a
   DOI (metadata in `.zenodo.json`; the release assets are not archived, so the rasters stay
-  in `samareew-data.zip`, deposited by hand on Zenodo as a new version of its own record). The workflow `.github/workflows/deploy.yml` then builds the site
+  in `samareew-data.zip`, deposited by hand on Zenodo as a new version of its own record). The workflow `.github/workflows/pages.yml` then builds the site
   with the map archives of the latest release and deploys it to GitHub Pages; it also runs on
   every push to `main` that changes `site/` or `outputs/` (repository setting: Pages, source
   "GitHub Actions").

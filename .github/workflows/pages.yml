@@ -1,12 +1,15 @@
 # Build the site and deploy it to GitHub Pages (https://bigtapha.github.io/samareew/).
 # The map archives (.pmtiles) are ignored by git: they come from site-assets.tar.gz in the
 # latest release (written by `python -m pipeline.s8_release`), extracted at the repository root.
+# Formerly deploy.yml: under that name, GitHub never started it on a push or a release after the
+# repository was recreated (13/10/2026), only by hand; an exact copy under another name did start
+# (test of 21/10/2026), so the file was renamed.
 name: Deploy site
 
 on:
   push:
     branches: [main]
-    paths: ["site/**", "outputs/**", ".github/workflows/deploy.yml"]
+    paths: ["site/**", "outputs/**", ".github/workflows/pages.yml"]
   release:
     types: [published]
   workflow_dispatch:
