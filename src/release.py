@@ -36,9 +36,9 @@ def data_package_files(root: Path, cities: list, growth_periods: list) -> list:
         pairs.append((root / "zones" / f"{name}.geojson", f"boundaries/{name}.geojson"))
     pairs.append((out / "site" / "map_notes.geojson", "known_errors/map_notes.geojson"))
     for name in ("labels.csv", "cover_2025.csv", "sample_key.csv", "strata.csv",
-                 "accuracy.json", "points.kml"):
+                 "accuracy.json", "points.kml", "filter_sensitivity.csv"):
         pairs.append((out / "validation" / name, f"validation/{name}"))
-    for name in ("agreement.csv", "built_area_sources.csv", "population_census.csv"):
+    for name in ("agreement.csv", "built_area_sources.csv", "population_census.csv", "sdg_census.csv"):
         pairs.append((out / "crosscheck" / name, f"crosscheck/{name}"))
     pairs.append((out / "model" / "accuracy_by_city.json", "model/accuracy_by_city.json"))
     return [(src, f"{DATA_PREFIX}/{arc}") for src, arc in pairs]
@@ -82,8 +82,8 @@ every year from Sentinel-2 imagery with one national Random Forest model.
 | `rasters/<city>/growth_type_<start>_<end>.tif` | Type of the new built-up area of each period ({periods}): {GROWTH_CODES} (uint8, EPSG:32628) |
 | `boundaries/*.geojson` | Study zones, GHSL urban clusters, communes, Touba sectors and centres (EPSG:4326) |
 | `known_errors/map_notes.geojson` | Large false detections checked on the imagery and left in the map: outline, mapped area, weight in the city's figures (not exhaustive) |
-| `validation/` | National accuracy sample: points and strata, photo-interpreted labels, second reading of {years[-1]}, map class of each point (`sample_key.csv`), accuracy and corrected areas (`accuracy.json`) |
-| `crosscheck/` | Comparison with Google Open Buildings, GHSL and the 2023 census (RGPH-5) |
+| `validation/` | National accuracy sample: points and strata, photo-interpreted labels, second reading of {years[-1]}, map class of each point (`sample_key.csv`), accuracy, corrected areas and corrected growth (`accuracy.json`), accuracy of other settings of the temporal filter (`filter_sensitivity.csv`) |
+| `crosscheck/` | Comparison with Google Open Buildings, GHSL and the 2013 and 2023 censuses (RGPH-4 and RGPH-5), including SDG 11.3.1 computed with the census (`sdg_census.csv`) |
 | `model/accuracy_by_city.json` | Agreement of the national model with the reference labels, by city |
 
 ## Reading the figures
